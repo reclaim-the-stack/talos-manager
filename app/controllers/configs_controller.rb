@@ -19,6 +19,22 @@ class ConfigsController < ApplicationController
     end
   end
 
+  def edit
+    @config = Config.find(params[:id])
+  end
+
+  def update
+    @config = Config.find(params[:id])
+
+    config_params = params.require(:config).permit(:name, :config)
+
+    if @config.update(config_params)
+      redirect_to configs_path
+    else
+      render :edit, status: 422
+    end
+  end
+
   def show
     uuid = params[:uuid]
     public_ip = request.remote_ip

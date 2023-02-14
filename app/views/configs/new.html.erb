@@ -1,20 +1,3 @@
 <h1 class="text-4xl mb-10">New Config</h1>
 
-<%= form_with model: @config do |f| %>
-  <% errors = @config.errors[:name].presence %>
-  <%= f.label :name, class: "font-bold mb-1 block" %>
-  <%= f.text_field :name, required: true, class: "w-full border-1 rounded #{errors ? 'border-red-300' : 'border-gray-300'} p-3 mb-4", placeholder: "Staging Worker" %>
-  <% if errors %>
-    <p class="text-red-500 -mt-3 mb-4 text-sm"><%= errors.to_sentence %></p>
-  <% end %>
-
-  <% errors = @config.errors[:config].presence %>
-  <%= f.label :config, class: "font-bold mb-1 block" %>
-  <%= f.text_area :config, required: true, class: "font-mono w-full text-sm w-full border-1 rounded #{errors ? 'border-red-300' : 'border-gray-300'} p-3 mb-5", rows: 20, placeholder: "version: v1alpha1&#10;persist: true&#10;machine: # ...&#10;cluster: # ...".html_safe %>
-  <% if errors %>
-    <pre class="font-sans text-red-500 -mt-3 mb-4 text-sm"><%= errors.to_sentence %></pre>
-  <% end %>
-
-  <%= f.submit "Save", class: "w-full text-white bg-mnd-red hover:bg-mnd-red-dark cursor-pointer disabled:cursor-default
-disabled:bg-mnd-red-light font-semibold p-3 mb-3" %>
-<% end %>
+<%= render "form", config: @config %>
