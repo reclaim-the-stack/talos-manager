@@ -1,16 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html hidden>
   <head>
     <title>DevopsTalosManager</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" href="/favicon.svg">
+
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+
+    <script type="module">
+      import { setup } from 'https://cdn.skypack.dev/twind/shim'
+
+      setup({
+        mode: 'silent', // change to 'warn' for non matching class warnings during development
+        theme: {
+          extend: {
+            colors: {
+              'mnd-red': '#ff4473',
+              'mnd-red-dark': '#ea065a',
+              'mnd-red-light': '#fd9cb9',
+              'mnd-white-dark': '#f7fafd',
+              'mnd-purple-dark': '#181646',
+              'mnd-gray': '#e8e8ed',
+            }
+          },
+        },
+      })
+    </script>
   </head>
 
-  <body>
-    <%= yield %>
+  <body class="bg-mnd-white-dark">
+    <div class="min-h-screen min-w-screen flex flex-col items-center mt-20">
+      <div class="bg-white py-10 px-5 sm:px-10 h-fit w-[870px] max-w-[90%] flex flex-col justify-center border rounded shadow-md sm:max-w-full">
+        <%= yield %>
+      </div>
+    </div>
   </body>
 </html>

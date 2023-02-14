@@ -1,0 +1,21 @@
+<%= form_with model: server do |f| %>
+  <% errors = f.object.errors[:hostname].presence %>
+  <%= f.label :hostname, required: true, class: "font-bold mb-1 block" %>
+  <%= f.text_field :hostname, class: "w-full border-1 #{errors ? 'border-red-300' : 'border-gray-300'} p-3 mb-4", placeholder: "worker-x" %>
+  <% if errors %>
+    <p class="text-red-500 -mt-3 mb-4 text-sm"><%= errors.to_sentence %></p>
+  <% end %>
+
+  <% errors = f.object.errors[:private_ip].presence %>
+  <%= f.label :private_ip, required: true, class: "font-bold mb-1 block" %>
+  <%= f.text_field :private_ip, class: "w-full border-1 #{errors ? 'border-red-300' : 'border-gray-300'} p-3 mb-5", placeholder: "10.0.x.x" %>
+  <% if errors %>
+    <p class="text-red-500 -mt-3 mb-4 text-sm"><%= errors.to_sentence %></p>
+  <% end %>
+
+  <%= f.label :config, class: "font-bold mb-1 block" %>
+  <%= f.select :config_id, Config.as_options, { include_blank: false }, class: "block border-1 border-gray-300  p-3 mb-5" %>
+
+  <%= f.submit "Bootstrap", class: "w-full text-white bg-mnd-red hover:bg-mnd-red-dark cursor-pointer disabled:cursor-default
+disabled:bg-mnd-red-light font-semibold p-3 mb-3" %>
+<% end %>

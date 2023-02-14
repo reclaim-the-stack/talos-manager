@@ -1,0 +1,14 @@
+<h1 class="text-4xl mb-10">Servers</h1>
+
+<% @servers.each do |server| %>
+  <div>
+    <h2 class="text-xl mb-5"><span class="font-bold"><%= server.public_ip %></span> | <%= server.smbios_uuid %></h2>
+    <%= turbo_frame_tag server do %>
+      <% if server.pending? %>
+        <%= render "form", server: server %>
+      <% else %>
+        <%= render server %>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

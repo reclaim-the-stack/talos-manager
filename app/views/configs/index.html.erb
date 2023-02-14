@@ -1,0 +1,17 @@
+<div class="flex mb-10 justify-between">
+  <h1 class="text-4xl">Configs</h1>
+  <%= link_to "New Config", new_config_path, class: "text-white bg-mnd-red hover:bg-mnd-red-dark font-semibold p-3 mb-3" %>
+</div>
+
+<p>
+  <b>Reference</b><br>
+  <a href="https://www.talos.dev/latest/reference/configuration/">
+    https://www.talos.dev/latest/reference/configuration/
+  </a>
+</p>
+
+<% @configs.each do |config| %>
+  <div>
+    <h2 class="text-xl mb-5"><span class="font-bold"><%= config.name %></span></h2>
+  </div>
+<% end %>

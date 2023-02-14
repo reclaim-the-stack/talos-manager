@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  resources :configs
+  resources :servers, only: :update
 
-  # Defines the root path route ("/")
-  # root "articles#index"
+  get "config", to: "configs#show", as: "get_config"
+
+  root "servers#index"
 end
