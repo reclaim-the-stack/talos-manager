@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+echo "--- Installing ruby"
+rbenv install --skip-existing
+
+echo "--- Installing gems"
+bundle install --path vendor/bundle -j 4
+
+# TODO: Add rspec and tests
+# echo "+++ Running tests"
+# bundle exec rspec

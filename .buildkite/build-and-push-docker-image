@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+echo "+++ Building and pushing application image"
+
+RUBY_VERSION=$(cat .ruby-version)
+
+docker buildx build . \
+  --build-arg RUBY_VERSION=$RUBY_VERSION \
+  --platform linux/amd64 \
+  -t ghcr.io/mynewsdesk/devops-talos-manager:sha-$BUILDKITE_COMMIT \
+  --cache-from type=registry,ref=ghcr.io/mynewsdesk/devops-talos-manager \
+  --cache-to type=registry,ref=ghcr.io/mynewsdesk/devops-talos-manager \
+  --progress plain \
+  --push
