@@ -9,8 +9,8 @@ RUBY_VERSION=$(cat .ruby-version)
 docker buildx build . \
   --build-arg RUBY_VERSION=$RUBY_VERSION \
   --platform linux/amd64 \
-  -t ghcr.io/mynewsdesk/devops-talos-manager:sha-$BUILDKITE_COMMIT \
-  --cache-from type=registry,ref=ghcr.io/mynewsdesk/devops-talos-manager \
-  --cache-to type=registry,ref=ghcr.io/mynewsdesk/devops-talos-manager \
+  -t europe-north1-docker.pkg.dev/kubernetes-367912/mynewsdesk/devops-talos-manager:sha-$BUILDKITE_COMMIT \
+  --cache-from type=registry,ref=europe-north1-docker.pkg.dev/kubernetes-367912/mynewsdesk/devops-talos-manager \
+  --cache-to type=registry,ref=europe-north1-docker.pkg.dev/kubernetes-367912/mynewsdesk/devops-talos-manager \
   --progress plain \
   --push
