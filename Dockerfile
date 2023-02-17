@@ -26,7 +26,11 @@ FROM base
 
 # libc6-compat required by nokogiri aarch64-linux
 # tzdata required by tzinfo
-RUN apk add libc6-compat tzdata
+# wget talosctl installation
+RUN apk add wget libc6-compat tzdata
+
+RUN wget https://github.com/siderolabs/talos/releases/download/v1.3.4/talosctl-linux-amd64 -O /usr/local/bin/talosctl
+RUN chmod +x /usr/local/bin/talosctl
 
 COPY --from=gems /app /app
 COPY . .
