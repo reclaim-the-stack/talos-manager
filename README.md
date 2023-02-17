@@ -6,5 +6,5 @@ Based on using the `talos.config` kernel parameter. You can apply this inside th
 
 The value should be eg:
 ```
-talos.config=https://<subdomain>.eu.ngrok.io/config?uuid=${uuid}
+talos.config=https://devops-talos-manager.mynewsdesk.dev/config?uuid=${uuid}
 ```
