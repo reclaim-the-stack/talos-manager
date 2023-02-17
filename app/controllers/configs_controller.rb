@@ -1,4 +1,6 @@
 class ConfigsController < ApplicationController
+  skip_before_action :require_authentication, only: :show
+
   def index
     @configs = Config.all
   end
