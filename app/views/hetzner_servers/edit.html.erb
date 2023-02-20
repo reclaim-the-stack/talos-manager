@@ -1,0 +1,19 @@
+<%= turbo_frame_tag @hetzner_server, :name do %>
+  <%= form_with model: @hetzner_server do |f| %>
+    <%= f.text_field :name, class: "border-1 border-gray p-1", placeholder: "server-name", autofocus: true %>
+  <% end %>
+<% end %>
+
+<%= turbo_frame_tag @hetzner_server, :vswitch do %>
+  <%= form_with model: @hetzner_server do |f| %>
+    <%= f.select(
+      :hetzner_vswitch_id,
+      HetznerVswitch.pluck(:name, :id),
+      { include_blank: true },
+      class: "border-1 border-gray p-1",
+      placeholder: "server-name",
+      autofocus: true,
+      onchange: "this.form.submit()"
+    ) %>
+  <% end %>
+<% end %>

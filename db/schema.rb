@@ -10,13 +10,34 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_14_084313) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_20_093844) do
   create_table "configs", force: :cascade do |t|
     t.string "name", null: false
     t.text "config", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_configs_on_name", unique: true
+  end
+
+  create_table "hetzner_servers", force: :cascade do |t|
+    t.string "name"
+    t.string "ip", null: false
+    t.string "ipv6", null: false
+    t.string "product", null: false
+    t.string "data_center", null: false
+    t.string "status", null: false
+    t.boolean "cancelled", null: false
+    t.integer "hetzner_vswitch_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["hetzner_vswitch_id"], name: "index_hetzner_servers_on_hetzner_vswitch_id"
+  end
+
+  create_table "hetzner_vswitches", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "vlan", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "servers", force: :cascade do |t|
@@ -32,4 +53,5 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_14_084313) do
     t.index ["public_ip"], name: "index_servers_on_public_ip", unique: true
   end
 
+  add_foreign_key "hetzner_servers", "hetzner_vswitches"
 end
