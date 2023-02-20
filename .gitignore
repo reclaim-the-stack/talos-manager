@@ -27,3 +27,9 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# MacOS
+.DS_Store
+
+# Dotenv
+.env*.local
