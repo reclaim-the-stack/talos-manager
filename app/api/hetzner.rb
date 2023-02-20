@@ -6,16 +6,24 @@ module Hetzner
 
   # Syncs current Hetzner API state to ActiveRecord models
   def self.sync_to_activerecord
-    vswitches_full = vswitches.map { |vswitch| Hetzner.vswitch(vswitch.fetch("id")) }
+    vswitches_full = Hetzner.vswitches.map { |vswitch| Hetzner.vswitch(vswitch.fetch("id")) }
 
-    vswitches_full.each do |vswitch_payload|
-      vswitch_params = vswitch_payload.slice("name", "vlan")
-
-      HetznerVswitch.create_with(vswitch_params).find_or_create_by!(id: vswitch_payload.fetch("id"))
+    # Upsert vswitches
+    vswitch_attributes = vswitches_full.map do |vswith_payload|
+      vswith_payload.slice("id", "name", "vlan")
     end
+    HetznerVswitch.upsert_all(vswitch_attributes)
 
-    servers.each do |server_payload|
-      server_params = {
+    # Upsert servers
+    server_attributes = Hetzner.servers.map do |server_payload|
+      vswitch = vswitches_full.find do |vswith_payload|
+        vswith_payload.fetch("server").any? do |server|
+          server.fetch("server_number") == server_payload.fetch("server_number")
+        end
+      end
+
+      {
+        id: server_payload.fetch("server_number"),
         name: server_payload.fetch("server_name"),
         cancelled: server_payload.fetch("cancelled"),
         data_center: server_payload.fetch("dc"),
@@ -23,24 +31,10 @@ module Hetzner
         ipv6: server_payload.fetch("server_ipv6_net"),
         product: server_payload.fetch("product"),
         status: server_payload.fetch("status"),
+        hetzner_vswitch_id: vswitch&.fetch("id"),
       }
-
-      HetznerServer.create_with(server_params).find_or_create_by!(id: server_payload.fetch("server_number"))
     end
-
-    vswitches_full.each do |vswitch_payload|
-      vswitch_id = vswitch_payload.fetch("id")
-      server_ids = vswitch_payload.fetch("server").map { |server| server.fetch("server_number") }
-
-      HetznerServer
-        .where(id: server_ids)
-        .update!(hetzner_vswitch_id: vswitch_id)
-
-      HetznerServer
-        .where(hetzner_vswitch_id: vswitch_id)
-        .where.not(id: server_ids)
-        .update!(hetzner_vswitch_id: nil)
-    end
+    HetznerServer.upsert_all(server_attributes)
   end
 
   # https://robot.hetzner.com/doc/webservice/en.html#server
@@ -48,6 +42,10 @@ module Hetzner
   # Limit: 200 requests per 1 hour
   def self.servers
     get("server").map { |server| server.fetch("server") }
+  end
+
+  def self.update_server(server_id, params)
+    post("server/#{server_id}", params)
   end
 
   # https://robot.hetzner.com/doc/webservice/en.html#get-vswitch
@@ -64,10 +62,16 @@ module Hetzner
     get("vswitch/#{id}")
   end
 
-  def self.add_server_to_vswitch(vswitch_id, server_ids)
-    server_ids = Array.wrap(server_ids)
+  # https://robot.hetzner.com/doc/webservice/en.html#post-vswitch-vswitch-id-server
+  # Limit: 100 requests per 1 hour
+  def self.add_server_to_vswitch(vswitch_id, server_id)
+    post("vswitch/#{vswitch_id}/server", server: server_id)
+  end
 
-    post("vswitch/#{vswitch_id}/server", server: server_ids)
+  # https://robot.hetzner.com/doc/webservice/en.html#delete-vswitch-vswitch-id-server
+  # Limit: 100 requests per 1 hour
+  def self.remove_server_from_vswitch(vswitch_id, server_id)
+    delete("vswitch/#{vswitch_id}/server", server: server_id)
   end
 
   %w[get post delete patch].each do |verb|
@@ -80,15 +84,15 @@ module Hetzner
     response = Typhoeus.send(
       method.downcase,
       "#{ENV.fetch('HETZNER_URL')}/#{path}",
-      body: params.to_json,
+      body: params,
       headers: {
-        "Content-Type" => "application/json",
+        "Content-Type" => "application/x-www-form-urlencoded",
         "Accept" => "application/json",
       },
     )
 
     raise HttpError, "#{response.code}, #{response.body}" unless response.success?
 
-    JSON.parse(response.body)
+    JSON.parse(response.body) unless response.body.empty?
   end
 end
