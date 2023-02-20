@@ -33,6 +33,15 @@ class HetznerServersController < ApplicationController
     head 204
   end
 
+  def rescue
+    hetzner_server = HetznerServer.find(params[:id])
+
+    Hetzner.active_rescue_system(hetzner_server.id)
+    Hetzner.reset(hetzner_server.id)
+
+    redirect_to hetzner_servers_path
+  end
+
   def sync
     Hetzner.sync_to_activerecord
 

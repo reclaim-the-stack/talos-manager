@@ -64,6 +64,8 @@ module Hetzner
     get("server").map { |server| server.fetch("server") }
   end
 
+  # https://robot.hetzner.com/doc/webservice/en.html#post-server-server-number
+  # Limit: 200 requests per 1 hour
   def self.update_server(server_id, params)
     post("server/#{server_id}", params)
   end
@@ -92,6 +94,35 @@ module Hetzner
   # Limit: 100 requests per 1 hour
   def self.remove_server_from_vswitch(vswitch_id, server_id)
     delete("vswitch/#{vswitch_id}/server", server: server_id)
+  end
+
+  # https://robot.hetzner.com/doc/webservice/en.html#post-boot-server-number-rescue
+  # Limit: 500 requests per 1 hour
+  def self.active_rescue_system(server_id)
+    post(
+      "boot/#{server_id}/rescue",
+      os: "linux",
+      authorized_key: devops_talos_manager_ssh_key.fetch("fingerprint"),
+    )
+  end
+
+  # https://robot.hetzner.com/doc/webservice/en.html#ssh-keys
+  # Limit: 500 requests per 1 hour
+  def self.ssh_keys
+    get("key").map { |key| key.fetch("key") }
+  end
+
+  # https://robot.hetzner.com/doc/webservice/en.html#get-reset-server-number
+  # Execute a hardware reset on a server
+  # Limit: 50 requests per hour
+  def self.reset(server_id)
+    post("reset/#{server_id}", type: "hw")
+  end
+
+  # Finds and memoizes an SSH key named 'devops-talos-manager' on the Hetzner account
+  def self.devops_talos_manager_ssh_key
+    @devops_talos_manager_ssh_key ||= ssh_keys.find { |key| key.fetch("name") == "devops-talos-manager" } or
+      raise("SSH key named 'devops-talos-manager' not found on Hetzner account")
   end
 
   %w[get post delete patch].each do |verb|
