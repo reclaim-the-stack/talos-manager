@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_20_093844) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_20_174210) do
   create_table "configs", force: :cascade do |t|
     t.string "name", null: false
     t.text "config", null: false
@@ -30,6 +30,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_20_093844) do
     t.integer "hetzner_vswitch_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "accessible", default: false, null: false
     t.index ["hetzner_vswitch_id"], name: "index_hetzner_servers_on_hetzner_vswitch_id"
   end
 

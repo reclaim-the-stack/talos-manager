@@ -1,28 +1,42 @@
-<h1 class="text-4xl mb-10">Hetzner Servers</h1>
+<div class="flex justify-between">
+  <h1 class="text-4xl mb-10">Hetzner Servers</h1>
+  <%= button_to icon_reload, sync_hetzner_servers_path, method: :post, class: "disabled:opacity-20 disabled:cursor-default", title: "Sync with Hetzner" %>
+</div>
 
 <table class="mb-5">
   <thead class="text-lg text-left">
     <th class="w-[225px]">Name</th>
     <th class="w-[190px]">IP</th>
     <th>Model</th>
-    <th class="w-[200px]">VSwitch</th>
+    <th class="w-[160px]">VSwitch</th>
+    <th class="w-[80px]"></th>
   </thead>
   <tbody>
     <% @hetzner_servers.each do |hetzner_server| %>
-    <tr class="h-11">
-      <td class="py-1 group">
+    <tr class="h-11 group hover:bg-gray-50">
+      <td class="py-1">
         <%= turbo_frame_tag hetzner_server, :name do %>
           <%= hetzner_server.name.presence || tag.span("untitled", class: "text-gray-400") %>
           <%= link_to icon_edit, edit_hetzner_server_path(hetzner_server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
         <% end %>
       </td>
-      <td class="font-mono text-sm"><%= hetzner_server.ip %></td>
+      <td><%= hetzner_server.ip %></td>
       <td><%= hetzner_server.product.split("-").first %></td>
-      <td class="group">
+      <td class="">
         <%= turbo_frame_tag hetzner_server, :vswitch do %>
           <%= hetzner_server.hetzner_vswitch&.name || tag.span("none", class: "text-gray-400") %>
           <%= link_to icon_edit, edit_hetzner_server_path(hetzner_server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
         <% end %>
+      </td>
+      <td>
+        <%=
+          button_to(
+            "Bootstrap",
+            bootstrap_hetzner_server_path(hetzner_server),
+            method: :post,
+            class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white group-hover:opacity-100",
+          ) if hetzner_server.accessible?
+       %>
       </td>
     </tr>
     <% end %>

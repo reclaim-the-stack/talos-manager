@@ -1,6 +1,8 @@
 class HetznerServersController < ApplicationController
+  TALOS_ISO_URL = "https://drive.google.com/uc?id=1cUFh6YjmmhsLCuXg8PIhZxsKCkp4upu5&export=download".freeze
+
   def index
-    @hetzner_servers = HetznerServer.all.order(name: :asc).includes(:hetzner_vswitch)
+    @hetzner_servers = HetznerServer.all.order(hetzner_vswitch_id: :asc, name: :asc).includes(:hetzner_vswitch)
   end
 
   def edit
@@ -14,8 +16,37 @@ class HetznerServersController < ApplicationController
 
     @hetzner_server.update!(hetzner_server_params.merge(sync: true))
 
-    @hetzner_servers = HetznerServer.all.order(name: :asc).includes(:hetzner_vswitch)
+    redirect_to hetzner_servers_path
+  end
 
-    render :index
+  def bootstrap
+    hetzner_server = HetznerServer.find(params[:id])
+
+    Net::SSH.start(hetzner_server.ip, "root", key_data: [ENV.fetch("SSH_PRIVATE_KEY")]) do |session|
+      ssh_exec_with_log! session, "wget '#{TALOS_ISO_URL}' -O talos.iso --no-verbose"
+      ssh_exec_with_log! session, "dd if=talos.iso of=/dev/sda status=progress"
+      session.exec "reboot"
+    end
+
+    hetzner_server.update!(accessible: false)
+
+    head 204
+  end
+
+  def sync
+    Hetzner.sync_to_activerecord
+
+    redirect_to hetzner_servers_path
+  end
+
+  private
+
+  def ssh_exec_with_log!(session, command)
+    status = {}
+    channel = session.exec(command, status: status)
+    channel.on_data { |_channel, data| $stdout.print(data) }
+    channel.on_extended_data { |_channel, data| $stderr.print(data) }
+    channel.wait
+    raise "failed to execute '#{command}' on #{session.host}" unless status.fetch(:exit_code) == 0
   end
 end

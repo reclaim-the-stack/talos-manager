@@ -4,6 +4,7 @@ ruby "3.2.0"
 
 gem "bootsnap", require: false
 gem "importmap-rails"
+gem "net-ssh"
 gem "propshaft"
 gem "puma"
 gem "rails"
