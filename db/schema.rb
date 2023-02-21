@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_21_102657) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_21_205658) do
   create_table "configs", force: :cascade do |t|
     t.string "name", null: false
     t.text "config", null: false
@@ -54,19 +54,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_21_102657) do
     t.datetime "updated_at", null: false
     t.index ["config_id"], name: "index_machine_configs_on_config_id"
     t.index ["hetzner_server_id"], name: "index_machine_configs_on_hetzner_server_id"
-  end
-
-  create_table "servers", force: :cascade do |t|
-    t.string "state", default: "pending", null: false
-    t.string "public_ip", null: false
-    t.string "smbios_uuid", null: false
-    t.string "private_ip"
-    t.string "hostname"
-    t.integer "config_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["config_id"], name: "index_servers_on_config_id"
-    t.index ["public_ip"], name: "index_servers_on_public_ip", unique: true
   end
 
   add_foreign_key "hetzner_servers", "hetzner_vswitches"
