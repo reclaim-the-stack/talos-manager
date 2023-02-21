@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_20_174210) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_21_102657) do
   create_table "configs", force: :cascade do |t|
     t.string "name", null: false
     t.text "config", null: false
@@ -31,7 +31,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_20_174210) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "accessible", default: false, null: false
+    t.string "uuid"
+    t.datetime "last_configured_at"
+    t.datetime "last_request_for_configuration_at"
     t.index ["hetzner_vswitch_id"], name: "index_hetzner_servers_on_hetzner_vswitch_id"
+    t.index ["ip"], name: "index_hetzner_servers_on_ip", unique: true
   end
 
   create_table "hetzner_vswitches", force: :cascade do |t|
@@ -39,6 +43,17 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_20_174210) do
     t.integer "vlan", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "machine_configs", force: :cascade do |t|
+    t.integer "config_id", null: false
+    t.integer "hetzner_server_id", null: false
+    t.string "hostname", null: false
+    t.string "private_ip", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["config_id"], name: "index_machine_configs_on_config_id"
+    t.index ["hetzner_server_id"], name: "index_machine_configs_on_hetzner_server_id"
   end
 
   create_table "servers", force: :cascade do |t|
@@ -55,4 +70,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_20_174210) do
   end
 
   add_foreign_key "hetzner_servers", "hetzner_vswitches"
+  add_foreign_key "machine_configs", "configs"
+  add_foreign_key "machine_configs", "hetzner_servers"
 end

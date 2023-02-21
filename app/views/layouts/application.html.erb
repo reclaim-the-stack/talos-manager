@@ -35,8 +35,7 @@
   <body class="bg-mnd-white-dark">
     <nav class="bg-white shadow-md flex px-3 items-center">
       <img src="/favicon.svg" class="h-12 py-2 mr-3">
-      <%= link_to "Servers", root_path, class: "text-l mr-3 #{'underline underline-offset-2' if params[:controller] == 'servers'}" %>
-      <%= link_to "Hetzner Servers", hetzner_servers_path, class: "text-l mr-3 #{'underline underline-offset-2' if params[:controller] == 'hetzner_servers'}" %>
+      <%= link_to "Servers", hetzner_servers_path, class: "text-l mr-3 #{'underline underline-offset-2' if params[:controller] == 'hetzner_servers'}" %>
       <%= link_to "Configs", configs_path, class: "text-l mr-3 #{'underline underline-offset-2' if params[:controller] == 'configs'}" %>
     </nav>
     <div class="min-h-screen min-w-screen flex flex-col items-center mt-20">

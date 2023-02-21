@@ -2,6 +2,8 @@ class HetznerServer < ApplicationRecord
   TALOS_ISO_URL = "https://drive.google.com/uc?id=1cUFh6YjmmhsLCuXg8PIhZxsKCkp4upu5&export=download".freeze
 
   belongs_to :hetzner_vswitch, optional: true
+  has_one :machine_config
+  has_one :config, through: :machine_config
 
   attr_accessor :sync # set to true to sync changed attributes to hetzner
 

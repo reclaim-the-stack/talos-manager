@@ -39,27 +39,20 @@ class ConfigsController < ApplicationController
 
   def show
     uuid = params[:uuid]
-    public_ip = request.remote_ip
-    # values = params.require(:values).split("__")
-    # raise "unexpected params: #{params}" unless values.length == 4
+    ip = request.remote_ip
 
-    # hostname, mac_address, smbios_serial, smbios_uuid = values
+    server = HetznerServer.find_by_ip!(ip)
 
-    server_params = {
-      # hostname: hostname,
-      # mac_address: mac_address,
-      # smbios_serial: smbios_serial,
-      smbios_uuid: uuid,
-      public_ip: public_ip,
-    }
+    server.update!(uuid: uuid) if uuid != server.uuid
 
-    server = Server.find_by_public_ip(public_ip) || Server.create!(server_params)
-
-    if server.configured?
+    if server.machine_config
+      server.update!(last_configured_at: Time.now)
       headers["Content-Type"] = "text/yaml"
-      render plain: server.generate_config
+      render plain: server.machine_config.generate_config
     else
-      sleep 10
+      server.update!(last_request_for_configuration_at: Time.now)
+
+      sleep 15
 
       attempt = params[:attempt] || 0
       redirect_to get_config_path(uuid: params[:uuid], attempt: attempt.to_i + 1)

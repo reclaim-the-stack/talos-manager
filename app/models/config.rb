@@ -2,9 +2,7 @@ class Config < ApplicationRecord
   validates_uniqueness_of :name
   validate :validate_talos_config
 
-  def self.as_options
-    all.map { |config| config.values_at(:name, :id) }
-  end
+  has_many :machine_configs
 
   private
 
@@ -32,10 +30,11 @@ class Config < ApplicationRecord
     #   * install instructions are required in "metal" mode
     #   * warning: use "worker" instead of "" for machine type
 
-    dummy_server = Server.new(config: self, hostname: "worker-1", private_ip: "10.0.1.1")
+    dummy_server = HetznerServer.new(ip: "108.108.108.108")
+    dummy_config = MachineConfig.new(config: self, hetzner_server: dummy_server, hostname: "worker-1", private_ip: "10.0.1.1")
     talos_validation =
       Tempfile.create("talos-config.yaml") do |file|
-        file.write(dummy_server.generate_config)
+        file.write(dummy_config.generate_config)
         file.flush
         `talosctl validate -m metal --strict -c #{file.path} 2>&1`
       end
