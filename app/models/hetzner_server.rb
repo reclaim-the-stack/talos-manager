@@ -1,4 +1,6 @@
 class HetznerServer < ApplicationRecord
+  TALOS_ISO_URL = "https://drive.google.com/uc?id=1cUFh6YjmmhsLCuXg8PIhZxsKCkp4upu5&export=download".freeze
+
   belongs_to :hetzner_vswitch, optional: true
 
   attr_accessor :sync # set to true to sync changed attributes to hetzner
@@ -10,6 +12,22 @@ class HetznerServer < ApplicationRecord
   validates_presence_of :status
 
   after_save :sync_with_hetzner, if: :sync
+
+  def bootstrap!
+    session = Net::SSH.start(ip, "root", key_data: [ENV.fetch("SSH_PRIVATE_KEY")])
+    uuid = session.exec! "dmidecode -s system-uuid"
+    if uuid.include? "-000000000000"
+      system_data = session.exec! "dmidecode -t system"
+      raise "Invalid SMBIOS UUID, send this output to Hetzner support: #{system_data}"
+    end
+
+    ssh_exec_with_log! session, "wget '#{TALOS_ISO_URL}' -O talos.iso --no-verbose"
+    ssh_exec_with_log! session, "dd if=talos.iso of=/dev/sda status=progress"
+    session.exec "reboot" # this will implicitly close the connection
+    session.shutdown! # a normal close would result in IOError due to reboot
+
+    update!(accessible: false)
+  end
 
   private
 
@@ -30,5 +48,14 @@ class HetznerServer < ApplicationRecord
         Hetzner.add_server_to_vswitch(new_vswitch_id, id)
       end
     end
+  end
+
+  def ssh_exec_with_log!(session, command)
+    status = {}
+    channel = session.exec(command, status: status)
+    channel.on_data { |_channel, data| $stdout.print(data) }
+    channel.on_extended_data { |_channel, data| $stderr.print(data) }
+    channel.wait
+    raise "failed to execute '#{command}' on #{session.host}" unless status.fetch(:exit_code) == 0
   end
 end
