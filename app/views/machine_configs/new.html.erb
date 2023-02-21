@@ -19,6 +19,6 @@
   <%= f.label :config, class: "font-bold mb-1 block" %>
   <%= f.select :config_id, Config.pluck(:name, :id), { include_blank: false }, class: "block border-1 border-gray-300  p-3 mb-5" %>
 
-  <%= f.submit "Configure", class: "w-full text-white bg-mnd-red hover:bg-mnd-red-dark cursor-pointer disabled:cursor-default
+  <%= f.submit "Configure", class: "w-full rounded text-white bg-mnd-red hover:bg-mnd-red-dark cursor-pointer disabled:cursor-default
 disabled:bg-mnd-red-light font-semibold p-3 mb-3" %>
 <% end %>

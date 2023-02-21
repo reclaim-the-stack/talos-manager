@@ -14,5 +14,5 @@ Rails.application.routes.draw do
 
   get "config", to: "configs#show", as: "get_config"
 
-  root "servers#index"
+  root "hetzner_servers#index"
 end

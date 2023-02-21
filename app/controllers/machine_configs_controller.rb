@@ -25,6 +25,12 @@ class MachineConfigsController < ApplicationController
     end
   end
 
+  def destroy
+    MachineConfig.find(params[:id]).destroy
+
+    redirect_to hetzner_servers_path
+  end
+
   private
 
   def default_private_ip(name)
