@@ -120,6 +120,9 @@ GEM
     nio4r (2.5.8)
     nokogiri (1.14.2-arm64-darwin)
       racc (~> 1.4)
+    nokogiri (1.14.2-x86_64-linux)
+      racc (~> 1.4)
+    pg (1.4.5)
     propshaft (0.6.4)
       actionpack (>= 7.0.0)
       activesupport (>= 7.0.0)
@@ -160,7 +163,6 @@ GEM
     rake (13.0.6)
     reline (0.3.2)
       io-console (~> 0.5)
-    sqlite3 (1.6.0-arm64-darwin)
     stimulus-rails (1.2.1)
       railties (>= 6.0.0)
     thor (1.2.1)
@@ -185,6 +187,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-22
+  x86_64-linux
 
 DEPENDENCIES
   bootsnap
@@ -192,10 +195,10 @@ DEPENDENCIES
   dotenv-rails
   importmap-rails
   net-ssh
+  pg
   propshaft
   puma
   rails
-  sqlite3
   stimulus-rails
   turbo-rails
   typhoeus
