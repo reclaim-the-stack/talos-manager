@@ -6,10 +6,14 @@ class MachineConfig < ApplicationRecord
   belongs_to :config
   belongs_to :hetzner_server
 
+  attr_accessor :already_configured # set to true to simulate the server already being configured
+
   validates_presence_of :hostname
   validate :validate_hostname_format
   validates_presence_of :private_ip
   validate :validate_private_ip_format
+
+  after_create :set_configured, if: :already_configured
 
   def generate_config
     raise "can't generate config before assigning hostname" if hostname.blank?
@@ -54,5 +58,9 @@ class MachineConfig < ApplicationRecord
         )
       end
     end
+  end
+
+  def set_configured
+    hetzner_server.update!(last_configured_at: Time.now, last_request_for_configuration_at: Time.at(0))
   end
 end

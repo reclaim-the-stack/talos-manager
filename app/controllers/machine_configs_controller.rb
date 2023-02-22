@@ -14,6 +14,7 @@ class MachineConfigsController < ApplicationController
       :hetzner_server_id,
       :hostname,
       :private_ip,
+      :already_configured,
     )
     @machine_config = MachineConfig.new(machine_config_params)
     @hetzner_server = @machine_config.hetzner_server
@@ -40,6 +41,7 @@ class MachineConfigsController < ApplicationController
       when /control-plane/ then "0"
       when /worker/ then "1"
       when /database/ then "2"
+      when /standby/ then "7"
       else "x"
       end
     ip << "."

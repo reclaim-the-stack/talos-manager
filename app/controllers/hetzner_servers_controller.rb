@@ -1,6 +1,8 @@
 class HetznerServersController < ApplicationController
   def index
-    @hetzner_servers = HetznerServer.all.order(hetzner_vswitch_id: :asc, name: :asc).includes(:hetzner_vswitch)
+    @hetzner_servers = HetznerServer.all
+      .includes(:hetzner_vswitch, :config)
+      .order(hetzner_vswitch_id: :asc, name: :asc)
   end
 
   def edit
