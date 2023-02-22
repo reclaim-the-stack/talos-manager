@@ -36,7 +36,7 @@
             <% if hetzner_server.last_configured_at && hetzner_server.last_configured_at > hetzner_server.last_request_for_configuration_at %>
               <span class="block h-4 w-4 mr-4 rounded-full bg-green-400"></span>
             <% else %>
-              <span class="animate-ping block h-4 w-4 mr-4 rounded-full bg-yellow-400 opacity-75"></span>
+              <span class="animate-ping duration-700 block h-4 w-4 mr-4 rounded-full bg-yellow-400 opacity-75"></span>
             <% end %>
           <% end %>
         </div>
@@ -50,7 +50,7 @@
               hetzner_server.machine_config,
               method: :delete,
               form_class: "inline",
-              class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white opacity-0 group-hover:opacity-100",
+              class: "opacity-0 group-hover:opacity-100",
             )
           %>
         <% else %>
