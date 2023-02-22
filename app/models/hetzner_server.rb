@@ -25,8 +25,13 @@ class HetznerServer < ApplicationRecord
 
     ssh_exec_with_log! session, "wget '#{TALOS_ISO_URL}' -O talos.iso --no-verbose"
     ssh_exec_with_log! session, "dd if=talos.iso of=/dev/sda status=progress"
-    session.exec! "reboot" # this will implicitly close the connection
-    session.shutdown! # a normal close would result in IOError due to reboot
+
+    begin
+      session.exec! "reboot"
+    rescue IOError
+      # rebooting implicitly closes the connection causing an IOError
+    end
+    session.shutdown!
 
     update!(accessible: false)
   end
