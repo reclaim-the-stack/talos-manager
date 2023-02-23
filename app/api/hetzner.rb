@@ -119,6 +119,10 @@ module Hetzner
     post("reset/#{server_id}", type: "hw")
   end
 
+  def self.press_power_button(server_id)
+    post("reset/#{server_id}", type: "power")
+  end
+
   # Finds and memoizes an SSH key named 'devops-talos-manager' on the Hetzner account
   def self.devops_talos_manager_ssh_key
     @devops_talos_manager_ssh_key ||= ssh_keys.find { |key| key.fetch("name") == "devops-talos-manager" } or
