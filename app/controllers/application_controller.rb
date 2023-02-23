@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::Base
+  default_form_builder ApplicationFormBuilder
+
   before_action :require_authentication
 
   private

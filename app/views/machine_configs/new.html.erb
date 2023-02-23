@@ -2,22 +2,10 @@
 
 <%= form_with model: @machine_config do |f| %>
   <%= f.hidden_field :hetzner_server_id %>
-  <% errors = f.object.errors[:hostname].presence %>
-  <%= f.label :hostname, class: "font-bold mb-1 block" %>
-  <%= f.text_field :hostname, required: true, class: "w-full border-1 #{errors ? 'border-red-300' : 'border-gray-300'} p-3 mb-4", placeholder: "worker-x" %>
-  <% if errors %>
-    <p class="text-red-500 -mt-3 mb-4 text-sm"><%= errors.to_sentence %></p>
-  <% end %>
 
-  <% errors = f.object.errors[:private_ip].presence %>
-  <%= f.label :private_ip, "Private IP", class: "font-bold mb-1 block" %>
-  <%= f.text_field :private_ip, required: true, class: "w-full border-1 #{errors ? 'border-red-300' : 'border-gray-300'} p-3 mb-5", placeholder: "10.0.x.x" %>
-  <% if errors %>
-    <p class="text-red-500 -mt-3 mb-4 text-sm"><%= errors.to_sentence %></p>
-  <% end %>
-
-  <%= f.label :config, class: "font-bold mb-1 block" %>
-  <%= f.select :config_id, Config.pluck(:name, :id), { include_blank: false }, class: "block border-1 border-gray-300  p-3 mb-5" %>
+  <%= f.text_field :hostname, required: true, placeholder: "worker-x" %>
+  <%= f.text_field :private_ip, required: true, placeholder: "10.0.x.x", label: "Private IP" %>
+  <%= f.select :config_id, Config.pluck(:name, :id), { include_blank: false }, required: false %>
 
   <%= f.label :already_configured, class: "mb-5 block" do %>
     <h3 class="font-bold mb-1 text-gray-900">Already Configured</h3>
@@ -25,6 +13,5 @@
     <span class="text-sm text-gray-600">Check to apply green status to the server immediately</span>
   <% end %>
 
-  <%= f.submit "Configure", class: "w-full rounded text-white bg-mnd-red hover:bg-mnd-red-dark cursor-pointer disabled:cursor-default
-disabled:bg-mnd-red-light font-semibold p-3 mb-3" %>
+  <%= f.submit "Configure" %>
 <% end %>
