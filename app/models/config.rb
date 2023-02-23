@@ -33,13 +33,13 @@ class Config < ApplicationRecord
     #   * install instructions are required in "metal" mode
     #   * warning: use "worker" instead of "" for machine type
 
-    dummy_cluster = Cluster.new(name: "test", endpoint: "https://test.com:6443")
-    dummy_cluster.validate # trigger the default secret generation callback
-    dummy_server = HetznerServer.new(
-      ip: "108.108.108.108",
-      cluster: dummy_cluster,
+    dummy_cluster = Cluster.new(
+      name: "test",
+      endpoint: "https://test.com:6443",
       hetzner_vswitch: HetznerVswitch.new(vlan: 4000),
     )
+    dummy_cluster.validate # trigger the default secret generation callback
+    dummy_server = HetznerServer.new(name: "control-plane-1", ip: "108.108.108.108", cluster: dummy_cluster)
     dummy_config = MachineConfig.new(config: self, hetzner_server: dummy_server, hostname: "worker-1", private_ip: "10.0.1.1")
     talos_validation =
       Tempfile.create("talos-config.yaml") do |file|
