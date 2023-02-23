@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_23_115816) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_23_170459) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,11 +20,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_23_115816) do
     t.text "secrets", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "hetzner_vswitch_id"
+    t.index ["hetzner_vswitch_id"], name: "index_clusters_on_hetzner_vswitch_id"
   end
 
   create_table "configs", force: :cascade do |t|
     t.string "name", null: false
-    t.text "config", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "install_disk", default: "/dev/nvme0n1", null: false
@@ -51,6 +52,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_23_115816) do
     t.string "uuid"
     t.datetime "last_configured_at"
     t.datetime "last_request_for_configuration_at"
+    t.bigint "cluster_id"
+    t.index ["cluster_id"], name: "index_hetzner_servers_on_cluster_id"
     t.index ["hetzner_vswitch_id"], name: "index_hetzner_servers_on_hetzner_vswitch_id"
     t.index ["ip"], name: "index_hetzner_servers_on_ip", unique: true
   end
@@ -73,6 +76,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_23_115816) do
     t.index ["hetzner_server_id"], name: "index_machine_configs_on_hetzner_server_id"
   end
 
+  add_foreign_key "clusters", "hetzner_vswitches"
+  add_foreign_key "hetzner_servers", "clusters"
   add_foreign_key "hetzner_servers", "hetzner_vswitches"
   add_foreign_key "machine_configs", "configs"
   add_foreign_key "machine_configs", "hetzner_servers"

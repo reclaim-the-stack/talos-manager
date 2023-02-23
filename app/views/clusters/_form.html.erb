@@ -1,6 +1,7 @@
 <%= form_with model: model do |f| %>
   <%= f.text_field :name, placeholder: "kubernetes-staging" %>
   <%= f.text_field :endpoint, placeholder: "https://kubernetes-staging.example.com:6443" %>
+  <%= f.select :hetzner_vswitch_id, HetznerVswitch.pluck(:name, :id), { include_blank: false }, required: false %>
   <%= f.text_area :secrets, required: false, class: "font-mono text-sm", rows: 20, placeholder: "Leave blank to generate secrets via talosctl or paste the contents of an existing secrets.yaml".html_safe %>
 
   <%= f.submit "Save" %>

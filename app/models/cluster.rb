@@ -1,9 +1,13 @@
 require "open3"
 
 class Cluster < ApplicationRecord
+  has_many :hetzner_servers
+  belongs_to :hetzner_vswitch
+
   before_validation :generate_default_secret, on: :create
 
   validates_presence_of :name
+  validates_presence_of :endpoint
   validates_presence_of :secrets
   validate :validate_secrets_yaml
 

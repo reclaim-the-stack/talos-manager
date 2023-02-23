@@ -10,8 +10,6 @@ class ConfigsController < ApplicationController
   end
 
   def create
-    config_params = params.require(:config).permit(:name, :config)
-
     @config = Config.new(config_params)
 
     if @config.save
@@ -27,8 +25,6 @@ class ConfigsController < ApplicationController
 
   def update
     @config = Config.find(params[:id])
-
-    config_params = params.require(:config).permit(:name, :config)
 
     if @config.update(config_params)
       redirect_to configs_path, notice: "Config #{@config.name} successfully updated!"
@@ -57,5 +53,20 @@ class ConfigsController < ApplicationController
       attempt = params[:attempt] || 0
       redirect_to get_config_path(uuid: params[:uuid], attempt: attempt.to_i + 1)
     end
+  end
+
+  private
+
+  def config_params
+    params.require(:config).permit(
+      :name,
+      :config,
+      :install_disk,
+      :install_image,
+      :kubernetes_version,
+      :patch,
+      :patch_control_plane,
+      :patch_worker,
+    )
   end
 end

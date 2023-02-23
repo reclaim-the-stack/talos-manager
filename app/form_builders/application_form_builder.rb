@@ -1,5 +1,10 @@
+# Avoid errors getting wrapped in an extra div
+ActionView::Base.field_error_proc = proc do |html_tag, _instance|
+  html_tag.html_safe
+end
+
 class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
-  INPUT_CLASSES = "w-full p-3 mb-5 rounded border border-gray-300 disabled:text-gray-500".freeze
+  INPUT_CLASSES = "w-full p-3 mb-5 rounded border border-gray-300 text-gray-900 disabled:text-gray-500".freeze
 
   def text_field(attribute, options = {})
     input_with_label_and_validation(attribute, options) { super }
@@ -42,7 +47,12 @@ class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
     options[:required] = true unless options.key?(:required)
     validation_errors = object.errors[attribute].to_sentence.capitalize.presence
 
-    label = label(attribute, options.delete(:label)&.delete_suffix(":"), class: "block mb-2 text-left font-bold")
+    label =
+      if options.key?(:label) && options[:label].nil?
+        nil
+      else
+        label(attribute, options.delete(:label)&.delete_suffix(":"), class: "block mb-2 text-left font-bold")
+      end
     error = validation_errors && %(<p class="-mt-2 mb-4 text-left text-sm text-red-500">#{validation_errors}</p>)
 
     options[:class] = "#{options[:class]} border-red-400" if error

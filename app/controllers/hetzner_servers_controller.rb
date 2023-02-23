@@ -1,7 +1,7 @@
 class HetznerServersController < ApplicationController
   def index
     @hetzner_servers = HetznerServer.all
-      .includes(:hetzner_vswitch, :config)
+      .includes(:config, :cluster)
       .order(hetzner_vswitch_id: :asc, name: :asc)
   end
 
@@ -12,11 +12,20 @@ class HetznerServersController < ApplicationController
   def update
     @hetzner_server = HetznerServer.find(params[:id])
 
-    hetzner_server_params = params.require(:hetzner_server).permit(:name, :hetzner_vswitch_id)
+    hetzner_server_params = params.require(:hetzner_server).permit(
+      :name,
+      :hetzner_vswitch_id,
+      :cluster_id,
+    )
 
-    @hetzner_server.update!(hetzner_server_params.merge(sync: true))
-
-    redirect_to hetzner_servers_path
+    if @hetzner_server.update(hetzner_server_params.merge(sync: true))
+      @hetzner_servers = HetznerServer.all
+        .includes(:hetzner_vswitch, :config, :cluster)
+        .order(hetzner_vswitch_id: :asc, name: :asc)
+      redirect_to hetzner_servers_path
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   def bootstrap

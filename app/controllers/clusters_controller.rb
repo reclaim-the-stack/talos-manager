@@ -8,7 +8,7 @@ class ClustersController < ApplicationController
   end
 
   def create
-    cluster_params = params.require(:cluster).permit(:name, :endpoint, :secrets)
+    cluster_params = params.require(:cluster).permit(:name, :endpoint, :secrets, :hetzner_vswitch_id)
 
     @cluster = Cluster.new(cluster_params)
 
@@ -26,7 +26,7 @@ class ClustersController < ApplicationController
   def update
     @cluster = Cluster.find(params[:id])
 
-    cluster_params = params.require(:cluster).permit(:name, :endpoint, :secrets)
+    cluster_params = params.require(:cluster).permit(:name, :endpoint, :secrets, :hetzner_vswitch_id)
 
     if @cluster.update(cluster_params)
       redirect_to clusters_path, notice: "Cluster #{@cluster.name} successfully updated!"

@@ -1,4 +1,11 @@
 class MachineConfigsController < ApplicationController
+  def show
+    machine_config = MachineConfig.find(params[:id])
+
+    headers["content-type"] = "text/yaml"
+    render plain: machine_config.generate_config
+  end
+
   def new
     @hetzner_server = HetznerServer.find(params.require(:hetzner_server_id))
     @machine_config = MachineConfig.new(

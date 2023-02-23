@@ -1,12 +1,14 @@
 class HetznerServer < ApplicationRecord
   TALOS_ISO_URL = "https://drive.google.com/uc?id=1cUFh6YjmmhsLCuXg8PIhZxsKCkp4upu5&export=download".freeze
 
-  belongs_to :hetzner_vswitch, optional: true
+  belongs_to :cluster, optional: true
+
   has_one :machine_config
   has_one :config, through: :machine_config
 
   attr_accessor :sync # set to true to sync changed attributes to hetzner
 
+  validates_uniqueness_of :name, allow_nil: true
   validates_presence_of :ip
   validates_presence_of :ipv6
   validates_presence_of :product
@@ -14,6 +16,10 @@ class HetznerServer < ApplicationRecord
   validates_presence_of :status
 
   after_save :sync_with_hetzner, if: :sync
+
+  def talos_type
+    name.include?("control-plane") ? "controlplane" : "worker"
+  end
 
   def bootstrap!
     session = Net::SSH.start(ip, "root", key_data: [ENV.fetch("SSH_PRIVATE_KEY")])

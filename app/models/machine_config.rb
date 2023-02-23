@@ -1,5 +1,6 @@
 # Represents an application of Config on a HetznerServer, including hostname and private_ip
 
+require "open3"
 require "resolv"
 
 class MachineConfig < ApplicationRecord
@@ -19,13 +20,58 @@ class MachineConfig < ApplicationRecord
     raise "can't generate config before assigning hostname" if hostname.blank?
     raise "can't generate config before assigning private_ip" if private_ip.blank?
 
-    config.config
-      .gsub("${hostname}", hostname)
-      .gsub("${private_ip}", private_ip)
-      .gsub("${public_ip}", hetzner_server.ip)
+    secrets_file = Tempfile.open do |file|
+      file.write hetzner_server.cluster.secrets
+      file.path
+    end
+    patch_file = Tempfile.open do |file|
+      file.write replace_substitution_variables(config.patch)
+      file.path
+    end
+    patch_control_plane_file = Tempfile.open do |file|
+      file.write replace_substitution_variables(config.patch_control_plane)
+      file.path
+    end
+    patch_worker_file = Tempfile.open do |file|
+      file.write replace_substitution_variables(config.patch_worker)
+      file.path
+    end
+
+    command = %(
+      talosctl gen config \
+        --install-disk #{config.install_disk} \
+        --install-image #{config.install_image} \
+        --kubernetes-version #{config.kubernetes_version} \
+        --config-patch @#{patch_file} \
+        --config-patch-control-plane @#{patch_control_plane_file} \
+        --config-patch-worker @#{patch_worker_file} \
+        --output-types #{hetzner_server.talos_type} \
+        --with-secrets #{secrets_file} \
+        --with-docs=false \
+        --with-examples=false \
+        -o - \
+        #{hetzner_server.cluster.name} \
+        #{hetzner_server.cluster.endpoint}
+    )
+
+    Open3.popen3(command) do |_stdin, stdout, stderr, wait_thread|
+      if wait_thread.value.success?
+        stdout.read
+      else
+        raise "Failed to generate talos configuration: #{stderr.read}"
+      end
+    end
   end
 
   private
+
+  def replace_substitution_variables(patch)
+    patch
+      .gsub("${hostname}", hostname)
+      .gsub("${private_ip}", private_ip)
+      .gsub("${public_ip}", hetzner_server.ip)
+      .gsub("${vlan}", hetzner_server.cluster.hetzner_vswitch.vlan.to_s)
+  end
 
   def validate_hostname_format
     return if hostname.blank?

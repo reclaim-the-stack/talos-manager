@@ -11,14 +11,14 @@ class Config < ApplicationRecord
 
   def validate_talos_config
     begin
-      YAML.safe_load(config)
+      YAML.safe_load(patch)
     rescue Psych::SyntaxError => e
-      errors.add(:config, e.message)
+      errors.add(:patch, e.message)
       return
     end
 
-    unless config.include?("${hostname}") && config.include?("${private_ip}")
-      errors.add(:config, "must include substitution variables ${hostname} and ${private_ip}")
+    unless patch.include?("${hostname}") && patch.include?("${private_ip}")
+      errors.add(:patch, "must include substitution variables ${hostname} and ${private_ip}")
       return
     end
 
@@ -33,7 +33,13 @@ class Config < ApplicationRecord
     #   * install instructions are required in "metal" mode
     #   * warning: use "worker" instead of "" for machine type
 
-    dummy_server = HetznerServer.new(ip: "108.108.108.108")
+    dummy_cluster = Cluster.new(name: "test", endpoint: "https://test.com:6443")
+    dummy_cluster.validate # trigger the default secret generation callback
+    dummy_server = HetznerServer.new(
+      ip: "108.108.108.108",
+      cluster: dummy_cluster,
+      hetzner_vswitch: HetznerVswitch.new(vlan: 4000),
+    )
     dummy_config = MachineConfig.new(config: self, hetzner_server: dummy_server, hostname: "worker-1", private_ip: "10.0.1.1")
     talos_validation =
       Tempfile.create("talos-config.yaml") do |file|

@@ -1,6 +1,6 @@
-<div class="flex mb-10 justify-between">
+<div class="flex mb-10 items-center justify-between">
   <h1 class="text-4xl">Configs</h1>
-  <%= link_to "New Config", new_config_path, class: "text-white rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold p-3 mb-3" %>
+  <%= link_to "New Config", new_config_path, class: "text-white rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold p-3" %>
 </div>
 
 <% @configs.each do |config| %>

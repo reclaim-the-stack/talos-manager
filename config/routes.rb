@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   resources :configs
   resources :clusters
-  resources :machine_configs, only: %i[new create destroy]
+  resources :machine_configs, only: %i[show new create destroy]
   resources :hetzner_servers, only: %i[index edit update] do
     collection do
       post :sync
