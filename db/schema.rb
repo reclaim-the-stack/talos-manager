@@ -10,13 +10,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_21_205658) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_23_101439) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "configs", force: :cascade do |t|
     t.string "name", null: false
     t.text "config", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "secret_id"
+    t.string "cluster_name", null: false
+    t.string "cluster_endpoint", null: false
+    t.string "install_disk", default: "/dev/nvme0n1", null: false
+    t.string "talos_image", default: "ghcr.io/siderolabs/installer:v1.3.5", null: false
+    t.string "kubernetes_version", default: "1.24.8", null: false
+    t.text "patch"
+    t.text "patch_control_plane"
+    t.text "patch_worker"
     t.index ["name"], name: "index_configs_on_name", unique: true
+    t.index ["secret_id"], name: "index_configs_on_secret_id"
   end
 
   create_table "hetzner_servers", force: :cascade do |t|
@@ -56,6 +69,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_21_205658) do
     t.index ["hetzner_server_id"], name: "index_machine_configs_on_hetzner_server_id"
   end
 
+  create_table "secrets", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "secrets", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_foreign_key "configs", "secrets"
   add_foreign_key "hetzner_servers", "hetzner_vswitches"
   add_foreign_key "machine_configs", "configs"
   add_foreign_key "machine_configs", "hetzner_servers"
