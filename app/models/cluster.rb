@@ -1,6 +1,6 @@
 require "open3"
 
-class Secret < ApplicationRecord
+class Cluster < ApplicationRecord
   before_validation :generate_default_secret, on: :create
 
   validates_presence_of :name

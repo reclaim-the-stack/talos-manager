@@ -20,7 +20,7 @@ class MachineConfigsController < ApplicationController
     @hetzner_server = @machine_config.hetzner_server
 
     if @machine_config.save
-      redirect_to hetzner_servers_path
+      redirect_to hetzner_servers_path, notice: "#{@hetzner_server.name} successfully configured!"
     else
       render :new, status: 422
     end

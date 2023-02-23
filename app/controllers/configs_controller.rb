@@ -15,7 +15,7 @@ class ConfigsController < ApplicationController
     @config = Config.new(config_params)
 
     if @config.save
-      redirect_to configs_path
+      redirect_to configs_path, notice: "Config #{@config.name} successfully created!"
     else
       render :new, status: 422
     end
@@ -31,7 +31,7 @@ class ConfigsController < ApplicationController
     config_params = params.require(:config).permit(:name, :config)
 
     if @config.update(config_params)
-      redirect_to configs_path
+      redirect_to configs_path, notice: "Config #{@config.name} successfully updated!"
     else
       render :edit, status: 422
     end

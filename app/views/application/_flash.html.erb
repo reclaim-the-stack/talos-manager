@@ -1,0 +1,28 @@
+<style>
+  @keyframes flash {
+    0% { opacity: 0; bottom: -30px }
+    5% { opacity: 1; bottom: 30px }
+    95% { opacity: 1; bottom: 30px }
+    100% { opacity: 0; bottom: -30px }
+  }
+</style>
+<dialog class="bottom-0 w-full bg-transparent" <%= "open" if flash[:notice] %>>
+  <div
+    class="flex bg-white shadow rounded opacity-0 -bottom-20 left-8 fixed p-3 items-center justify-between"
+    style="animation: flash 10s; animation-iteration-count: 1;"
+  >
+    <div class="bg-green-100 rounded-lg text-green-600 p-2 ml-2 mr-4">
+      <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+      </svg>
+    </div>
+    <p class="mr-3 text-gray-800"><%= flash[:notice] %></p>
+    <form method="dialog" class="flex items-center">
+      <button type="submit" class="text-gray-500 hover:text-gray-800">
+        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </form>
+  </div>
+</dialog>

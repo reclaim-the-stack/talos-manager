@@ -1,0 +1,12 @@
+<div class="flex mb-10 justify-between">
+  <h1 class="text-4xl">Clusters</h1>
+  <%= link_to "New Cluster", new_cluster_path, class: "text-white rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold p-3 mb-3" %>
+</div>
+
+<% @clusters.each do |cluster| %>
+  <div class="flex mb-5">
+    <h2 class="text-xl mr-5"><span class="font-bold"><%= cluster.name %></span></h2>
+    <%= link_to "Edit", edit_cluster_path(cluster), class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2 mr-2" %>
+    <%= button_to icon_trash("w-5"), cluster_path(cluster), method: :delete, data: { turbo_confirm: "Sure you want to destroy the cluster #{cluster.name}?" }, class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2" %>
+  </div>
+<% end %>

@@ -1,5 +1,8 @@
 class Config < ApplicationRecord
   validates_uniqueness_of :name
+  validates_presence_of :install_disk
+  validates_presence_of :install_image
+  validates_presence_of :kubernetes_version
   validate :validate_talos_config
 
   has_many :machine_configs
