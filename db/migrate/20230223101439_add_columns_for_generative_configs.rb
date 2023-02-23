@@ -14,7 +14,7 @@ class AddColumnsForGenerativeConfigs < ActiveRecord::Migration[7.0]
 
     Config.find_each do |config|
       config_data = YAML.load(config.config)
-      config.update!(
+      config.update_columns(
         cluster_name: config_data.dig("cluster", "clusterName"),
         cluster_endpoint: config_data.dig("cluster", "controlPlane", "endpoint"),
       )
