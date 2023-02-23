@@ -1,6 +1,11 @@
 Rails.application.routes.draw do
   resources :configs
-  resources :clusters
+  resources :clusters do
+    member do
+      get :talosconfig
+      get :kubeconfig
+    end
+  end
   resources :machine_configs, only: %i[show new create destroy]
   resources :hetzner_servers, only: %i[index edit update] do
     collection do

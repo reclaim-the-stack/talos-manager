@@ -6,8 +6,10 @@
 <% @clusters.each do |cluster| %>
   <div class="flex items-center mb-5 gap-3">
     <h2 class="text-xl font-bold"><%= cluster.name %></h2>
-    <p>- <%= cluster.endpoint %></p>
+
     <%= link_to "Edit", edit_cluster_path(cluster), class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2" %>
+    <%= link_to "#{icon_download('inline h-4')} talosconfig".html_safe, talosconfig_cluster_path(cluster), class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2" %>
+    <%= link_to "#{icon_download('inline h-4')} kubeconfig".html_safe, kubeconfig_cluster_path(cluster), class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2" %>
     <%= button_to icon_trash("w-5"), cluster_path(cluster), method: :delete, data: { turbo_confirm: "Sure you want to destroy the cluster #{cluster.name}?" }, class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2" %>
   </div>
 <% end %>

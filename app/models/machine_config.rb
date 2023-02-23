@@ -16,7 +16,7 @@ class MachineConfig < ApplicationRecord
 
   after_create :set_configured, if: :already_configured
 
-  def generate_config
+  def generate_config(output_type: hetzner_server.talos_type)
     raise "can't generate config before assigning hostname" if hostname.blank?
     raise "can't generate config before assigning private_ip" if private_ip.blank?
 
@@ -45,7 +45,7 @@ class MachineConfig < ApplicationRecord
         --config-patch @#{patch_file} \
         --config-patch-control-plane @#{patch_control_plane_file} \
         --config-patch-worker @#{patch_worker_file} \
-        --output-types #{hetzner_server.talos_type} \
+        --output-types #{output_type} \
         --with-secrets #{secrets_file} \
         --with-docs=false \
         --with-examples=false \
@@ -54,13 +54,26 @@ class MachineConfig < ApplicationRecord
         #{hetzner_server.cluster.endpoint}
     )
 
-    Open3.popen3(command) do |_stdin, stdout, stderr, wait_thread|
+    config = Open3.popen3(command) do |_stdin, stdout, stderr, wait_thread|
       if wait_thread.value.success?
         stdout.read
       else
         raise "Failed to generate talos configuration: #{stderr.read}"
       end
     end
+
+    # Initially talosconfig is generated with an endpoint of 127.0.0.1 and no nodes.
+    # Hence we add the first control plane IP as both enpoint and node.
+    if output_type == "talosconfig"
+      talosconfig = YAML.safe_load(config)
+      context_name = talosconfig.fetch("context")
+      context = talosconfig.fetch("contexts").fetch(context_name)
+      context["endpoints"] = [hetzner_server.ip]
+      context["nodes"] = [hetzner_server.ip]
+      config = talosconfig.to_yaml.delete_prefix("---\n")
+    end
+
+    config
   end
 
   private
