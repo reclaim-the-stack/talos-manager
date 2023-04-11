@@ -35,26 +35,6 @@ module Hetzner
       }
     end
     Server.upsert_all(server_attributes)
-
-    # Set server accessible status based on SSH connectability
-    threads = Server.all.map do |server|
-      Thread.new do
-        Net::SSH.start(
-          server.ip,
-          "root",
-          key_data: [ENV.fetch("SSH_PRIVATE_KEY")],
-          non_interactive: true,
-          verify_host_key: :never,
-          timeout: 2,
-        ).close
-        server
-      rescue Errno::ECONNREFUSED, Net::SSH::AuthenticationFailed, Net::SSH::ConnectionTimeout
-        nil
-      end
-    end
-    accessible_servers_ids = threads.map(&:value).compact.map(&:id)
-    Server.where(id: accessible_servers_ids).update!(accessible: true)
-    Server.where.not(id: accessible_servers_ids).update!(accessible: false)
   end
 
   # https://robot.hetzner.com/doc/webservice/en.html#server
