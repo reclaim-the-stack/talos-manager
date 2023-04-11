@@ -1,7 +1,7 @@
 require "open3"
 
 class Cluster < ApplicationRecord
-  has_many :hetzner_servers
+  has_many :servers
   belongs_to :hetzner_vswitch
 
   before_validation :generate_default_secret, on: :create

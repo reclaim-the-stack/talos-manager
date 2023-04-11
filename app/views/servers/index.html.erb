@@ -1,6 +1,6 @@
 <div class="flex justify-between">
-  <h1 class="text-4xl mb-10">Hetzner Servers</h1>
-  <%= button_to icon_reload, sync_hetzner_servers_path, method: :post, class: "disabled:opacity-20 disabled:cursor-default", title: "Sync with Hetzner" %>
+  <h1 class="text-4xl mb-10">Servers</h1>
+  <%= button_to icon_reload, sync_servers_path, method: :post, class: "disabled:opacity-20 disabled:cursor-default", title: "Sync with Hetzner" %>
 </div>
 
 <table class="mb-5">
@@ -14,26 +14,26 @@
     <th class="">Actions</th>
   </thead>
   <tbody>
-    <% @hetzner_servers.each do |hetzner_server| %>
+    <% @servers.each do |server| %>
     <tr class="h-11 group hover:bg-gray-50">
       <td class="py-1">
-        <%= turbo_frame_tag hetzner_server, :name do %>
-          <%= hetzner_server.name.presence || tag.span("untitled", class: "text-gray-400") %>
-          <%= link_to icon_edit, edit_hetzner_server_path(hetzner_server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
+        <%= turbo_frame_tag server, :name do %>
+          <%= server.name.presence || tag.span("untitled", class: "text-gray-400") %>
+          <%= link_to icon_edit, edit_server_path(server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
         <% end %>
       </td>
-      <td><%= hetzner_server.ip %></td>
-      <td><%= hetzner_server.product.split("-").first %></td>
+      <td><%= server.ip %></td>
+      <td><%= server.product.split("-").first %></td>
       <td>
-        <%= turbo_frame_tag hetzner_server, :cluster do %>
-          <%= hetzner_server.cluster&.name || tag.span("none", class: "text-gray-400") %>
-          <%= link_to icon_edit, edit_hetzner_server_path(hetzner_server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
+        <%= turbo_frame_tag server, :cluster do %>
+          <%= server.cluster&.name || tag.span("none", class: "text-gray-400") %>
+          <%= link_to icon_edit, edit_server_path(server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
         <% end %>
       </td>
       <td>
         <div class="flex items-center">
-          <% if hetzner_server.last_request_for_configuration_at %>
-            <% if hetzner_server.last_configured_at && hetzner_server.last_configured_at > hetzner_server.last_request_for_configuration_at %>
+          <% if server.last_request_for_configuration_at %>
+            <% if server.last_configured_at && server.last_configured_at > server.last_request_for_configuration_at %>
               <span class="block h-4 w-4 mr-4 rounded-full bg-green-400"></span>
             <% else %>
               <span class="animate-ping duration-700 block h-4 w-4 mr-4 rounded-full bg-yellow-400 opacity-75"></span>
@@ -42,25 +42,25 @@
         </div>
       </td>
       <td>
-        <% if hetzner_server.machine_config %>
+        <% if server.machine_config %>
           <div class="flex items-center gap-2">
-            <p><%= hetzner_server.config.name %></p>
+            <p><%= server.config.name %></p>
             <%=
               button_to(
                 icon_trash("w-4"),
-                hetzner_server.machine_config,
+                server.machine_config,
                 method: :delete,
                 form_class: "inline",
                 class: "opacity-0 group-hover:opacity-100",
               )
             %>
-            <%= link_to icon_download, hetzner_server.machine_config, class: "h-4 block opacity-0 group-hover:opacity-100" %>
+            <%= link_to icon_download, server.machine_config, class: "h-4 block opacity-0 group-hover:opacity-100" %>
           </div>
         <% else %>
           <%=
             link_to(
               "Configure",
-              new_machine_config_path(hetzner_server_id: hetzner_server.id),
+              new_machine_config_path(server_id: server.id),
               class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white group-hover:opacity-100",
             )
           %>
@@ -68,20 +68,20 @@
       </td>
       <td>
         <%=
-          if hetzner_server.accessible?
+          if server.accessible?
             button_to(
               "Bootstrap",
-              bootstrap_hetzner_server_path(hetzner_server),
+              bootstrap_server_path(server),
               method: :post,
               class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white group-hover:opacity-100",
             )
           else
             button_to(
               "Rescue",
-              rescue_hetzner_server_path(hetzner_server),
+              rescue_server_path(server),
               method: :post,
               class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white opacity-0 group-hover:opacity-100",
-              data: { turbo_confirm: "Are you sure you want to enable rescue mode for #{hetzner_server.name}?" },
+              data: { turbo_confirm: "Are you sure you want to enable rescue mode for #{server.name}?" },
             )
           end
         %>

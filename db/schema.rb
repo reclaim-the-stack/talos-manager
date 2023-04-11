@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_23_170459) do
+ActiveRecord::Schema[7.0].define(version: 2023_04_11_122629) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -37,7 +37,25 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_23_170459) do
     t.index ["name"], name: "index_configs_on_name", unique: true
   end
 
-  create_table "hetzner_servers", force: :cascade do |t|
+  create_table "hetzner_vswitches", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "vlan", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "machine_configs", force: :cascade do |t|
+    t.integer "config_id", null: false
+    t.integer "server_id", null: false
+    t.string "hostname", null: false
+    t.string "private_ip", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["config_id"], name: "index_machine_configs_on_config_id"
+    t.index ["server_id"], name: "index_machine_configs_on_server_id"
+  end
+
+  create_table "servers", force: :cascade do |t|
     t.string "name"
     t.string "ip", null: false
     t.string "ipv6", null: false
@@ -53,32 +71,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_23_170459) do
     t.datetime "last_configured_at"
     t.datetime "last_request_for_configuration_at"
     t.bigint "cluster_id"
-    t.index ["cluster_id"], name: "index_hetzner_servers_on_cluster_id"
-    t.index ["hetzner_vswitch_id"], name: "index_hetzner_servers_on_hetzner_vswitch_id"
-    t.index ["ip"], name: "index_hetzner_servers_on_ip", unique: true
-  end
-
-  create_table "hetzner_vswitches", force: :cascade do |t|
-    t.string "name", null: false
-    t.integer "vlan", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "machine_configs", force: :cascade do |t|
-    t.integer "config_id", null: false
-    t.integer "hetzner_server_id", null: false
-    t.string "hostname", null: false
-    t.string "private_ip", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["config_id"], name: "index_machine_configs_on_config_id"
-    t.index ["hetzner_server_id"], name: "index_machine_configs_on_hetzner_server_id"
+    t.index ["cluster_id"], name: "index_servers_on_cluster_id"
+    t.index ["hetzner_vswitch_id"], name: "index_servers_on_hetzner_vswitch_id"
+    t.index ["ip"], name: "index_servers_on_ip", unique: true
   end
 
   add_foreign_key "clusters", "hetzner_vswitches"
-  add_foreign_key "hetzner_servers", "clusters"
-  add_foreign_key "hetzner_servers", "hetzner_vswitches"
   add_foreign_key "machine_configs", "configs"
-  add_foreign_key "machine_configs", "hetzner_servers"
+  add_foreign_key "machine_configs", "servers"
+  add_foreign_key "servers", "clusters"
+  add_foreign_key "servers", "hetzner_vswitches"
 end

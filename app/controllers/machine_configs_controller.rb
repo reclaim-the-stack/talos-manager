@@ -7,27 +7,27 @@ class MachineConfigsController < ApplicationController
   end
 
   def new
-    @hetzner_server = HetznerServer.find(params.require(:hetzner_server_id))
+    @server = Server.find(params.require(:server_id))
     @machine_config = MachineConfig.new(
-      hetzner_server: @hetzner_server,
-      hostname: @hetzner_server.name,
-      private_ip: default_private_ip(@hetzner_server.name),
+      server: @server,
+      hostname: @server.name,
+      private_ip: default_private_ip(@server.name),
     )
   end
 
   def create
     machine_config_params = params.require(:machine_config).permit(
       :config_id,
-      :hetzner_server_id,
+      :server_id,
       :hostname,
       :private_ip,
       :already_configured,
     )
     @machine_config = MachineConfig.new(machine_config_params)
-    @hetzner_server = @machine_config.hetzner_server
+    @server = @machine_config.server
 
     if @machine_config.save
-      redirect_to hetzner_servers_path, notice: "#{@hetzner_server.name} successfully configured!"
+      redirect_to servers_path, notice: "#{@server.name} successfully configured!"
     else
       render :new, status: 422
     end
@@ -36,7 +36,7 @@ class MachineConfigsController < ApplicationController
   def destroy
     MachineConfig.find(params[:id]).destroy
 
-    redirect_to hetzner_servers_path
+    redirect_to servers_path
   end
 
   private

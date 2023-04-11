@@ -34,10 +34,10 @@ module Hetzner
         hetzner_vswitch_id: vswitch&.fetch("id"),
       }
     end
-    HetznerServer.upsert_all(server_attributes)
+    Server.upsert_all(server_attributes)
 
     # Set server accessible status based on SSH connectability
-    threads = HetznerServer.all.map do |server|
+    threads = Server.all.map do |server|
       Thread.new do
         Net::SSH.start(
           server.ip,
@@ -53,8 +53,8 @@ module Hetzner
       end
     end
     accessible_servers_ids = threads.map(&:value).compact.map(&:id)
-    HetznerServer.where(id: accessible_servers_ids).update!(accessible: true)
-    HetznerServer.where.not(id: accessible_servers_ids).update!(accessible: false)
+    Server.where(id: accessible_servers_ids).update!(accessible: true)
+    Server.where.not(id: accessible_servers_ids).update!(accessible: false)
   end
 
   # https://robot.hetzner.com/doc/webservice/en.html#server
