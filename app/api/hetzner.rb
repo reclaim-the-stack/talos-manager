@@ -24,6 +24,7 @@ module Hetzner
 
       {
         id: server_payload.fetch("server_number"),
+        type: "Server::HetznerDedicated",
         name: server_payload.fetch("server_name"),
         cancelled: server_payload.fetch("cancelled"),
         data_center: server_payload.fetch("dc"),

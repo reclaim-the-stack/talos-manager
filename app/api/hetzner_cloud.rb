@@ -12,6 +12,7 @@ module HetznerCloud
     server_attributes = servers.map do |server_payload|
       {
         id: server_payload.fetch("id"),
+        type: "Server::HetznerCloud",
         name: server_payload.fetch("name"),
         cancelled: false,
         data_center: server_payload.fetch("datacenter").fetch("name"),
