@@ -63,7 +63,7 @@ class ServersController < ApplicationController
           timeout: 2,
         ).close
         server
-      rescue Errno::ECONNREFUSED, Net::SSH::AuthenticationFailed, Net::SSH::ConnectionTimeout
+      rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Net::SSH::AuthenticationFailed, Net::SSH::ConnectionTimeout
         nil
       end
     end
