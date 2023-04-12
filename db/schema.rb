@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_12_141722) do
+ActiveRecord::Schema[7.0].define(version: 2023_04_12_153422) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -28,7 +28,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_12_141722) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "install_disk", default: "/dev/nvme0n1", null: false
     t.string "install_image", default: "ghcr.io/siderolabs/installer:v1.3.5", null: false
     t.string "kubernetes_version", default: "1.24.8", null: false
     t.text "patch"
@@ -52,6 +51,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_12_141722) do
     t.string "private_ip", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "install_disk", default: "/dev/sda", null: false
     t.index ["config_id"], name: "index_machine_configs_on_config_id"
     t.index ["server_id"], name: "index_machine_configs_on_server_id"
   end
@@ -73,6 +73,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_12_141722) do
     t.datetime "last_request_for_configuration_at"
     t.bigint "cluster_id"
     t.string "type", default: "Server::HetznerDedicated", null: false
+    t.string "bootstrap_disk"
     t.index ["cluster_id"], name: "index_servers_on_cluster_id"
     t.index ["hetzner_vswitch_id"], name: "index_servers_on_hetzner_vswitch_id"
     t.index ["ip"], name: "index_servers_on_ip", unique: true

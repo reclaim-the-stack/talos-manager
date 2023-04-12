@@ -13,6 +13,7 @@ class MachineConfig < ApplicationRecord
   validate :validate_hostname_format
   validates_presence_of :private_ip
   validate :validate_private_ip_format
+  validates_presence_of :install_disk
 
   after_create :set_configured, if: :already_configured
 
@@ -39,7 +40,7 @@ class MachineConfig < ApplicationRecord
 
     command = %(
       talosctl gen config \
-        --install-disk #{config.install_disk} \
+        --install-disk #{server.install_disk} \
         --install-image #{config.install_image} \
         --kubernetes-version #{config.kubernetes_version} \
         --config-patch @#{patch_file} \

@@ -65,7 +65,6 @@ class ConfigsController < ApplicationController
     params.require(:config).permit(
       :name,
       :config,
-      :install_disk,
       :install_image,
       :kubernetes_version,
       :patch,

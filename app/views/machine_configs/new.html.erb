@@ -5,6 +5,7 @@
 
   <%= f.text_field :hostname, required: true, placeholder: "worker-x" %>
   <%= f.text_field :private_ip, required: true, placeholder: "10.0.x.x", label: "Private IP" %>
+  <%= f.text_field :install_disk, required: true, placeholder: "/dev/sda" %>
   <%= f.select :config_id, Config.pluck(:name, :id), { include_blank: false }, required: false %>
 
   <%= f.label :already_configured, class: "mb-5 block" do %>

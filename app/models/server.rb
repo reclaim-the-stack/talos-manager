@@ -32,14 +32,16 @@ class Server < ApplicationRecord
 
     host = ENV.fetch("HOST")
     nvme = session.exec!("ls /dev/nvme0n1 && echo 'has-nvme'").chomp.ends_with? "has-nvme"
-    install_disk = nvme ? "/dev/nvme0n1" : "/dev/sda"
-    partition = nvme ? "p3" : "3"
 
-    ssh_exec_with_log! session, "wget #{TALOS_IMAGE_URL} --quiet -O - | tar xvfzO - | dd of=#{install_disk} status=progress"
+    update!(bootstrap_disk: nvme ? "/dev/nvme0n1" : "/dev/sda")
+
+    boot_partition = nvme ? "p3" : "3"
+
+    ssh_exec_with_log! session, "wget #{TALOS_IMAGE_URL} --quiet -O - | tar xvfzO - | dd of=#{bootstrap_disk} status=progress"
     ssh_exec_with_log! session, "sync"
 
     # assuming that p3 is the BOOT partition, can make sure with `gdisk /dev/nvme0n1` and `s` command
-    ssh_exec_with_log! session, "mount #{install_disk}#{partition} /mnt"
+    ssh_exec_with_log! session, "mount #{bootstrap_disk}#{boot_partition} /mnt"
     ssh_exec_with_log! session, "sed -i 's/vmlinuz/vmlinuz talos.config=https:\\/\\/#{host}\\/config?uuid=${uuid}/' "\
                                 "/mnt/grub/grub.cfg"
     ssh_exec_with_log! session, "umount /mnt"

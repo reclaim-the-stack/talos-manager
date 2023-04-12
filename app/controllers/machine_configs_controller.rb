@@ -12,6 +12,7 @@ class MachineConfigsController < ApplicationController
       server: @server,
       hostname: @server.name,
       private_ip: default_private_ip(@server.name),
+      install_disk: @server.bootstrap_disk,
     )
   end
 
@@ -22,6 +23,7 @@ class MachineConfigsController < ApplicationController
       :hostname,
       :private_ip,
       :already_configured,
+      :install_disk,
     )
     @machine_config = MachineConfig.new(machine_config_params)
     @server = @machine_config.server
