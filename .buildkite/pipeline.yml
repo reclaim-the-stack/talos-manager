@@ -1,8 +1,0 @@
-steps:
-  - command: .buildkite/run
-    plugins:
-      - mynewsdesk/devops-buildkite-cache#master
-
-  - command: .buildkite/build-and-push-docker-image
-    key: docker_image
-    label: ":docker: Build and push docker image"
