@@ -3,7 +3,12 @@
   <%= f.text_field :install_disk, placeholder: "/dev/nvme0n1" %>
   <%= f.text_field :install_image, placeholder: "ghcr.io/siderolabs/installer:v1.3.7" %>
   <%= f.text_field :kubernetes_version, placeholder: "1.26.3" %>
-  <%= f.check_box :kubespan, label: "Enable KubeSpan", class: "w-auto" %>
+
+  <%= f.label :kubespan, class: "mb-5 block" do %>
+    <h3 class="font-bold mb-1 text-gray-900">Enable Kubespan</h3>
+    <%= f.check_box :kubespan, class: "mr-1" %>
+  <% end %>
+
   <%= f.text_area :patch, required: false, class: "font-mono w-full text-sm", rows: 20, placeholder: "machine: # ...&#10;cluster: # ...".html_safe %>
   <%= f.text_area :patch_control_plane, required: false, class: "font-mono w-full text-sm", rows: 5, placeholder: "machine: # ...&#10;cluster: # ...".html_safe %>
   <%= f.text_area :patch_worker, required: false, class: "font-mono w-full text-sm", rows: 5, placeholder: "machine: # ...&#10;cluster: # ...".html_safe %>
