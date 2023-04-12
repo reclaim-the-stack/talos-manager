@@ -4,13 +4,25 @@ App built to help bootstrap and manage Talos Linux servers on Hetzner.
 
 ## Approach
 
-Based on bootstrapping nodes via the `talos.config` kernel parameter (https://www.talos.dev/latest/reference/kernel/#talosconfig). You can apply this inside the Grub config of a Talos installation image. By write the image to disk with `dd` and then mounting the boot partition we can inject the parameter into its `grub/grub.cfg`.
+Based on bootstrapping nodes via the `talos.config` kernel parameter (https://www.talos.dev/latest/reference/kernel/#talosconfig). This can be applied inside the Grub config of a Talos installation image. By writing the image to disk with `dd` and then mounting the boot partition we can inject the parameter into its `grub/grub.cfg`.
 
 Example of passing a URL into the talos.config parameter:
 
 ```
 talos.config=https://talos-manager.example.com/config?uuid=${uuid}
 ```
+
+## Deploying
+
+Feel free to deploy the application using our published container images at https://hub.docker.com/r/reclaimthestack/talos-manager/tags
+
+Apart from deploying the application you'll also need to deploy a Postgres database and configure some ENV variables:
+
+- `DATABASE_URL` - a postgres URL for the postgresql database
+- `BASIC_AUTH_PASSWORD` - simple way of securing access to the application via HTTP basic auth
+- `HETZNER_CLOUD_API_TOKEN` - a read + write Hetzner cloud API token
+- `HOST` - the hostname on which you are deploying this app (eg. `talos-manager.yourdomain.com`)
+- `SSH_PRIVATE_KEY` - a private key used to connect to servers for bootstrapping, the public key must be added to Hetzner Robot as well as Hetzner Cloud with a name including `talos-manager`
 
 ## Solving invalid UUID issues
 
