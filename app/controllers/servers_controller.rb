@@ -39,8 +39,7 @@ class ServersController < ApplicationController
   def rescue
     server = Server.find(params[:id])
 
-    Hetzner.active_rescue_system(server.id)
-    Hetzner.reset(server.id)
+    server.rescue
 
     redirect_to servers_path
   end

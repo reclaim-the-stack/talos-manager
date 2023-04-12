@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_11_122629) do
+ActiveRecord::Schema[7.0].define(version: 2023_04_12_090936) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -71,9 +71,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_11_122629) do
     t.datetime "last_configured_at"
     t.datetime "last_request_for_configuration_at"
     t.bigint "cluster_id"
+    t.string "type", default: "Server::HetznerDedicated", null: false
     t.index ["cluster_id"], name: "index_servers_on_cluster_id"
     t.index ["hetzner_vswitch_id"], name: "index_servers_on_hetzner_vswitch_id"
     t.index ["ip"], name: "index_servers_on_ip", unique: true
+    t.index ["type"], name: "index_servers_on_type"
   end
 
   add_foreign_key "clusters", "hetzner_vswitches"

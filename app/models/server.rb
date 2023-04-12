@@ -15,7 +15,8 @@ class Server < ApplicationRecord
   validates_presence_of :data_center
   validates_presence_of :status
 
-  after_save :sync_with_hetzner, if: :sync
+  # Implement #sync_with_provider in subclasses of Server
+  after_save :sync_with_provider, if: :sync
 
   def talos_type
     name.include?("control-plane") ? "controlplane" : "worker"
@@ -30,18 +31,15 @@ class Server < ApplicationRecord
     end
 
     host = ENV.fetch("HOST")
-    install_disk =
-      if session.exec!("ls /dev/nvme0n1 && echo 'has-nvme'").chomp == "has-nvme"
-        "/dev/nvme0n1"
-      else
-        "/dev/sda"
-      end
+    nvme = session.exec!("ls /dev/nvme0n1 && echo 'has-nvme'").chomp == "has-nvme"
+    install_disk = nvme ? "/dev/nvme0n1" : "/dev/sda"
+    partition = nvme ? "p3" : "3"
 
     ssh_exec_with_log! session, "wget #{TALOS_IMAGE_URL} --quiet -O - | tar xvfzO - | dd of=#{install_disk} status=progress"
     ssh_exec_with_log! session, "sync"
 
     # assuming that p3 is the BOOT partition, can make sure with `gdisk /dev/nvme0n1` and `s` command
-    ssh_exec_with_log! session, "mount #{install_disk}p3 /mnt"
+    ssh_exec_with_log! session, "mount #{install_disk}#{partition} /mnt"
     ssh_exec_with_log! session, "sed -i 's/vmlinuz/vmlinuz talos.config=https:\\/\\/#{host}\\/config?uuid=${uuid}/' "\
                                 "/mnt/grub/grub.cfg"
     ssh_exec_with_log! session, "umount /mnt"
@@ -56,25 +54,14 @@ class Server < ApplicationRecord
     update!(accessible: false)
   end
 
+  def rescue
+    raise "#rescue is not implemented for #{self.class.name}"
+  end
+
   private
 
-  def sync_with_hetzner
-    if saved_change_to_name?
-      Hetzner.update_server(id, server_name: name)
-    end
-
-    if saved_change_to_hetzner_vswitch_id?
-      initial_vswitch_id, new_vswitch_id = saved_changes.fetch("hetzner_vswitch_id")
-
-      # The server was connected to a vswitch and we need to disconnect it
-      if initial_vswitch_id
-        Hetzner.remove_server_from_vswitch(initial_vswitch_id, id)
-      end
-
-      if new_vswitch_id
-        Hetzner.add_server_to_vswitch(new_vswitch_id, id)
-      end
-    end
+  def sync_with_provider
+    raise "#sync_with_provider is not implemented for #{self.class.name}"
   end
 
   def ssh_exec_with_log!(session, command)

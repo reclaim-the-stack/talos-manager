@@ -1,11 +1,13 @@
+<% cast_server = @server.becomes(Server) %>
+
 <%= turbo_frame_tag @server, :name do %>
-  <%= form_with model: @server do |f| %>
+  <%= form_with model: cast_server do |f| %>
     <%= f.text_field :name, label: nil, class: "border-1 border-gray p-1 last:mb-0", placeholder: "server-name", autofocus: true %>
   <% end %>
 <% end %>
 
 <%= turbo_frame_tag @server, :vswitch do %>
-  <%= form_with model: @server, builder: ActionView::Helpers::FormBuilder do |f| %>
+  <%= form_with model: cast_server, builder: ActionView::Helpers::FormBuilder do |f| %>
     <%= f.select(
       :hetzner_vswitch_id,
       HetznerVswitch.pluck(:name, :id),
@@ -18,7 +20,7 @@
 <% end %>
 
 <%= turbo_frame_tag @server, :cluster do %>
-  <%= form_with model: @server, builder: ActionView::Helpers::FormBuilder do |f| %>
+  <%= form_with model: cast_server, builder: ActionView::Helpers::FormBuilder do |f| %>
     <%= f.select(
       :cluster_id,
       Cluster.pluck(:name, :id),

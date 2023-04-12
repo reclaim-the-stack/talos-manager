@@ -25,12 +25,44 @@ module HetznerCloud
     Server.upsert_all(server_attributes)
   end
 
+  # https://docs.hetzner.cloud/#server-actions-enable-rescue-mode-for-a-server
+  def self.active_rescue_system(server_id)
+    post(
+      "servers/#{server_id}/actions/enable_rescue",
+      ssh_keys: ssh_keys.map { |ssh_key| ssh_key.fetch("id") },
+    )
+  end
+
+  # https://docs.hetzner.cloud/#server-actions-soft-reboot-a-server
+  def self.reset(server_id)
+    post("servers/#{server_id}/actions/reboot")
+  end
+
+  # https://docs.hetzner.cloud/#server-actions-power-on-a-server
+  def self.power_on(server_id)
+    post("servers/#{server_id}/actions/poweron")
+  end
+
+  # https://docs.hetzner.cloud/#ssh-keys-get-all-ssh-keys
+  def self.ssh_keys
+    get("ssh_keys").fetch("ssh_keys")
+  end
+
   # https://docs.hetzner.cloud/#servers-get-all-servers
   def self.servers
     get("servers").fetch("servers")
   end
 
-  %w[get post delete patch].each do |verb|
+  def self.server(id)
+    get("servers/#{id}").fetch("server")
+  end
+
+  # https://docs.hetzner.cloud/#servers-update-a-server
+  def self.update_server(id, params)
+    put("servers/#{id}", params)
+  end
+
+  %w[get post delete put].each do |verb|
     define_singleton_method(verb) do |path, params = nil|
       request(verb, path, params)
     end
@@ -40,10 +72,10 @@ module HetznerCloud
     response = Typhoeus.send(
       method.downcase,
       "#{BASE_URL}/#{path}",
-      body: params,
+      body: params&.to_json,
       headers: {
         "Authorization" => "Bearer #{ENV.fetch('HETZNER_CLOUD_API_TOKEN')}",
-        "Content-Type" => "application/x-www-form-urlencoded",
+        "Content-Type" => "application/json",
         "Accept" => "application/json",
       },
     )
