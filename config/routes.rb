@@ -7,7 +7,7 @@ Rails.application.routes.draw do
     end
   end
   resources :machine_configs, only: %i[show new create destroy]
-  resources :hetzner_servers, only: %i[index edit update] do
+  resources :servers, only: %i[index edit update] do
     collection do
       post :sync
     end
@@ -20,5 +20,5 @@ Rails.application.routes.draw do
 
   get "config", to: "configs#show", as: "get_config"
 
-  root "hetzner_servers#index"
+  root "servers#index"
 end

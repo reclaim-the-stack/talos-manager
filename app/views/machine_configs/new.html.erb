@@ -1,7 +1,7 @@
-<h1 class="text-4xl mb-10">Configure <%= @hetzner_server.name %></h1>
+<h1 class="text-4xl mb-10">Configure <%= @server.name %></h1>
 
 <%= form_with model: @machine_config do |f| %>
-  <%= f.hidden_field :hetzner_server_id %>
+  <%= f.hidden_field :server_id %>
 
   <%= f.text_field :hostname, required: true, placeholder: "worker-x" %>
   <%= f.text_field :private_ip, required: true, placeholder: "10.0.x.x", label: "Private IP" %>

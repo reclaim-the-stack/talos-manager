@@ -1,11 +1,11 @@
-# Represents an application of Config on a HetznerServer, including hostname and private_ip
+# Represents an application of Config on a Server, including hostname and private_ip
 
 require "open3"
 require "resolv"
 
 class MachineConfig < ApplicationRecord
   belongs_to :config
-  belongs_to :hetzner_server
+  belongs_to :server
 
   attr_accessor :already_configured # set to true to simulate the server already being configured
 
@@ -16,12 +16,12 @@ class MachineConfig < ApplicationRecord
 
   after_create :set_configured, if: :already_configured
 
-  def generate_config(output_type: hetzner_server.talos_type)
+  def generate_config(output_type: server.talos_type)
     raise "can't generate config before assigning hostname" if hostname.blank?
     raise "can't generate config before assigning private_ip" if private_ip.blank?
 
     secrets_file = Tempfile.open do |file|
-      file.write hetzner_server.cluster.secrets
+      file.write server.cluster.secrets
       file.path
     end
     patch_file = Tempfile.open do |file|
@@ -50,8 +50,8 @@ class MachineConfig < ApplicationRecord
         --with-docs=false \
         --with-examples=false \
         -o - \
-        #{hetzner_server.cluster.name} \
-        #{hetzner_server.cluster.endpoint}
+        #{server.cluster.name} \
+        #{server.cluster.endpoint}
     )
 
     config = Open3.popen3(command) do |_stdin, stdout, stderr, wait_thread|
@@ -68,8 +68,8 @@ class MachineConfig < ApplicationRecord
       talosconfig = YAML.safe_load(config)
       context_name = talosconfig.fetch("context")
       context = talosconfig.fetch("contexts").fetch(context_name)
-      context["endpoints"] = [hetzner_server.ip]
-      context["nodes"] = [hetzner_server.ip]
+      context["endpoints"] = [server.ip]
+      context["nodes"] = [server.ip]
       config = talosconfig.to_yaml.delete_prefix("---\n")
     end
 
@@ -82,8 +82,8 @@ class MachineConfig < ApplicationRecord
     patch
       .gsub("${hostname}", hostname)
       .gsub("${private_ip}", private_ip)
-      .gsub("${public_ip}", hetzner_server.ip)
-      .gsub("${vlan}", hetzner_server.cluster.hetzner_vswitch.vlan.to_s)
+      .gsub("${public_ip}", server.ip)
+      .gsub("${vlan}", server.cluster.hetzner_vswitch.vlan.to_s)
   end
 
   def validate_hostname_format
@@ -120,6 +120,6 @@ class MachineConfig < ApplicationRecord
   end
 
   def set_configured
-    hetzner_server.update!(last_configured_at: Time.now, last_request_for_configuration_at: Time.at(0))
+    server.update!(last_configured_at: Time.now, last_request_for_configuration_at: Time.at(0))
   end
 end

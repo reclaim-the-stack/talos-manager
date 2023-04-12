@@ -35,7 +35,7 @@
     <%= render "flash" %>
     <nav class="bg-white shadow-md flex gap-5 px-3 items-center">
       <img src="/favicon.svg" class="h-12 py-2">
-      <%= link_to "Servers", hetzner_servers_path, class: "text-l hover:underline underline-offset-2 #{'underline' if params[:controller] == 'hetzner_servers'}" %>
+      <%= link_to "Servers", servers_path, class: "text-l hover:underline underline-offset-2 #{'underline' if params[:controller] == 'servers'}" %>
       <%= link_to "Clusters", clusters_path, class: "text-l hover:underline underline-offset-2 #{'underline' if params[:controller] == 'clusters'}" %>
       <%= link_to "Configs", configs_path, class: "text-l hover:underline underline-offset-2 #{'underline' if params[:controller] == 'configs'}" %>
     </nav>

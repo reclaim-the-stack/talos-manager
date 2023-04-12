@@ -1,17 +1,20 @@
-# devops-talos-manager
+# Talos Manager
 
-App built to help bootstrap and manage Talos Linux servers.
+App built to help bootstrap and manage Talos Linux servers on Hetzner.
 
-Based on using the `talos.config` kernel parameter. You can apply this inside the grub config of the talos metal image. Ie. write it to disk with `dd` and then `mount /dev/nvme0n1p3 /mnt` followed by `vi /mnt/grub/grub.cfg`.
+## Approach
 
-The value should be eg:
+Based on bootstrapping nodes via the `talos.config` kernel parameter (https://www.talos.dev/latest/reference/kernel/#talosconfig). You can apply this inside the Grub config of a Talos installation image. By write the image to disk with `dd` and then mounting the boot partition we can inject the parameter into its `grub/grub.cfg`.
+
+Example of passing a URL into the talos.config parameter:
+
 ```
-talos.config=https://devops-talos-manager.mynewsdesk.dev/config?uuid=${uuid}
+talos.config=https://talos-manager.example.com/config?uuid=${uuid}
 ```
 
 ## Solving invalid UUID issues
 
-Login to Hetzner robot UI. Navigate to support and get support for the server which is having issues. Send them an email in the style of:
+We have had some occasions where a newly rented dedicated server did not come with a properly configured SMBIOS UUID. If Talos Manager encounters a node with an invalid UUID it will raise an error during bootstrapping. To fix the issue: Login to Hetzner Robot UI. Navigate to support and get support for the server which is having issues. Send them an email in the style of:
 
 ```
 Hi,

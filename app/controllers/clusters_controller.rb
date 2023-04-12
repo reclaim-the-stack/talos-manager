@@ -44,7 +44,7 @@ class ClustersController < ApplicationController
   def talosconfig
     @cluster = Cluster.find(params[:id])
 
-    first_control_plane = @cluster.hetzner_servers
+    first_control_plane = @cluster.servers
       .where.associated(:machine_config)
       .where("name ILIKE '%control-plane%'")
       .order(name: :asc)
@@ -63,7 +63,7 @@ class ClustersController < ApplicationController
   def kubeconfig
     @cluster = Cluster.find(params[:id])
 
-    first_control_plane = @cluster.hetzner_servers
+    first_control_plane = @cluster.servers
       .where.associated(:machine_config)
       .where("name ILIKE '%control-plane%'")
       .order(name: :asc)

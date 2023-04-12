@@ -37,7 +37,7 @@ class ConfigsController < ApplicationController
     uuid = params[:uuid]
     ip = request.remote_ip
 
-    server = HetznerServer.find_by_ip!(ip)
+    server = Server.find_by_ip!(ip)
 
     server.update!(uuid: uuid) if uuid != server.uuid
 

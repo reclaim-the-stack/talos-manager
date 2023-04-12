@@ -39,8 +39,8 @@ class Config < ApplicationRecord
       hetzner_vswitch: HetznerVswitch.new(vlan: 4000),
     )
     dummy_cluster.validate # trigger the default secret generation callback
-    dummy_server = HetznerServer.new(name: "control-plane-1", ip: "108.108.108.108", cluster: dummy_cluster)
-    dummy_config = MachineConfig.new(config: self, hetzner_server: dummy_server, hostname: "worker-1", private_ip: "10.0.1.1")
+    dummy_server = Server.new(name: "control-plane-1", ip: "108.108.108.108", cluster: dummy_cluster)
+    dummy_config = MachineConfig.new(config: self, server: dummy_server, hostname: "worker-1", private_ip: "10.0.1.1")
     talos_validation =
       Tempfile.create("talos-config.yaml") do |file|
         file.write(dummy_config.generate_config)
