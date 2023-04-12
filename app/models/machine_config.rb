@@ -40,7 +40,7 @@ class MachineConfig < ApplicationRecord
 
     command = %(
       talosctl gen config \
-        --install-disk #{server.install_disk} \
+        --install-disk #{install_disk} \
         --install-image #{config.install_image} \
         --kubernetes-version #{config.kubernetes_version} \
         --config-patch @#{patch_file} \
