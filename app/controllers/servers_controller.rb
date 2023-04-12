@@ -44,7 +44,7 @@ class ServersController < ApplicationController
 
     server.rescue
 
-    redirect_to servers_path
+    redirect_to servers_path, notice: "Server #{server.name} is rebooting in rescue mode"
   end
 
   def sync
