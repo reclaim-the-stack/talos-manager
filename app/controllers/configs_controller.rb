@@ -6,7 +6,10 @@ class ConfigsController < ApplicationController
   end
 
   def new
-    @config = Config.new
+    @config = Config.new(
+      kubernetes_version: "1.26.3",
+      install_image: "ghcr.io/siderolabs/installer:v1.3.7",
+    )
   end
 
   def create
