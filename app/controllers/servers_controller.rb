@@ -31,9 +31,12 @@ class ServersController < ApplicationController
   def bootstrap
     server = Server.find(params[:id])
 
-    server.bootstrap!
+    # pretend it's not accessible while bootstrapping to hide bootstrap button
+    server.update!(accessible: false)
 
-    redirect_to servers_path
+    ServerBootstrapJob.perform_later(server.id)
+
+    redirect_to servers_path, notice: "Server #{server.name} is being bootstrapped"
   end
 
   def rescue
