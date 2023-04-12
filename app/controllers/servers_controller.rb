@@ -71,6 +71,6 @@ class ServersController < ApplicationController
     Server.where(id: accessible_servers_ids).update!(accessible: true)
     Server.where.not(id: accessible_servers_ids).update!(accessible: false)
 
-    redirect_to servers_path
+    redirect_to servers_path, notice: "Synced servers"
   end
 end
