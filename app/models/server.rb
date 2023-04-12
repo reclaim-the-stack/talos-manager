@@ -31,7 +31,7 @@ class Server < ApplicationRecord
     end
 
     host = ENV.fetch("HOST")
-    nvme = session.exec!("ls /dev/nvme0n1 && echo 'has-nvme'").chomp == "has-nvme"
+    nvme = session.exec!("ls /dev/nvme0n1 && echo 'has-nvme'").chomp.ends_with? "has-nvme"
     install_disk = nvme ? "/dev/nvme0n1" : "/dev/sda"
     partition = nvme ? "p3" : "3"
 
