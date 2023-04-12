@@ -17,11 +17,6 @@ class Config < ApplicationRecord
       return
     end
 
-    unless patch.include?("${hostname}") && patch.include?("${private_ip}")
-      errors.add(:patch, "must include substitution variables ${hostname} and ${private_ip}")
-      return
-    end
-
     # Use `talosctl validate` to validate the config.
     #
     # Valid output example:
