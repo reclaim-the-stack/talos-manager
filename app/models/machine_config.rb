@@ -49,6 +49,7 @@ class MachineConfig < ApplicationRecord
         --with-secrets #{secrets_file} \
         --with-docs=false \
         --with-examples=false \
+        #{'--with-kubespan' if config.kubespan?} \
         -o - \
         #{server.cluster.name} \
         #{server.cluster.endpoint}

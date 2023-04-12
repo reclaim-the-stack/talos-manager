@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_12_090936) do
+ActiveRecord::Schema[7.0].define(version: 2023_04_12_141722) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -34,6 +34,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_12_090936) do
     t.text "patch"
     t.text "patch_control_plane"
     t.text "patch_worker"
+    t.boolean "kubespan", default: false, null: false
     t.index ["name"], name: "index_configs_on_name", unique: true
   end
 

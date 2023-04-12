@@ -22,6 +22,10 @@ class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
     input_with_label_and_validation(attribute, options) { super }
   end
 
+  def check_box(attribute, options = {})
+    input_with_label_and_validation(attribute, options) { super }
+  end
+
   def select(attribute, choices = nil, options = {}, html_options = {})
     html_options[:class] = "#{INPUT_CLASSES} appearance-none"
     # Inline CSS SVG background for custom caret
