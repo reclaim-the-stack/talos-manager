@@ -2,6 +2,9 @@ class Server::HetznerCloud < Server
   def rescue
     ::HetznerCloud.active_rescue_system(id)
 
+    # Hetzner appears to temporarily lock the server immediately after enabling rescue mode
+    sleep 1
+
     if ::HetznerCloud.server(id).fetch("status") == "off"
       ::HetznerCloud.power_on(id)
     else
