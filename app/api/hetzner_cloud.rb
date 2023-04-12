@@ -36,7 +36,7 @@ module HetznerCloud
 
   # https://docs.hetzner.cloud/#server-actions-soft-reboot-a-server
   def self.reset(server_id)
-    post("servers/#{server_id}/actions/reboot")
+    post("servers/#{server_id}/actions/reset")
   end
 
   # https://docs.hetzner.cloud/#server-actions-power-on-a-server
