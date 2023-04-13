@@ -3,7 +3,7 @@ class Server < ApplicationRecord
 
   belongs_to :cluster, optional: true
 
-  has_one :machine_config
+  has_one :machine_config, dependent: :destroy
   has_one :config, through: :machine_config
 
   attr_accessor :sync # set to true to sync changed attributes to hetzner

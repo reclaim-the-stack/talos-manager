@@ -23,7 +23,7 @@ module HetznerCloud
         hetzner_vswitch_id: nil,
       }
     end
-    Server::HetznerCloud.where.not(id: server_attributes.map { |sa| sa.fetch(:id) }).delete_all
+    Server::HetznerCloud.where.not(id: server_attributes.map { |sa| sa.fetch(:id) }).destroy_all
     Server.upsert_all(server_attributes)
   end
 

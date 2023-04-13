@@ -35,7 +35,7 @@ module Hetzner
         hetzner_vswitch_id: vswitch&.fetch("id"),
       }
     end
-    Server::HetznerDedicated.where.not(id: server_attributes.map { |sa| sa.fetch(:id) }).delete_all
+    Server::HetznerDedicated.where.not(id: server_attributes.map { |sa| sa.fetch(:id) }).destroy_all
     Server.upsert_all(server_attributes)
   end
 
