@@ -85,6 +85,8 @@ module Hetzner
       os: "linux",
       authorized_key: devops_talos_manager_ssh_key.fetch("fingerprint"),
     )
+  rescue HttpError => e
+    raise unless e.message.include? "BOOT_ALREADY_ENABLED"
   end
 
   # https://robot.hetzner.com/doc/webservice/en.html#ssh-keys
