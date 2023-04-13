@@ -24,7 +24,6 @@ module Hetzner
 
       {
         id: server_payload.fetch("server_number"),
-        type: "Server::HetznerDedicated",
         name: server_payload.fetch("server_name"),
         cancelled: server_payload.fetch("cancelled"),
         data_center: server_payload.fetch("dc"),
@@ -35,7 +34,8 @@ module Hetzner
         hetzner_vswitch_id: vswitch&.fetch("id"),
       }
     end
-    Server.upsert_all(server_attributes)
+    Server::HetznerDedicated.where.not(id: server_attributes.map { |sa| sa.fetch(:id) }).delete_all
+    Server::HetznerDedicated.upsert_all(server_attributes)
   end
 
   # https://robot.hetzner.com/doc/webservice/en.html#server

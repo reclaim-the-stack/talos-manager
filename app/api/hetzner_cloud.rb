@@ -12,7 +12,6 @@ module HetznerCloud
     server_attributes = servers.map do |server_payload|
       {
         id: server_payload.fetch("id"),
-        type: "Server::HetznerCloud",
         name: server_payload.fetch("name"),
         cancelled: false,
         data_center: server_payload.fetch("datacenter").fetch("name"),
@@ -23,7 +22,8 @@ module HetznerCloud
         hetzner_vswitch_id: nil,
       }
     end
-    Server.upsert_all(server_attributes)
+    Server::HetznerCloud.where.not(id: server_attributes.map { |sa| sa.fetch(:id) }).delete_all
+    Server::HetznerCloud.upsert_all(server_attributes)
   end
 
   # https://docs.hetzner.cloud/#server-actions-enable-rescue-mode-for-a-server
