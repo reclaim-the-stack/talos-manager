@@ -12,7 +12,7 @@ class MachineConfigsController < ApplicationController
       server: @server,
       hostname: @server.name,
       private_ip: default_private_ip(@server.name),
-      install_disk: @server.bootstrap_disk,
+      install_disk: @server.bootstrap_disk || "/dev/sda",
     )
   end
 
