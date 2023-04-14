@@ -32,7 +32,7 @@ FROM base
 # wget for talosctl installation
 RUN apk add wget libc6-compat tzdata libcurl libpq
 
-RUN wget https://github.com/siderolabs/talos/releases/download/v1.3.5/talosctl-linux-amd64 -O /usr/local/bin/talosctl
+RUN wget https://github.com/siderolabs/talos/releases/download/v1.3.7/talosctl-linux-amd64 -O /usr/local/bin/talosctl
 RUN chmod +x /usr/local/bin/talosctl
 
 COPY --from=gems /app /app
