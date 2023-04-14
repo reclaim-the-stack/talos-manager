@@ -5,5 +5,5 @@ run:
   web: bundle exec puma -C config/puma.rb
 release:
   command:
-    - bin/rails db:migrate
+    - bin/rails db:schema:load db:migrate
   image: web
