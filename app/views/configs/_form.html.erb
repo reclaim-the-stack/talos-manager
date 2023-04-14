@@ -1,6 +1,5 @@
 <%= form_with model: model do |f| %>
   <%= f.text_field :name, placeholder: "staging" %>
-  <%= f.text_field :install_disk, placeholder: "/dev/nvme0n1" %>
   <%= f.text_field :install_image, placeholder: "ghcr.io/siderolabs/installer:v1.3.7" %>
   <%= f.text_field :kubernetes_version, placeholder: "1.26.3" %>
 
