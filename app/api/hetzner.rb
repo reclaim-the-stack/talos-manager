@@ -119,15 +119,25 @@ module Hetzner
     end
   end
 
+  def self.headers
+    @headers ||= begin
+      username = ENV.fetch("HETZNER_WEBSERVICE_USER")
+      password = ENV.fetch("HETZNER_WEBSERVICE_PASSWORD")
+      basic_auth = Base64.strict_encode64("#{username}:#{password}")
+      {
+        "Content-Type" => "application/x-www-form-urlencoded",
+        "Accept" => "application/json",
+        "Authorization" => "Basic #{basic_auth}",
+      }
+    end
+  end
+
   def self.request(method, path, params = nil)
     response = Typhoeus.send(
       method.downcase,
-      "#{ENV.fetch('HETZNER_URL')}/#{path}",
+      "https://robot-ws.your-server.de/#{path}",
       body: params,
-      headers: {
-        "Content-Type" => "application/x-www-form-urlencoded",
-        "Accept" => "application/json",
-      },
+      headers: headers,
     )
 
     raise HttpError, "#{response.code}, #{response.body}" unless response.success?
