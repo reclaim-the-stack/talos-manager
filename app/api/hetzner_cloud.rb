@@ -8,6 +8,13 @@ module HetznerCloud
 
   # Syncs current Hetzner Cloud API state to ActiveRecord models
   def self.sync_to_activerecord
+    if ENV["HETZNER_CLOUD_API_TOKEN"].blank?
+      Rails.logger.warn(
+        %(class=HetznerCloud action=sync_to_activerecord status=skipped reason="Missing Hetzner cloud API token"),
+      )
+      return
+    end
+
     # Upsert servers
     server_attributes = servers.map do |server_payload|
       {

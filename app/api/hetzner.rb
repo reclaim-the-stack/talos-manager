@@ -6,6 +6,13 @@ module Hetzner
 
   # Syncs current Hetzner API state to ActiveRecord models
   def self.sync_to_activerecord
+    if ENV["HETZNER_WEBSERVICE_USER"].blank? || ENV["HETZNER_WEBSERVICE_PASSWORD"].blank?
+      Rails.logger.warn(
+        %(class=Hetzner action=sync_to_activerecord status=skipped reason="Missing Hetzner webservice credentials"),
+      )
+      return
+    end
+
     vswitches_full = Hetzner.vswitches.map { |vswitch| Hetzner.vswitch(vswitch.fetch("id")) }
 
     # Upsert vswitches
