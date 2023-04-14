@@ -19,7 +19,7 @@ module Hetzner
     vswitch_attributes = vswitches_full.map do |vswith_payload|
       vswith_payload.slice("id", "name", "vlan")
     end
-    HetznerVswitch.upsert_all(vswitch_attributes)
+    HetznerVswitch.upsert_all(vswitch_attributes) if vswitch_attributes.any?
 
     # Upsert servers
     server_attributes = Hetzner.servers.map do |server_payload|
@@ -43,7 +43,7 @@ module Hetzner
       }
     end
     Server::HetznerDedicated.where.not(id: server_attributes.map { |sa| sa.fetch(:id) }).destroy_all
-    Server.upsert_all(server_attributes)
+    Server.upsert_all(server_attributes) if server_attributes.any?
   end
 
   # https://robot.hetzner.com/doc/webservice/en.html#server

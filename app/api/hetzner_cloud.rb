@@ -31,7 +31,7 @@ module HetznerCloud
       }
     end
     Server::HetznerCloud.where.not(id: server_attributes.map { |sa| sa.fetch(:id) }).destroy_all
-    Server.upsert_all(server_attributes)
+    Server.upsert_all(server_attributes) if server_attributes.any?
   end
 
   # https://docs.hetzner.cloud/#server-actions-enable-rescue-mode-for-a-server
