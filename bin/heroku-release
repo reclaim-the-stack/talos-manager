@@ -1,0 +1,21 @@
+# Release command which handles initial database bootstrap as well as subsequent migrations. Based on:
+# https://gist.github.com/stevenharman/98576bf49b050b9e59fb26626b7cceff#file-bin-heroku_release-sh
+
+set -euo pipefail
+
+schema_version=$(bin/rails db:version | { grep "^Current version: [0-9]\\+$" || true; } | tr -s ' ' | cut -d ' ' -f3)
+
+if [ -z "$schema_version" ]; then
+  echo "💀  [Release Phase]: Database schema version could not be determined. Does the database exist?"
+  exit 1
+fi
+
+if [ "$schema_version" -eq "0" ]; then
+  echo "⏳   [Release Phase]: Loading the database schema."
+  bin/rails db:schema:load
+else
+  echo "⏳   [Release Phase]: Running database migrations."
+  bin/rails db:migrate
+fi
+
+echo "✅   [Release Phase]: Database is up to date."
