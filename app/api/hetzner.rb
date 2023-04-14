@@ -116,8 +116,8 @@ module Hetzner
 
   # Finds and memoizes an SSH key named 'devops-talos-manager' on the Hetzner account
   def self.devops_talos_manager_ssh_key
-    @devops_talos_manager_ssh_key ||= ssh_keys.find { |key| key.fetch("name") == "devops-talos-manager" } or
-      raise("SSH key named 'devops-talos-manager' not found on Hetzner account")
+    @devops_talos_manager_ssh_key ||= ssh_keys.find { |key| key.fetch("name").include? "talos-manager" } or
+      raise("SSH key named 'talos-manager' not found on Hetzner account")
   end
 
   %w[get post delete patch].each do |verb|
