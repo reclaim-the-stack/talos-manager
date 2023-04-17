@@ -9,6 +9,11 @@ ENV BUNDLE_PATH=vendor/bundle
 ENV BUNDLE_WITHOUT=development:test
 ENV BUNDLE_CLEAN=true
 
+FROM base as talosctl
+
+RUN wget https://github.com/siderolabs/talos/releases/download/v1.3.7/talosctl-linux-amd64 -O /usr/local/bin/talosctl
+RUN chmod +x /usr/local/bin/talosctl
+
 FROM base as gems
 
 # git for git based Gemfile definitions
@@ -32,10 +37,8 @@ FROM base
 # wget for talosctl installation
 RUN apk add wget libc6-compat tzdata libcurl libpq
 
-RUN wget https://github.com/siderolabs/talos/releases/download/v1.3.7/talosctl-linux-amd64 -O /usr/local/bin/talosctl
-RUN chmod +x /usr/local/bin/talosctl
-
 COPY --from=gems /app /app
+COPY --from=talosctl /usr/local/bin/talosctl /usr/local/bin/talosctl
 COPY . .
 
 ENV RAILS_ENV=production
