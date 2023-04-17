@@ -16,13 +16,7 @@ talos.config=https://talos-manager.example.com/config?uuid=${uuid}
 
 Feel free to deploy the application using our published container images at https://hub.docker.com/r/reclaimthestack/talos-manager/tags
 
-Apart from deploying the application you'll also need to deploy a Postgres database and configure some ENV variables:
-
-- `DATABASE_URL` - a postgres URL for the postgresql database
-- `BASIC_AUTH_PASSWORD` - simple way of securing access to the application via HTTP basic auth
-- `HETZNER_CLOUD_API_TOKEN` - a read + write Hetzner cloud API token
-- `HOST` - the hostname on which you are deploying this app (eg. `talos-manager.yourdomain.com`)
-- `SSH_PRIVATE_KEY` - a private key used to connect to servers for bootstrapping, the public key must be added to Hetzner Robot as well as Hetzner Cloud with a name including `talos-manager`
+Apart from deploying the application you'll also need to deploy a Postgres database and configure some ENV variables. Follow the SSH key and Heroku deployment instructions and apply the same ENV variables in whatever environment you're deploying on.
 
 ### Creating an SSH key and upload to Hetzner
 
@@ -60,7 +54,10 @@ Now we can configure the application.
 # We'll start by setting some standard Rails variables
 heroku config:set \
   RAILS_ENV=production \
-  SECRET_KEY_BASE=$(head /dev/urandom | md5)
+  SECRET_KEY_BASE=$(head /dev/urandom | md5) \
+  AR_ENCRYPTION_PRIMARY_KEY=$(head /dev/urandom | md5) \
+  AR_ENCRYPTION_DETERMINISTIC_KEY=$(head /dev/urandom | md5) \
+  AR_ENCRYPTION_KEY_DERIVATION_SALT=$(head /dev/urandom | md5)
 
 # Rails expects DATABASE_URL to connect to Postgres but crunchy uses CRUNCHY_DATABASE_URL
 heroku config:set DATABASE_URL=$(heroku config:get CRUNCHY_DATABASE_URL)
@@ -100,6 +97,8 @@ Once Postgres is ready, we're can go ahead and git push to build and deploy the 
 ```
 git push heroku
 ```
+
+Once the build has completed you should be able to access Talos Manager at `<name>.herokuapp.com` with the `BASIC_AUTH_PASSWORD` value as password.
 
 ## Solving invalid UUID issues
 

@@ -4,6 +4,8 @@ class Cluster < ApplicationRecord
   has_many :servers
   belongs_to :hetzner_vswitch, optional: true
 
+  encrypts :secrets
+
   before_validation :generate_default_secret, on: :create
 
   validates_presence_of :name
