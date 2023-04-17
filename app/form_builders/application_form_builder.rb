@@ -55,10 +55,12 @@ class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
       end
     error = validation_errors && %(<p class="-mt-2 mb-4 text-left text-sm text-red-500">#{validation_errors}</p>)
 
+    hint = options[:hint] && %(<p class="text-sm text-gray-400 -mt-2 mb-4">#{options.delete(:hint)}</p>)
+
     options[:class] = "#{options[:class]} border-red-400" if error
 
     input = yield
 
-    %(#{label}#{input}#{error}).html_safe
+    %(#{label}#{input}#{hint}#{error}).html_safe
   end
 end
