@@ -12,6 +12,7 @@ class Cluster < ApplicationRecord
   validates_presence_of :endpoint
   validates_presence_of :secrets
   validate :validate_secrets_yaml
+  validate :validate_endpoint_url
 
   private
 
@@ -42,5 +43,14 @@ class Cluster < ApplicationRecord
         errors.add(:secrets, stderr.read)
       end
     end
+  end
+
+  def validate_endpoint_url
+    return if endpoint.blank?
+
+    errors.add(:endpoint, "must start with https://") unless endpoint.start_with?("https://")
+    errors.add(:endpoint, "must end with an explicit port, eg. :6443") unless endpoint.match?(/:\d+$/)
+  rescue URI::InvalidURIError
+    errors.add(:endpoint, "must be a valid URL")
   end
 end
