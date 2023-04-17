@@ -173,6 +173,26 @@ machine:
           <auth-details>
 ```
 
+### Configuring private network on a Hetzner vSwitch
+
+To ease private network configuration you can make use of the `${private_ip}` and `${vlan}` substitution variables. The `vlan` number will be picked up from your Hetzner vSwitch, provided you have associated your cluster with one.
+
+Note: We currently do not support hybrid cloud / metal server configuration when using this approach since the patches will be applied to cloud servers as well, which can't be connected to the vSwitch.
+
+```yaml
+machine:
+  network:
+    hostname: ${hostname}
+    interfaces:
+      - dhcp: true
+        interface: eth0
+        vlans:
+          - addresses:
+              - ${private_ip}/21
+            mtu: 1400
+            vlanId: ${vlan}
+```
+
 ## Solving invalid UUID issues
 
 We have had some occasions where a newly rented dedicated server did not come with a properly configured SMBIOS UUID. If Talos Manager encounters a node with an invalid UUID it will raise an error during bootstrapping. To fix the issue: Login to Hetzner Robot UI. Navigate to support and get support for the server which is having issues. Send them an email in the style of:
