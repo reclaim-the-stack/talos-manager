@@ -55,6 +55,7 @@ Now we can configure the application.
 heroku config:set \
   RAILS_ENV=production \
   SECRET_KEY_BASE=$(head /dev/urandom | md5) \
+  RAILS_MAX_THREADS=20 \
   AR_ENCRYPTION_PRIMARY_KEY=$(head /dev/urandom | md5) \
   AR_ENCRYPTION_DETERMINISTIC_KEY=$(head /dev/urandom | md5) \
   AR_ENCRYPTION_KEY_DERIVATION_SALT=$(head /dev/urandom | md5)
@@ -99,6 +100,78 @@ git push heroku
 ```
 
 Once the build has completed you should be able to access Talos Manager at `<name>.herokuapp.com` with the `BASIC_AUTH_PASSWORD` value as password.
+
+## Config Patch Examples
+
+### Basic
+
+As a baseline config we recommend:
+- setting the Linux CPU governor to `performance` to ensure you're not missing out on performance
+- setting `network.hostname` to interpolate the servername
+- setting `vm.max_map_count` to `262144` (or higher) to avoid issues with eg. Elastic Search
+
+```yaml
+machine:
+  install:
+    extraKernelArgs:
+      - cpufreq.default_governor=performance
+  network:
+    hostname: ${hostname}
+  sysctls:
+    vm.max_map_count: 262144 # Increase max_map_count required by eg. elasticsearch
+```
+
+### Disk Encryption
+
+Talos supports disk encryption based on SMBIOS UUID of each server. This provides an easy way to get encryption at rest for all your nodes.
+
+```yaml
+machine:
+  systemDiskEncryption:
+    ephemeral:
+      provider: luks2
+      keys:
+        - nodeID: {}
+          slot: 0
+    state:
+      provider: luks2
+      keys:
+        - nodeID: {}
+          slot: 0
+```
+
+### OpenEBS LocalPV directory
+
+If you want to use the OpenEBS LocalPV local storage provider you need to add an extra mounted directory under `/var/openebs/local`.
+
+```yaml
+machine:
+  kubelet:
+    # OpenEBS LocalPV provisioner needs a directory available at /var/openebs/local
+    extraMounts:
+      - destination: /var/openebs/local
+        options:
+          - rbind
+          - rshared
+          - rw
+        source: /var/openebs/local
+        type: bind
+```
+
+### Providing access to a private Docker registry
+
+For real world production deployments you're likely using a private Docker registry to manage your application images. One option to support pulling images from a private registry is to do it inside of Kubernetes using the `imagePullSecrets` Pod resource field. But to avoid extra boilerplate in your resource YAML files it can be convenient to provide access directly on the Talos OS level instead.
+
+For a reference on all available fields for registry config see: https://www.talos.dev/v1.3/reference/configuration/#registriesconfig
+
+```yaml
+machine:
+  registries:
+    config:
+      <registry-host>:
+        auth:
+          <auth-details>
+```
 
 ## Solving invalid UUID issues
 
