@@ -91,7 +91,7 @@ module Hetzner
     post(
       "boot/#{server_id}/rescue",
       os: "linux",
-      authorized_key: devops_talos_manager_ssh_key.fetch("fingerprint"),
+      authorized_key: talos_manager_ssh_key.fetch("fingerprint"),
     )
   rescue HttpError => e
     raise unless e.message.include? "BOOT_ALREADY_ENABLED"
@@ -115,8 +115,8 @@ module Hetzner
   end
 
   # Finds and memoizes an SSH key named 'devops-talos-manager' on the Hetzner account
-  def self.devops_talos_manager_ssh_key
-    @devops_talos_manager_ssh_key ||= ssh_keys.find { |key| key.fetch("name").include? "talos-manager" } or
+  def self.talos_manager_ssh_key
+    @talos_manager_ssh_key ||= ssh_keys.find { |key| key.fetch("name").include? "talos-manager" } or
       raise("SSH key named 'talos-manager' not found on Hetzner account")
   end
 
