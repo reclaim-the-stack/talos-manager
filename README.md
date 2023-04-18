@@ -193,6 +193,18 @@ machine:
             vlanId: ${vlan}
 ```
 
+## Assigning node roles and taints
+
+Example of setting the appropriate roles and taints for compatibility with the default Reclaim the Stack platform scheduling rules. Before running, ensure you are targeting the correct kubernetes cluster either by setting the `KUBECONFIG=...` ENV variable or merging the cluster `kubeconfig` into your `~/.kube/config` file.
+
+```
+kubectl label node worker-1 node-role.kubernetes.io/worker=
+kubectl label node database-1 node-role.kubernetes.io/database=
+kubectl taint node database-1 role=database:NoSchedule
+```
+
+Note: If you don't want to separate database workloads to specific nodes you can apply the database roles to your regular workers and skip adding the taints.
+
 ## Solving invalid UUID issues
 
 We have had some occasions where a newly rented dedicated server did not come with a properly configured SMBIOS UUID. If Talos Manager encounters a node with an invalid UUID it will raise an error during bootstrapping. To fix the issue: Login to Hetzner Robot UI. Navigate to support and get support for the server which is having issues. Send them an email in the style of:
