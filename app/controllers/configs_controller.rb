@@ -79,6 +79,7 @@ class ConfigsController < ApplicationController
       :config,
       :install_image,
       :kubernetes_version,
+      :kubespan,
       :patch,
       :patch_control_plane,
       :patch_worker,
