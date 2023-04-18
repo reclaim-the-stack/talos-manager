@@ -10,7 +10,8 @@ class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
     input_with_label_and_validation(attribute, options) { super }
   end
 
-  def text_area(attribute, options= {})
+  def text_area(attribute, options = {})
+    options.merge!(type: "textarea")
     input_with_label_and_validation(attribute, options) { super }
   end
 
@@ -46,6 +47,7 @@ class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
     options[:class] = "#{INPUT_CLASSES} #{options[:class]}"
     options[:required] = true unless options.key?(:required)
     validation_errors = object.errors[attribute].to_sentence.capitalize.presence
+    hint_margins = options.delete(:type) == "textarea" ? "-mt-4 mb-5" : "-mt-2 mb-4"
 
     label =
       if options.key?(:label) && options[:label].nil?
@@ -53,9 +55,8 @@ class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
       else
         label(attribute, options.delete(:label)&.delete_suffix(":"), class: "block mb-2 text-left font-bold")
       end
+    hint = options[:hint] && %(<p class="text-sm text-gray-400 #{hint_margins}">#{options.delete(:hint)}</p>)
     error = validation_errors && %(<p class="-mt-2 mb-4 text-left text-sm text-red-500">#{validation_errors}</p>)
-
-    hint = options[:hint] && %(<p class="text-sm text-gray-400 -mt-2 mb-4">#{options.delete(:hint)}</p>)
 
     options[:class] = "#{options[:class]} border-red-400" if error
 

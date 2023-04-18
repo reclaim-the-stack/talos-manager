@@ -1,15 +1,16 @@
 <%= form_with model: model do |f| %>
   <%= f.text_field :name, placeholder: "staging" %>
-  <%= f.text_field :install_image, placeholder: "ghcr.io/siderolabs/installer:v1.3.7" %>
-  <%= f.text_field :kubernetes_version, placeholder: "1.26.3" %>
+  <%= f.text_field :install_image, placeholder: "ghcr.io/siderolabs/installer:v1.3.7", hint: "Gets passed into the --imagedisk argument for talosctl gen config." %>
+  <%= f.text_field :kubernetes_version, placeholder: "1.26.3", hint: "Gets passed into the --kubernetes-version argument for talosctl gen config." %>
 
   <%= f.label :kubespan, class: "mb-5 block" do %>
     <h3 class="font-bold mb-1 text-gray-900">Enable Kubespan</h3>
     <%= f.check_box :kubespan, class: "mr-1" %>
+    <span class="text-sm text-gray-400">Enables the --with-kubespan argument during config generation</span>
   <% end %>
 
-  <%= f.text_area :patch, required: false, class: "font-mono w-full text-sm", rows: 20, placeholder: "machine: # ...&#10;cluster: # ...".html_safe %>
-  <%= f.text_area :patch_control_plane, required: false, class: "font-mono w-full text-sm", rows: 5, placeholder: "machine: # ...&#10;cluster: # ...".html_safe %>
-  <%= f.text_area :patch_worker, required: false, class: "font-mono w-full text-sm", rows: 5, placeholder: "machine: # ...&#10;cluster: # ...".html_safe %>
+  <%= f.text_area :patch, required: false, class: "font-mono w-full text-sm", rows: 20, placeholder: "machine: # ...&#10;cluster: # ...".html_safe, hint: "Gets passed into the --config-patch argument for talosctl gen config." %>
+  <%= f.text_area :patch_control_plane, required: false, class: "font-mono w-full text-sm", rows: 5, placeholder: "machine: # ...&#10;cluster: # ...".html_safe, hint: "Gets passed into the --config-patch-control-plane argument for talosctl gen config." %>
+  <%= f.text_area :patch_worker, required: false, class: "font-mono w-full text-sm", rows: 5, placeholder: "machine: # ...&#10;cluster: # ...".html_safe, hint: "Gets passed into the --config-patch-worker argument for talosctl gen config." %>
   <%= f.submit "Save" %>
 <% end %>
