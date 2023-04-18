@@ -1,7 +1,7 @@
 require "open3"
 
 class Cluster < ApplicationRecord
-  has_many :servers
+  has_many :servers, dependent: :nullify
   belongs_to :hetzner_vswitch, optional: true
 
   encrypts :secrets
