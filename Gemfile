@@ -22,3 +22,7 @@ end
 group :development do
   gem "web-console"
 end
+
+group :production do
+  gem "cloudflare-rails" # fixes request.remote_ip behind Cloudflare proxy
+end
