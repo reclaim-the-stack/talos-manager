@@ -36,9 +36,11 @@ class ClustersController < ApplicationController
   end
 
   def destroy
-    Cluster.find(params[:id]).destroy
+    cluster = Cluster.find(params[:id])
 
-    redirect_to clusters_path
+    cluster.destroy!
+
+    redirect_to clusters_path, notice: "Cluster  #{cluster.name} successfully deleted!"
   end
 
   def talosconfig

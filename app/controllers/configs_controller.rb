@@ -59,6 +59,18 @@ class ConfigsController < ApplicationController
     end
   end
 
+  def destroy
+    config = Config.find(params[:id])
+
+    if config.machine_configs.any?
+      redirect_to configs_path, alert: "Can't delete #{config.name} because of existing server associations."
+    else
+      config.destroy!
+
+      redirect_to configs_path, notice: "Config #{config.name} successfully deleted!"
+    end
+  end
+
   private
 
   def config_params
