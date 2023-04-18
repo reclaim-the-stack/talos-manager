@@ -3,8 +3,8 @@
 <%= form_with model: @machine_config do |f| %>
   <%= f.hidden_field :server_id %>
 
-  <%= f.text_field :hostname, required: true, placeholder: "worker-x" %>
-  <%= f.text_field :private_ip, required: true, placeholder: "10.0.x.x", label: "Private IP" %>
+  <%= f.text_field :hostname, required: true, placeholder: "worker-x", hint: "Will substitute ${hostname} in your config patches." %>
+  <%= f.text_field :private_ip, required: true, placeholder: "10.0.x.x", label: "Private IP", hint: "Will substitute ${private_ip} in your config patches." %>
   <%= f.text_field :install_disk, required: true, placeholder: "/dev/sda" %>
   <%= f.select :config_id, Config.pluck(:name, :id), { include_blank: false }, required: false %>
 
