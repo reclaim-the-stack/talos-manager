@@ -32,14 +32,15 @@ module Hetzner
       {
         id: server_payload.fetch("server_number"),
         type: "Server::HetznerDedicated",
-        name: server_payload.fetch("server_name"),
+        architecture: server_payload.fetch("product").start_with?("RX") ? "arm64" : "amd64",
         cancelled: server_payload.fetch("cancelled"),
         data_center: server_payload.fetch("dc"),
+        hetzner_vswitch_id: vswitch&.fetch("id"),
         ip: server_payload.fetch("server_ip"),
         ipv6: server_payload.fetch("server_ipv6_net"),
+        name: server_payload.fetch("server_name"),
         product: server_payload.fetch("product"),
         status: server_payload.fetch("status"),
-        hetzner_vswitch_id: vswitch&.fetch("id"),
       }
     end
     Server::HetznerDedicated.where.not(id: server_attributes.map { |sa| sa.fetch(:id) }).destroy_all

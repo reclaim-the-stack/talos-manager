@@ -1,5 +1,6 @@
 class Server < ApplicationRecord
-  TALOS_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.3.7/metal-amd64.tar.gz".freeze
+  TALOS_AMD64_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.4.0/metal-amd64.tar.gz".freeze
+  TALOS_ARM64_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.4.0/metal-arm64.tar.gz".freeze
 
   belongs_to :cluster, optional: true
 
@@ -31,13 +32,14 @@ class Server < ApplicationRecord
     end
 
     host = ENV.fetch("HOST")
+    talos_image_url = architecture == "amd64" ? TALOS_AMD64_IMAGE_URL : TALOS_ARM64_IMAGE_URL
     nvme = session.exec!("ls /dev/nvme0n1 && echo 'has-nvme'").chomp.ends_with? "has-nvme"
 
     update!(bootstrap_disk: nvme ? "/dev/nvme0n1" : "/dev/sda")
 
     boot_partition = nvme ? "p3" : "3"
 
-    ssh_exec_with_log! session, "wget #{TALOS_IMAGE_URL} --quiet -O - | tar xvfzO - | dd of=#{bootstrap_disk} status=progress"
+    ssh_exec_with_log! session, "wget #{talos_image_url} --quiet -O - | tar xvfzO - | dd of=#{bootstrap_disk} status=progress"
     ssh_exec_with_log! session, "sync"
 
     # assuming that p3 is the BOOT partition, can make sure with `gdisk /dev/nvme0n1` and `s` command

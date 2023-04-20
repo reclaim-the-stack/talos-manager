@@ -20,14 +20,15 @@ module HetznerCloud
       {
         id: server_payload.fetch("id"),
         type: "Server::HetznerCloud",
-        name: server_payload.fetch("name"),
+        architecture: server_payload.fetch("server_type").fetch("architecture") == "arm" ? "arm64" : "amd64",
         cancelled: false,
         data_center: server_payload.fetch("datacenter").fetch("name"),
+        hetzner_vswitch_id: nil,
         ip: server_payload.fetch("public_net").fetch("ipv4").fetch("ip"),
         ipv6: server_payload.fetch("public_net").fetch("ipv6").fetch("ip"),
+        name: server_payload.fetch("name"),
         product: server_payload.fetch("server_type").fetch("name"),
         status: server_payload.fetch("status"),
-        hetzner_vswitch_id: nil,
       }
     end
     Server::HetznerCloud.where.not(id: server_attributes.map { |sa| sa.fetch(:id) }).destroy_all
