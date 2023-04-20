@@ -54,6 +54,13 @@ module Hetzner
     get("server").map { |server| server.fetch("server") }
   end
 
+  # https://robot.hetzner.com/doc/webservice/en.html#get-server-server-number
+  # Query server data for a specific server
+  # Limit: 200 requests per 1 hour
+  def self.server(id)
+    get("server/#{id}").fetch("server")
+  end
+
   # https://robot.hetzner.com/doc/webservice/en.html#post-server-server-number
   # Limit: 200 requests per 1 hour
   def self.update_server(server_id, params)
@@ -102,6 +109,13 @@ module Hetzner
   # Limit: 500 requests per 1 hour
   def self.ssh_keys
     get("key").map { |key| key.fetch("key") }
+  end
+
+  # https://robot.hetzner.com/doc/webservice/en.html#get-reset-server-number
+  # Query reset options for a specific server. Also returns the current reset state.
+  # Limit: 500 requests per 1 hour
+  def self.reset_state(server_id)
+    get("reset/#{server_id}").fetch("reset")
   end
 
   # https://robot.hetzner.com/doc/webservice/en.html#get-reset-server-number

@@ -1,7 +1,12 @@
 class Server::HetznerDedicated < Server
   def rescue
     Hetzner.active_rescue_system(id)
-    Hetzner.reset(id)
+
+    if Hetzner.reset_state(id).fetch("operating_status") == "shut off"
+      Hetzner.press_power_button(id)
+    else
+      Hetzner.reset(id)
+    end
   end
 
   def sync_with_provider
