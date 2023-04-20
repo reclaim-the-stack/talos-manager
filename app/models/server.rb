@@ -39,6 +39,7 @@ class Server < ApplicationRecord
 
     boot_partition = nvme ? "p3" : "3"
 
+    Rails.logger.info "Bootstrapping #{ip} with talos image #{talos_image_url} on #{bootstrap_disk}"
     ssh_exec_with_log! session, "wget #{talos_image_url} --quiet -O - | tar xvfzO - | dd of=#{bootstrap_disk} status=progress"
     ssh_exec_with_log! session, "sync"
 
