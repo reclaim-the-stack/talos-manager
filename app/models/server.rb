@@ -1,6 +1,6 @@
 class Server < ApplicationRecord
-  TALOS_AMD64_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.4.0/metal-amd64.tar.gz".freeze
-  TALOS_ARM64_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.4.0/metal-arm64.tar.gz".freeze
+  TALOS_AMD64_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.3.7/metal-amd64.tar.gz".freeze
+  TALOS_ARM64_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.3.7/metal-arm64.tar.gz".freeze
 
   belongs_to :cluster, optional: true
 
