@@ -15,78 +15,78 @@
   </thead>
   <tbody>
     <% @servers.each do |server| %>
-    <tr class="h-11 group hover:bg-gray-50">
-      <td class="py-1">
-        <%= turbo_frame_tag server, :name do %>
-          <%= server.name.presence || tag.span("untitled", class: "text-gray-400") %>
-          <%= link_to icon_edit, edit_server_path(server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
-        <% end %>
-      </td>
-      <td><%= server.ip %></td>
-      <td><%= server.product.split("-").first %></td>
-      <td>
-        <%= turbo_frame_tag server, :cluster do %>
-          <%= server.cluster&.name || tag.span("none", class: "text-gray-400") %>
-          <%= link_to icon_edit, edit_server_path(server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
-        <% end %>
-      </td>
-      <td>
-        <div class="flex items-center">
-          <% if server.last_request_for_configuration_at %>
-            <% if server.last_configured_at && server.last_configured_at > server.last_request_for_configuration_at %>
-              <span class="block h-4 w-4 mr-4 rounded-full bg-green-400"></span>
-            <% else %>
-              <span class="animate-ping duration-700 block h-4 w-4 mr-4 rounded-full bg-yellow-400 opacity-75"></span>
-            <% end %>
+      <tr class="h-11 group hover:bg-gray-50">
+        <td class="py-1">
+          <%= turbo_frame_tag server, :name do %>
+            <%= server.name.presence || tag.span("untitled", class: "text-gray-400") %>
+            <%= link_to icon_edit, edit_server_path(server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
           <% end %>
-        </div>
-      </td>
-      <td>
-        <% if server.machine_config %>
-          <div class="flex items-center gap-2">
-            <p><%= server.config.name %></p>
+        </td>
+        <td><%= server.ip %></td>
+        <td><%= server.product.split("-").first %></td>
+        <td>
+          <%= turbo_frame_tag server, :cluster do %>
+            <%= server.cluster&.name || tag.span("none", class: "text-gray-400") %>
+            <%= link_to icon_edit, edit_server_path(server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
+          <% end %>
+        </td>
+        <td>
+          <div class="flex items-center">
+            <% if server.last_request_for_configuration_at %>
+              <% if server.last_configured_at && server.last_configured_at > server.last_request_for_configuration_at %>
+                <span class="block h-4 w-4 mr-4 rounded-full bg-green-400"></span>
+              <% else %>
+                <span class="animate-ping duration-700 block h-4 w-4 mr-4 rounded-full bg-yellow-400 opacity-75"></span>
+              <% end %>
+            <% end %>
+          </div>
+        </td>
+        <td>
+          <% if server.machine_config %>
+            <div class="flex items-center gap-2">
+              <p><%= server.config.name %></p>
+              <%=
+                button_to(
+                  icon_trash("w-4"),
+                  server.machine_config,
+                  method: :delete,
+                  form_class: "inline",
+                  class: "opacity-0 group-hover:opacity-100",
+                )
+              %>
+              <%= link_to icon_download, server.machine_config, class: "h-4 block opacity-0 group-hover:opacity-100" %>
+            </div>
+          <% else %>
             <%=
-              button_to(
-                icon_trash("w-4"),
-                server.machine_config,
-                method: :delete,
-                form_class: "inline",
-                class: "opacity-0 group-hover:opacity-100",
+              link_to(
+                "Configure",
+                new_machine_config_path(server_id: server.id),
+                class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white group-hover:opacity-100",
               )
             %>
-            <%= link_to icon_download, server.machine_config, class: "h-4 block opacity-0 group-hover:opacity-100" %>
-          </div>
-        <% else %>
+          <% end %>
+        </td>
+        <td>
           <%=
-            link_to(
-              "Configure",
-              new_machine_config_path(server_id: server.id),
-              class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white group-hover:opacity-100",
-            )
+            if server.accessible?
+              button_to(
+                "Bootstrap",
+                bootstrap_server_path(server),
+                method: :post,
+                class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white group-hover:opacity-100",
+              )
+            else
+              button_to(
+                "Rescue",
+                rescue_server_path(server),
+                method: :post,
+                class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white opacity-0 group-hover:opacity-100",
+                data: { turbo_confirm: "Are you sure you want to enable rescue mode for #{server.name}?" },
+              )
+            end
           %>
-        <% end %>
-      </td>
-      <td>
-        <%=
-          if server.accessible?
-            button_to(
-              "Bootstrap",
-              bootstrap_server_path(server),
-              method: :post,
-              class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white group-hover:opacity-100",
-            )
-          else
-            button_to(
-              "Rescue",
-              rescue_server_path(server),
-              method: :post,
-              class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white opacity-0 group-hover:opacity-100",
-              data: { turbo_confirm: "Are you sure you want to enable rescue mode for #{server.name}?" },
-            )
-          end
-        %>
-      </td>
-    </tr>
+        </td>
+      </tr>
     <% end %>
   </tbody>
 </table>
