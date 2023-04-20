@@ -11,10 +11,10 @@
     <th class="">Cluster</th>
     <th class=""></th>
     <th class="">Config</th>
-    <th class="">Actions</th>
+    <th class="w-4"></th>
   </thead>
   <tbody>
-    <% @servers.each do |server| %>
+    <% @servers.each_with_index do |server, i| %>
       <tr class="h-11 group hover:bg-gray-50">
         <td class="py-1">
           <%= turbo_frame_tag server, :name do %>
@@ -66,25 +66,65 @@
             %>
           <% end %>
         </td>
-        <td>
+        <td class="relative">
           <%=
-            if server.accessible?
+            link_to(
+              icon_ellipsis_vertical,
+              "#",
+              onclick: <<~JS,
+                // Don't do anything if the popup menu is already visible
+                if (!this.nextElementSibling.classList.contains('hidden')) {
+                  console.log("already visible")
+                  return false
+                }
+
+                var otherVisible = Array.from(document.querySelectorAll('[data-server-actions]')).find((e) => {
+                  return !e.classList.contains("hidden")
+                })
+                if (otherVisible) {
+                  console.log("other visible")
+                  return false
+                }
+
+                console.log("click")
+                // Show the popup menu
+                this.nextElementSibling.classList.remove('hidden')
+
+                // Hide the popup menu when clicking outside of it
+                setTimeout(function() {
+                  console.log("timeout")
+                  document.addEventListener('click', function(e) {
+                    console.log("document#click")
+                    if (!e.target.closest('[data-server-actions]')) {
+                      document.removeEventListener('click', arguments.callee)
+                      document.querySelectorAll('[data-server-actions]').forEach(el => el.classList.add('hidden'))
+                    }
+                  })
+                })
+                return false
+              JS
+            )
+          %>
+          <div style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.2)" data-server-actions class="rounded bg-white w-[200px] py-3 right-[1.5rem] top-0 absolute <%= i == 0 ? 'hidden' : 'hidden' %>">
+            <%=
               button_to(
-                "Bootstrap",
-                bootstrap_server_path(server),
-                method: :post,
-                class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white group-hover:opacity-100",
-              )
-            else
-              button_to(
-                "Rescue",
+                "Enter Rescue Mode",
                 rescue_server_path(server),
                 method: :post,
-                class: "rounded text-sm p-2 bg-mnd-red hover:bg-mnd-red-dark disabled:cursor-default disabled:bg-mnd-red-light text-white opacity-0 group-hover:opacity-100",
+                class: "text-sm text-left w-full py-2 px-4 hover:bg-gray-200 disabled:cursor-default disabled:text-gray-400",
                 data: { turbo_confirm: "Are you sure you want to enable rescue mode for #{server.name}?" },
               )
-            end
-          %>
+            %>
+            <%=
+              button_to(
+                "Bootstrap #{'🚀' if server.accessible?}",
+                bootstrap_server_path(server),
+                method: :post,
+                disabled: !server.accessible?,
+                class: "text-sm text-left w-full py-2 px-4 hover:bg-gray-200 disabled:bg-white disabled:cursor-default disabled:text-gray-400",
+              )
+            %>
+          </div>
         </td>
       </tr>
     <% end %>
