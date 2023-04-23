@@ -50,7 +50,7 @@ class ConfigsController < ApplicationController
       headers["Content-Type"] = "text/yaml"
       render plain: server.machine_config.generate_config
     else
-      server.update!(last_request_for_configuration_at: Time.now)
+      server.update!(last_configured_at: nil, last_request_for_configuration_at: Time.now)
 
       sleep 15
 
