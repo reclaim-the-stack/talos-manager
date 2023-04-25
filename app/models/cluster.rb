@@ -1,6 +1,8 @@
 require "open3"
 
 class Cluster < ApplicationRecord
+  NoControlPlaneError = Class.new(StandardError)
+
   has_many :servers, dependent: :nullify
   belongs_to :hetzner_vswitch, optional: true
 
@@ -13,6 +15,20 @@ class Cluster < ApplicationRecord
   validates_presence_of :secrets
   validate :validate_secrets_yaml
   validate :validate_endpoint_url
+
+  def talosconfig
+    first_control_plane = servers
+      .where.associated(:machine_config)
+      .where("name ILIKE '%control-plane%'")
+      .order(name: :asc)
+      .first
+
+    if first_control_plane
+      first_control_plane.machine_config.generate_config(output_type: "talosconfig")
+    else
+      raise NoControlPlaneError
+    end
+  end
 
   private
 

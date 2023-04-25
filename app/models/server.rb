@@ -63,6 +63,25 @@ class Server < ApplicationRecord
     raise "#rescue is not implemented for #{self.class.name}"
   end
 
+  def reset
+    talosconfig_path = "tmp/#{name}-talosconfig"
+    File.write(talosconfig_path, cluster.talosconfig)
+    command = "talosctl reset "\
+              "--graceful "\
+              "--wait=false "\
+              "--reboot "\
+              "--system-labels-to-wipe STATE "\
+              "--system-labels-to-wipe EPHEMERAL "\
+              "--talosconfig=#{talosconfig_path} "\
+              "-n #{ip}"
+    Rails.logger.info "class=Server method=reset name='#{name}' command='#{command}'"
+    if (success = system(command))
+      machine_config.destroy!
+      update!(last_configured_at: nil, last_request_for_configuration_at: nil)
+    end
+    success
+  end
+
   private
 
   def sync_with_provider

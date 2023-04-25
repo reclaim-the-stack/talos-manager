@@ -47,6 +47,18 @@ class ServersController < ApplicationController
     redirect_to servers_path, notice: "Server #{server.name} is rebooting in rescue mode"
   end
 
+  def reset
+    server = Server.find(params[:id])
+
+    if server.reset
+      redirect_to servers_path, notice: "Server #{server.name} is being reset"
+    else
+      redirect_to servers_path, alert: "Failed to execute talosctl reset for #{server.name}"
+    end
+  rescue Cluster::NoControlPlaneError
+    redirect_to servers_path, alert: "Can't reset server without a cluster control plane server configured!"
+  end
+
   def sync
     Hetzner.sync_to_activerecord
     HetznerCloud.sync_to_activerecord

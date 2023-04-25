@@ -44,22 +44,12 @@ class ClustersController < ApplicationController
   end
 
   def talosconfig
-    @cluster = Cluster.find(params[:id])
+    cluster = Cluster.find(params[:id])
 
-    first_control_plane = @cluster.servers
-      .where.associated(:machine_config)
-      .where("name ILIKE '%control-plane%'")
-      .order(name: :asc)
-      .first
-
-    if first_control_plane
-      talosconfig = first_control_plane.machine_config.generate_config(output_type: "talosconfig")
-
-      headers["Content-Type"] = "text/yaml"
-      render plain: talosconfig
-    else
-      redirect_to clusters_path, alert: "Can't generate talosconfig without a control plane server configured!"
-    end
+    headers["Content-Type"] = "text/yaml"
+    render plain: cluster.talosconfig
+  rescue Cluster::NoControlPlaneError
+    redirect_to clusters_path, alert: "Can't generate talosconfig without a control plane server configured!"
   end
 
   def kubeconfig

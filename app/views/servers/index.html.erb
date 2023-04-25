@@ -3,6 +3,17 @@
   <%= button_to icon_reload, sync_servers_path, method: :post, class: "disabled:opacity-20 disabled:cursor-default", title: "Sync with Hetzner" %>
 </div>
 
+<%=
+  tag.div(
+    id: "server-actions-backdrop",
+    class: "bg-gray-200 hidden opacity-0 hidden absolute fixed top-0 left-0 w-full h-full",
+    onclick: <<~JS
+      document.querySelectorAll('[data-server-actions]').forEach(el => el.classList.add('hidden'))
+      this.classList.add('hidden')
+    JS
+  )
+%>
+
 <table class="mb-5">
   <thead class="text-lg text-left">
     <th class="">Name</th>
@@ -72,43 +83,29 @@
               icon_ellipsis_vertical,
               "#",
               onclick: <<~JS,
-                // Don't do anything if the popup menu is already visible
+                // Don't do anything if this popup menu is already visible
                 if (!this.nextElementSibling.classList.contains('hidden')) {
-                  console.log("already visible")
+                  document.getElementById('server-actions-backdrop').click()
                   return false
                 }
 
-                var otherVisible = Array.from(document.querySelectorAll('[data-server-actions]')).find((e) => {
-                  return !e.classList.contains("hidden")
-                })
-                if (otherVisible) {
-                  console.log("other visible")
-                  return false
-                }
+                // Hide all other popup menus
+                document.querySelectorAll('[data-server-actions]').forEach(el => el.classList.add('hidden'))
 
-                console.log("click")
-                // Show the popup menu
+                // Show this popup menu
                 this.nextElementSibling.classList.remove('hidden')
 
-                // Hide the popup menu when clicking outside of it
-                setTimeout(function() {
-                  console.log("timeout")
-                  document.addEventListener('click', function(e) {
-                    console.log("document#click")
-                    if (!e.target.closest('[data-server-actions]')) {
-                      document.removeEventListener('click', arguments.callee)
-                      document.querySelectorAll('[data-server-actions]').forEach(el => el.classList.add('hidden'))
-                    }
-                  })
-                })
+                // Show the backdrop which will close the popup menu when clicked
+                document.getElementById('server-actions-backdrop').classList.remove('hidden')
+
                 return false
               JS
             )
           %>
-          <div style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.2)" data-server-actions class="rounded bg-white w-[200px] py-3 right-[1.5rem] top-0 absolute <%= i == 0 ? 'hidden' : 'hidden' %>">
+          <div style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.2)" data-server-actions class="rounded-lg bg-white w-[230px] py-3 right-[1.5rem] top-0 absolute <%= i == 0 ? 'hidden' : 'hidden' %>">
             <%=
               button_to(
-                "Enter Rescue Mode",
+                "⛑️ Enter Rescue Mode",
                 rescue_server_path(server),
                 method: :post,
                 class: "text-sm text-left w-full py-2 px-4 hover:bg-gray-200 disabled:cursor-default disabled:text-gray-400",
@@ -117,11 +114,23 @@
             %>
             <%=
               button_to(
-                "Bootstrap #{'🚀' if server.accessible?}",
+                "#{'🚀 ' if server.accessible?}Bootstrap",
                 bootstrap_server_path(server),
                 method: :post,
                 disabled: !server.accessible?,
                 class: "text-sm text-left w-full py-2 px-4 hover:bg-gray-200 disabled:bg-white disabled:cursor-default disabled:text-gray-400",
+                title: server.accessible? ? "" : "Server must be in Rescue mode to bootstrap",
+              )
+            %>
+            <%=
+              button_to(
+                "#{'↩️ ' if server.last_configured_at? && server.cluster}Reset to maintenance mode",
+                reset_server_path(server),
+                method: :post,
+                disabled: !server.last_configured_at? || !server.cluster,
+                class: "text-sm text-left w-full py-2 px-4 hover:bg-gray-200 disabled:bg-white disabled:cursor-default disabled:text-gray-400",
+                title: server.last_configured_at? ? "" : "Server must configured to be reset",
+                data: { turbo_confirm: "This will wipe all data on '#{server.name}' and boot it into maintenance mode where it will start requesting configuration again, proceed?" }
               )
             %>
           </div>

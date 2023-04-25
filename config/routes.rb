@@ -16,6 +16,7 @@ Rails.application.routes.draw do
       member do
         post :bootstrap
         post :rescue
+        post :reset
       end
     end
   end
