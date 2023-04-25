@@ -47,3 +47,5 @@ ENV RAILS_ENV=production
 ENV SECRET_KEY_BASE=foo
 
 RUN bundle exec rails assets:precompile
+
+CMD ["bin/rails", "server"]
