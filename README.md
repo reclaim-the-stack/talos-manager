@@ -52,13 +52,15 @@ Now we can configure the application.
 
 ```
 # We'll start by setting some standard Rails variables
+function random_string() { cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 }
+
 heroku config:set \
   RAILS_ENV=production \
-  SECRET_KEY_BASE=$(head /dev/urandom | md5) \
   RAILS_MAX_THREADS=20 \
-  AR_ENCRYPTION_PRIMARY_KEY=$(head /dev/urandom | md5) \
-  AR_ENCRYPTION_DETERMINISTIC_KEY=$(head /dev/urandom | md5) \
-  AR_ENCRYPTION_KEY_DERIVATION_SALT=$(head /dev/urandom | md5)
+  SECRET_KEY_BASE=$(random_string) \
+  AR_ENCRYPTION_PRIMARY_KEY=$(random_string) \
+  AR_ENCRYPTION_DETERMINISTIC_KEY=$(random_string) \
+  AR_ENCRYPTION_KEY_DERIVATION_SALT=$(random_string)
 
 # Rails expects DATABASE_URL to connect to Postgres but crunchy uses CRUNCHY_DATABASE_URL
 heroku config:set DATABASE_URL=$(heroku config:get CRUNCHY_DATABASE_URL)
@@ -80,7 +82,7 @@ heroku config:set HOST=<application-name>.herokuapp.com
 heroku config:set SSH_PRIVATE_KEY="$(cat ~/.ssh/talos-manager.pem)"
 
 # Set a HTTP basic auth password to protect the app
-heroku config:set BASIC_AUTH_PASSWORD=$(head /dev/urandom | md5)
+heroku config:set BASIC_AUTH_PASSWORD=$(random_string)
 ```
 
 Confirm that the Crunchy Postgres cluster is in ready status. This can take a few minutes after initial creation.
