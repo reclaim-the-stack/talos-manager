@@ -83,7 +83,7 @@
               icon_ellipsis_vertical,
               "#",
               onclick: <<~JS,
-                // Don't do anything if this popup menu is already visible
+                // Hide and return if this popup menu is already visible
                 if (!this.nextElementSibling.classList.contains('hidden')) {
                   document.getElementById('server-actions-backdrop').click()
                   return false
