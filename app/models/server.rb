@@ -66,8 +66,10 @@ class Server < ApplicationRecord
   def reset
     talosconfig_path = "tmp/#{name}-talosconfig"
     File.write(talosconfig_path, cluster.talosconfig)
+    members = `talosctl get members -o jsonpath={.spec.hostname} --talosconfig=#{talosconfig_path}`
+    more_than_one_remaining = members.lines.length > 1
     command = "talosctl reset "\
-              "--graceful "\
+              "--graceful=#{more_than_one_remaining} "\
               "--wait=false "\
               "--reboot "\
               "--system-labels-to-wipe STATE "\
