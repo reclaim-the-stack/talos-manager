@@ -123,6 +123,19 @@ machine:
     vm.max_map_count: 262144 # Increase max_map_count required by eg. elasticsearch
 ```
 
+### KubeSpan Network
+
+This patch will enable Talos [KubeSpan](https://www.talos.dev/v1.4/kubernetes-guides/network/kubespan/) and also allow KubeSpan to run the pod - pod network via the `advertiseKubernetesNetworks` setting. This allows simplified hybrid cloud / metal node networking (eg. cloud nodes using public IP's can communicate with bare metal nodes on a private VLAN).
+
+```yaml
+machine:
+  network:
+    kubespan:
+      enabled: true
+      advertiseKubernetesNetworks: true
+      mtu: 1320 # should be 80 less than the underlying network, which is 1400 on Hetzner VLAN
+```
+
 ### Disk Encryption
 
 Talos supports disk encryption based on SMBIOS UUID of each server. This provides an easy way to get encryption at rest for all your nodes.
