@@ -52,7 +52,7 @@ Now we can configure the application.
 
 ```
 # We'll start by setting some standard Rails variables
-function random_string() { cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 }
+function random_string() { cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1; }
 
 heroku config:set \
   RAILS_ENV=production \
