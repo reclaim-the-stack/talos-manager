@@ -5,3 +5,4 @@
 - Surface UUID bootstrapping error in frontend
 - Better tracking of rescue mode
 - Better tracking of bootstrapping
+- Allow labels and annotations to be set on nodes post bootstrap
