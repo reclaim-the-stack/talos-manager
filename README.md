@@ -75,8 +75,17 @@ heroku config:set HETZNER_CLOUD_API_TOKEN=<hetzner-cloud-api-token>
 # If you're not planning to use dedicated servers you can skip this part.
 heroku config:set HETZNER_WEBSERVICE_USER=<username> HETZNER_WEBSERVICE_PASSWORD=<password>
 
-# Note: You may want to change this to your own domain via the Heroku application settings page
-heroku config:set HOST=<application-name>.herokuapp.com
+# For application host you have two options:
+
+# 1. Deploy to your own domain
+# Full documentation at https://devcenter.heroku.com/articles/custom-domains
+heroku domains:add <your-custom-url>
+heroku config:set HOST=<your-custom-url>
+
+# 2. Deploy to a Heroku subdomain
+# For this you'll want to enable the runtime-dyno-metadata lab feature which will provide us
+# with the HEROKU_APP_DEFAULT_DOMAIN_NAME environment variable.
+heroku labs:enable runtime-dyno-metadata
 
 # Assumes you created the SSH key for bootstrapping according to the instructions above
 heroku config:set SSH_PRIVATE_KEY="$(cat ~/.ssh/talos-manager.pem)"

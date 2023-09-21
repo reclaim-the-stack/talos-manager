@@ -31,7 +31,6 @@ class Server < ApplicationRecord
       raise "Invalid SMBIOS UUID, send this output to Hetzner support: #{system_data}"
     end
 
-    host = ENV.fetch("HOST")
     talos_image_url = architecture == "amd64" ? TALOS_AMD64_IMAGE_URL : TALOS_ARM64_IMAGE_URL
     nvme = session.exec!("ls /dev/nvme0n1 && echo 'has-nvme'").chomp.ends_with? "has-nvme"
 
@@ -45,7 +44,7 @@ class Server < ApplicationRecord
 
     # assuming that p3 is the BOOT partition, can make sure with `gdisk /dev/nvme0n1` and `s` command
     ssh_exec_with_log! session, "mount #{bootstrap_disk}#{boot_partition} /mnt"
-    ssh_exec_with_log! session, "sed -i 's/vmlinuz/vmlinuz talos.config=https:\\/\\/#{host}\\/config?uuid=${uuid}/' "\
+    ssh_exec_with_log! session, "sed -i 's/vmlinuz/vmlinuz talos.config=https:\\/\\/#{HOST}\\/config?uuid=${uuid}/' "\
                                 "/mnt/grub/grub.cfg"
     ssh_exec_with_log! session, "umount /mnt"
 
