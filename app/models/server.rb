@@ -1,6 +1,6 @@
 class Server < ApplicationRecord
-  TALOS_AMD64_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.3.7/metal-amd64.tar.gz".freeze
-  TALOS_ARM64_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.3.7/metal-arm64.tar.gz".freeze
+  TALOS_AMD64_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.5.2/metal-amd64.raw.xz".freeze
+  TALOS_ARM64_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.5.2/metal-arm64.raw.xz".freeze
 
   belongs_to :cluster, optional: true
 
@@ -39,7 +39,7 @@ class Server < ApplicationRecord
     boot_partition = nvme ? "p3" : "3"
 
     Rails.logger.info "Bootstrapping #{ip} with talos image #{talos_image_url} on #{bootstrap_disk}"
-    ssh_exec_with_log! session, "wget #{talos_image_url} --quiet -O - | tar xvfzO - | dd of=#{bootstrap_disk} status=progress"
+    ssh_exec_with_log! session, "wget #{talos_image_url} --quiet -O - | xz -d | dd of=#{bootstrap_disk} status=progress"
     ssh_exec_with_log! session, "sync"
 
     # assuming that p3 is the BOOT partition, can make sure with `gdisk /dev/nvme0n1` and `s` command
