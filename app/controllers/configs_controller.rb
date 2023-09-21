@@ -46,7 +46,8 @@ class ConfigsController < ApplicationController
     server.update!(uuid: uuid) if uuid != server.uuid
 
     if server.machine_config
-      server.update!(last_configured_at: Time.now)
+      # Using 1.second.ago seems silly but is required to show the correct status in the UI at the moment
+      server.update!(last_request_for_configuration_at: 1.second.ago, last_configured_at: Time.now)
       headers["Content-Type"] = "text/yaml"
       render plain: server.machine_config.generate_config
     else

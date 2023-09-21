@@ -7,7 +7,7 @@ class MachineConfig < ApplicationRecord
   belongs_to :config
   belongs_to :server
 
-  attr_accessor :already_configured # set to true to simulate the server already being configured
+  attribute :already_configured, :boolean # set to true to simulate the server already being configured
 
   validates_presence_of :hostname
   validate :validate_hostname_format
