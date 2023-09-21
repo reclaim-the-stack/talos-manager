@@ -1,6 +1,9 @@
 <%= form_with model: model do |f| %>
   <%= f.text_field :name, placeholder: "staging" %>
-  <%= f.text_field :install_image, placeholder: "ghcr.io/siderolabs/installer:v1.3.7", hint: "Gets passed into the --imagedisk argument for talosctl gen config." %>
+  <%# Hiding install_image since it doesn't actually do anything if maintenance mode is already %>
+  <%# installed via a disk image (which we do when bootstrapping). Can change it back to text_field %>
+  <%# when/if Talos starts making proper use of the configuration. %>
+  <%= f.hidden_field :install_image, readonly: true, hint: "Gets passed into the --imagedisk argument for talosctl gen config." %>
   <%= f.text_field :kubernetes_version, placeholder: "1.26.3", hint: "Gets passed into the --kubernetes-version argument for talosctl gen config." %>
 
   <%= f.label :kubespan, class: "mb-5 block" do %>
