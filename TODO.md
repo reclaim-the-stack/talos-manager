@@ -3,4 +3,5 @@
 - Auto sync once per minute or so
 - Realtime bootstrapping log
 - Surface UUID bootstrapping error in frontend
-- Figure out Talos 1.4 bootstrapping
+- Better tracking of rescue mode
+- Better tracking of bootstrapping
