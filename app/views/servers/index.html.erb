@@ -46,8 +46,13 @@
             <% if server.last_request_for_configuration_at %>
               <% if server.last_configured_at && server.last_configured_at > server.last_request_for_configuration_at %>
                 <span class="block h-4 w-4 mr-4 rounded-full bg-green-400"></span>
-              <% else %>
+              <% elsif server.last_request_for_configuration_at > 1.minutes.ago %>
                 <span class="animate-ping duration-700 block h-4 w-4 mr-4 rounded-full bg-yellow-400 opacity-75"></span>
+              <% else %>
+                <span
+                  class="block h-4 w-4 mr-4 rounded-full border-1 border-dotted border-gray-400"
+                  title="Last seen <%= time_ago_in_words server.last_request_for_configuration_at %> ago"
+                ></span>
               <% end %>
             <% end %>
           </div>
