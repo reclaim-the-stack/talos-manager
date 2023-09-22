@@ -23,6 +23,12 @@ class Server < ApplicationRecord
     name.include?("control-plane") ? "controlplane" : "worker"
   end
 
+  # Implement #bootstrappable? in subclasses of Server. Eg. for Hetzner servers this is
+  # true when servers are in rescue mode and SSH is accessible.
+  def bootstrappable?
+    raise "#bootstrappable? is not implemented for #{self.class.name}"
+  end
+
   def bootstrap!
     session = Net::SSH.start(ip, "root", key_data: [ENV.fetch("SSH_PRIVATE_KEY")])
     uuid = session.exec! "dmidecode -s system-uuid".chomp

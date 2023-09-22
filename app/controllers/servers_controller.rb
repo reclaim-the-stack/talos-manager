@@ -66,17 +66,7 @@ class ServersController < ApplicationController
     # Set server accessible status based on SSH connectability
     threads = Server.all.map do |server|
       Thread.new do
-        Net::SSH.start(
-          server.ip,
-          "root",
-          key_data: [ENV.fetch("SSH_PRIVATE_KEY")],
-          non_interactive: true,
-          verify_host_key: :never,
-          timeout: 2,
-        ).close
-        server
-      rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Net::SSH::AuthenticationFailed, Net::SSH::ConnectionTimeout
-        nil
+        server.bootstrappable? ? server : nil
       end
     end
     accessible_servers_ids = threads.map(&:value).compact.map(&:id)

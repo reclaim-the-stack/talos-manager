@@ -1,4 +1,22 @@
 class Server::HetznerDedicated < Server
+  def bootstrappable?
+    session = Net::SSH.start(
+      ip,
+      "root",
+      key_data: [ENV.fetch("SSH_PRIVATE_KEY")],
+      non_interactive: true,
+      verify_host_key: :never,
+      timeout: 2,
+    )
+    hostname = session.exec!("hostname")
+    session.close
+    hostname.include?("rescue")
+  rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Net::SSH::AuthenticationFailed, Net::SSH::ConnectionTimeout
+    false
+  ensure
+    session&.shutdown!
+  end
+
   def rescue
     Hetzner.active_rescue_system(id)
 
