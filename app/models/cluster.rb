@@ -35,11 +35,14 @@ class Cluster < ApplicationRecord
   def generate_default_secret
     return if secrets.present?
 
-    self.secrets = Tempfile.create do |tempfile|
-      `talosctl gen secrets -o #{tempfile.path}`
-      tempfile.flush
-      File.read(tempfile.path)
+    random_tmp_file = "#{Dir.tmpdir}/#{SecureRandom.hex}"
+    if system "talosctl gen secrets -o #{random_tmp_file}"
+      self.secrets = File.read(random_tmp_file)
+    else
+      raise "Failed to generate default secrets"
     end
+  ensure
+    FileUtils.rm_f(random_tmp_file)
   end
 
   # Caution: Turns out talosctl gen config doesn't really validate secrets YAML all that much
@@ -47,18 +50,18 @@ class Cluster < ApplicationRecord
   def validate_secrets_yaml
     return if secrets.blank?
 
-    Tempfile.create do |tempfile|
-      tempfile.write(secrets)
-      tempfile.flush
+    random_tmp_file = "#{Dir.tmpdir}/#{SecureRandom.hex}"
+    File.write(random_tmp_file, secrets)
 
-      cmd = "talosctl gen config -o - --output-types controlplane --with-secrets #{tempfile.path} test https://host:6443"
+    cmd = "talosctl gen config -o - --output-types controlplane --with-secrets #{random_tmp_file} test https://host:6443"
 
-      Open3.popen3(cmd) do |_stdin, _stdout, stderr, wait_thread|
-        break if wait_thread.value.success?
+    Open3.popen3(cmd) do |_stdin, _stdout, stderr, wait_thread|
+      break if wait_thread.value.success?
 
-        errors.add(:secrets, stderr.read)
-      end
+      errors.add(:secrets, stderr.read)
     end
+  ensure
+    FileUtils.rm_f(random_tmp_file)
   end
 
   def validate_endpoint_url
