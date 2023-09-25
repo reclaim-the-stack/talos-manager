@@ -1,0 +1,32 @@
+<span id="SERVER-<%= server.id %>-MENU">
+  <%=
+    button_to(
+      "⛑️ Enter Rescue Mode",
+      rescue_server_path(server),
+      method: :post,
+      class: "text-sm text-left w-full py-2 px-4 hover:bg-gray-200 disabled:cursor-default disabled:text-gray-400",
+      data: { turbo_confirm: "Are you sure you want to enable rescue mode for #{server.name}?" },
+    )
+  %>
+  <%=
+    button_to(
+      "#{'🚀 ' if server.accessible?}Bootstrap",
+      bootstrap_server_path(server),
+      method: :post,
+      disabled: !server.accessible?,
+      class: "text-sm text-left w-full py-2 px-4 hover:bg-gray-200 disabled:bg-white disabled:cursor-default disabled:text-gray-400",
+      title: server.accessible? ? "" : "Server must be in Rescue mode to bootstrap",
+    )
+  %>
+  <%=
+    button_to(
+      "#{'↩️ ' if server.last_configured_at? && server.cluster}Reset to maintenance mode",
+      reset_server_path(server),
+      method: :post,
+      disabled: !server.last_configured_at? || !server.cluster,
+      class: "text-sm text-left w-full py-2 px-4 hover:bg-gray-200 disabled:bg-white disabled:cursor-default disabled:text-gray-400",
+      title: server.last_configured_at? ? "" : "Server must configured to be reset",
+      data: { turbo_confirm: "This will wipe all data on '#{server.name}' and boot it into maintenance mode where it will start requesting configuration again, proceed?" }
+    )
+  %>
+</span>

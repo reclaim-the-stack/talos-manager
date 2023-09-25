@@ -19,6 +19,21 @@ class Server < ApplicationRecord
   # Implement #sync_with_provider in subclasses of Server
   after_save :sync_with_provider, if: :sync
 
+  after_update_commit -> {
+    if saved_change_to_name?
+      broadcast_replace_to "servers", target: "SERVER-#{id}-NAME", partial: "servers/server_name", locals: { server: self }
+    end
+    if saved_change_to_last_configured_at? || saved_change_to_last_request_for_configuration_at?
+      broadcast_replace_to "servers", target: "SERVER-#{id}-STATUS", partial: "servers/server_status", locals: { server: self }
+    end
+    if saved_change_to_name? ||
+      saved_change_to_last_configured_at? ||
+      saved_change_to_last_request_for_configuration_at? ||
+      saved_change_to_accessible?
+      broadcast_replace_to "servers", target: "SERVER-#{id}-MENU", partial: "servers/server_menu", locals: { server: self }
+    end
+  }
+
   def talos_type
     name.include?("control-plane") ? "controlplane" : "worker"
   end

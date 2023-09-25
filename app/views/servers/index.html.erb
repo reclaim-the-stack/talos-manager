@@ -1,3 +1,5 @@
+<%= turbo_stream_from "servers" %>
+
 <div class="flex justify-between">
   <h1 class="text-4xl mb-10">Servers</h1>
   <%= button_to icon_reload, sync_servers_path, method: :post, class: "disabled:opacity-20 disabled:cursor-default", title: "Sync with Hetzner" %>
@@ -25,11 +27,11 @@
     <th class="w-4"></th>
   </thead>
   <tbody>
-    <% @servers.each_with_index do |server, i| %>
+    <% @servers.each_with_index do |server| %>
       <tr class="h-11 group hover:bg-gray-50">
         <td class="py-1">
           <%= turbo_frame_tag server, :name do %>
-            <%= server.name.presence || tag.span("untitled", class: "text-gray-400") %>
+            <%= render "server_name", server: %>
             <%= link_to icon_edit, edit_server_path(server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
           <% end %>
         </td>
@@ -41,22 +43,7 @@
             <%= link_to icon_edit, edit_server_path(server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
           <% end %>
         </td>
-        <td>
-          <div class="flex items-center">
-            <% if server.last_request_for_configuration_at %>
-              <% if server.last_configured_at && server.last_configured_at > server.last_request_for_configuration_at %>
-                <span class="block h-4 w-4 mr-4 rounded-full bg-green-400"></span>
-              <% elsif server.last_request_for_configuration_at > 1.minutes.ago %>
-                <span class="animate-ping duration-700 block h-4 w-4 mr-4 rounded-full bg-yellow-400 opacity-75"></span>
-              <% else %>
-                <span
-                  class="block h-4 w-4 mr-4 rounded-full border-1 border-dotted border-gray-400"
-                  title="Last seen <%= time_ago_in_words server.last_request_for_configuration_at %> ago"
-                ></span>
-              <% end %>
-            <% end %>
-          </div>
-        </td>
+        <%= render "server_status", server: %>
         <td>
           <% if server.machine_config %>
             <div class="flex items-center gap-2">
@@ -107,37 +94,8 @@
               JS
             )
           %>
-          <div style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.2)" data-server-actions class="rounded-lg bg-white w-[230px] py-3 right-[1.5rem] top-0 absolute <%= i == 0 ? 'hidden' : 'hidden' %>">
-            <%=
-              button_to(
-                "⛑️ Enter Rescue Mode",
-                rescue_server_path(server),
-                method: :post,
-                class: "text-sm text-left w-full py-2 px-4 hover:bg-gray-200 disabled:cursor-default disabled:text-gray-400",
-                data: { turbo_confirm: "Are you sure you want to enable rescue mode for #{server.name}?" },
-              )
-            %>
-            <%=
-              button_to(
-                "#{'🚀 ' if server.accessible?}Bootstrap",
-                bootstrap_server_path(server),
-                method: :post,
-                disabled: !server.accessible?,
-                class: "text-sm text-left w-full py-2 px-4 hover:bg-gray-200 disabled:bg-white disabled:cursor-default disabled:text-gray-400",
-                title: server.accessible? ? "" : "Server must be in Rescue mode to bootstrap",
-              )
-            %>
-            <%=
-              button_to(
-                "#{'↩️ ' if server.last_configured_at? && server.cluster}Reset to maintenance mode",
-                reset_server_path(server),
-                method: :post,
-                disabled: !server.last_configured_at? || !server.cluster,
-                class: "text-sm text-left w-full py-2 px-4 hover:bg-gray-200 disabled:bg-white disabled:cursor-default disabled:text-gray-400",
-                title: server.last_configured_at? ? "" : "Server must configured to be reset",
-                data: { turbo_confirm: "This will wipe all data on '#{server.name}' and boot it into maintenance mode where it will start requesting configuration again, proceed?" }
-              )
-            %>
+          <div style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.2)" data-server-actions class="rounded-lg bg-white w-[230px] py-3 right-[1.5rem] top-0 absolute hidden">
+            <%= render "server_menu", server: %>
           </div>
         </td>
       </tr>
