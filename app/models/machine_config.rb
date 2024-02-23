@@ -21,21 +21,24 @@ class MachineConfig < ApplicationRecord
     raise "can't generate config before assigning hostname" if hostname.blank?
     raise "can't generate config before assigning private_ip" if private_ip.blank?
 
-    secrets_file = Tempfile.open do |file|
+    secrets_file = "#{Dir.tmpdir}/secrets-#{SecureRandom.hex}"
+    File.open(secrets_file, "w") do |file|
       file.write server.cluster.secrets
-      file.path
     end
-    patch_file = Tempfile.open do |file|
+
+    patch_file = "#{Dir.tmpdir}/patch-#{SecureRandom.hex}"
+    File.open(patch_file, "w") do |file|
       file.write replace_substitution_variables(config.patch)
-      file.path
     end
-    patch_control_plane_file = Tempfile.open do |file|
+
+    patch_control_plane_file = "#{Dir.tmpdir}/patch-control-plane-#{SecureRandom.hex}"
+    File.open(patch_control_plane_file, "w") do |file|
       file.write replace_substitution_variables(config.patch_control_plane)
-      file.path
     end
-    patch_worker_file = Tempfile.open do |file|
+
+    patch_worker_file = "#{Dir.tmpdir}/patch-worker-#{SecureRandom.hex}"
+    File.open(patch_worker_file, "w") do |file|
       file.write replace_substitution_variables(config.patch_worker)
-      file.path
     end
 
     command = %(
@@ -63,6 +66,11 @@ class MachineConfig < ApplicationRecord
         raise "Failed to generate talos configuration: #{stderr.read}"
       end
     end
+
+    File.delete(secrets_file)
+    File.delete(patch_file)
+    File.delete(patch_control_plane_file)
+    File.delete(patch_worker_file)
 
     # Initially talosconfig is generated with an endpoint of 127.0.0.1 and no nodes.
     # Hence we add the first control plane IP as both enpoint and node.
