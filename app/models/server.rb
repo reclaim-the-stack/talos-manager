@@ -14,7 +14,8 @@ class Server < ApplicationRecord
   validates_presence_of :ipv6
   validates_presence_of :product
   validates_presence_of :data_center
-  validates_presence_of :status
+  validates_presence_of :status # running, initializing, starting, stopping, off, deleting migrating, rebuilding, unknown
+
 
   # Implement #sync_with_provider in subclasses of Server
   after_save :sync_with_provider, if: :sync
