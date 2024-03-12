@@ -8,15 +8,17 @@
 <%=
   tag.div(
     id: "server-actions-backdrop",
-    class: "bg-gray-200 hidden opacity-0 hidden absolute fixed top-0 left-0 w-full h-full",
+    class: "bg-gray-200 hidden opacity-0 hidden absolute fixed top-0 left-0 w-full h-full pointer-events-auto",
     onclick: <<~JS
       document.querySelectorAll('[data-server-actions]').forEach(el => el.classList.add('hidden'))
+      document.getElementById('server-table').classList.remove('pointer-events-none')
+      document.getElementById('server-table').classList.add('pointer-events-auto')
       this.classList.add('hidden')
     JS
   )
 %>
 
-<table class="mb-5">
+<table id="server-table" class="mb-5">
   <thead class="text-lg text-left">
     <th class="">Name</th>
     <th class="">IP</th>
@@ -84,6 +86,10 @@
                 // Hide all other popup menus
                 document.querySelectorAll('[data-server-actions]').forEach(el => el.classList.add('hidden'))
 
+                // Disable click events on other elements
+                document.getElementById('server-table').classList.remove('pointer-events-auto')
+                document.getElementById('server-table').classList.add('pointer-events-none')
+
                 // Show this popup menu
                 this.nextElementSibling.classList.remove('hidden')
 
@@ -94,7 +100,7 @@
               JS
             )
           %>
-          <div style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.2)" data-server-actions class="rounded-lg bg-white w-[230px] py-3 right-[1.5rem] top-0 absolute hidden">
+          <div style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.2)" data-server-actions class="rounded-lg bg-white w-[230px] py-3 right-[1.5rem] top-0 absolute hidden pointer-events-auto">
             <%= render "server_menu", server: %>
           </div>
         </td>
