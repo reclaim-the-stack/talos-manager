@@ -99,7 +99,7 @@ class Server < ApplicationRecord
               "-n #{ip}"
     Rails.logger.info "class=Server method=reset name='#{name}' command='#{command}'"
     if (success = system(command))
-      machine_config.destroy!
+      machine_config&.destroy!
       update!(last_configured_at: nil, last_request_for_configuration_at: nil)
     end
     success
