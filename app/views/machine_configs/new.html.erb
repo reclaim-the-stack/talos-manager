@@ -6,7 +6,7 @@
   <%= f.text_field :hostname, required: true, placeholder: "worker-x", hint: "Will substitute ${hostname} in your config patches." %>
   <%= f.text_field :private_ip, required: true, placeholder: "10.0.x.x", label: "Private IP", hint: "Will substitute ${private_ip} in your config patches." %>
   <%= f.text_field :install_disk, required: true, placeholder: "/dev/sda", hint: "Gets passed into the --install-disk argument for talosctl gen config." %>
-  <%= f.select :config_id, Config.pluck(:name, :id), { include_blank: false }, required: false %>
+  <%= f.select :config_id, Config.pluck(:name, :id), { include_blank: true }, required: true %>
 
   <%= f.label :already_configured, class: "mb-5 block" do %>
     <h3 class="font-bold mb-1 text-gray-900">Already Configured</h3>
