@@ -1,6 +1,6 @@
 class Server < ApplicationRecord
-  TALOS_AMD64_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.6.6/metal-amd64.raw.xz".freeze
-  TALOS_ARM64_IMAGE_URL = "https://github.com/siderolabs/talos/releases/download/v1.6.6/metal-arm64.raw.xz".freeze
+  TALOS_AMD64_IMAGE_URL = ENV["TALOS_AMD64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.6.6/metal-amd64.raw.xz".freeze
+  TALOS_ARM64_IMAGE_URL = ENV["TALOS_ARM64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.6.6/metal-arm64.raw.xz".freeze
 
   belongs_to :cluster, optional: true
 
@@ -60,8 +60,11 @@ class Server < ApplicationRecord
 
     boot_partition = nvme ? "p3" : "3"
 
+    # Support Talos versions 1.3 and below which were packaged as tar.gz
+    extract_command = talos_image_url.end_with?(".tar.gz") ? "tar xvfzO -" : "xz -d"
+
     Rails.logger.info "Bootstrapping #{ip} with talos image #{talos_image_url} on #{bootstrap_disk}"
-    ssh_exec_with_log! session, "wget #{talos_image_url} --quiet -O - | xz -d | dd of=#{bootstrap_disk} status=progress"
+    ssh_exec_with_log! session, "wget #{talos_image_url} --quiet -O - | #{extract_command} | dd of=#{bootstrap_disk} status=progress"
     ssh_exec_with_log! session, "sync"
 
     # assuming that p3 is the BOOT partition, can make sure with `gdisk /dev/nvme0n1` and `s` command
