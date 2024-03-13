@@ -112,6 +112,16 @@ git push heroku
 
 Once the build has completed you should be able to access Talos Manager at `<name>.herokuapp.com` with the `BASIC_AUTH_PASSWORD` value as password.
 
+#### Deploying with a specific talos version
+
+If you need to support a legacy version of Talos you can set the `TALOS_AMD64_IMAGE_URL` and `TALOS_ARM64_IMAGE_URL` ENV variables to point to the specific version you need. You will also need to manually build the docker container using the `TALOS_VERSION` build arg. Eg:
+
+```
+docker build --platform linux/amd64 --build-arg TALOS_VERSION=1.3.7 -t registry.heroku.com/<heroku-app-name>/web .
+docker push registry.heroku.com/<heroku-app-name>/web
+heroku container:release web --app <heroku-app-name>
+```
+
 ## Config Patch Examples
 
 ### Basic
