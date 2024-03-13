@@ -1,5 +1,6 @@
 # This Dockerfile produces a production ready image for running in Kubernetes.
 
+ARG TALOS_VERSION=1.6.6
 ARG RUBY_VERSION=3.2.0
 FROM ruby:${RUBY_VERSION}-alpine as base
 
@@ -11,7 +12,7 @@ ENV BUNDLE_CLEAN=true
 
 FROM base as talosctl
 
-RUN wget https://github.com/siderolabs/talos/releases/download/v1.3.7/talosctl-linux-amd64 -O /usr/local/bin/talosctl
+RUN wget https://github.com/siderolabs/talos/releases/download/v${TALOS_VERSION}/talosctl-linux-amd64 -O /usr/local/bin/talosctl
 RUN chmod +x /usr/local/bin/talosctl
 
 FROM base as gems
