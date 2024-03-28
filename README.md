@@ -86,6 +86,7 @@ heroku config:set HOST=<your-custom-url>
 # For this you'll want to enable the runtime-dyno-metadata lab feature which will provide us
 # with the HEROKU_APP_DEFAULT_DOMAIN_NAME environment variable.
 heroku labs:enable runtime-dyno-metadata
+heroku config:set HOST=$(heroku config:get HEROKU_APP_DEFAULT_DOMAIN_NAME)
 
 # Assumes you created the SSH key for bootstrapping according to the instructions above
 heroku config:set SSH_PRIVATE_KEY="$(cat ~/.ssh/talos-manager.pem)"
