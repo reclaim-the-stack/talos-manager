@@ -11,7 +11,7 @@ ENV BUNDLE_CLEAN=true
 
 FROM base as talosctl
 
-ARG TALOS_VERSION=1.6.6
+ARG TALOS_VERSION=1.6.7
 RUN wget https://github.com/siderolabs/talos/releases/download/v${TALOS_VERSION}/talosctl-linux-amd64 -O /usr/local/bin/talosctl
 RUN chmod +x /usr/local/bin/talosctl
 
