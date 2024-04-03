@@ -7,6 +7,10 @@ class ClustersController < ApplicationController
     @cluster = Cluster.new
   end
 
+  def edit
+    @cluster = Cluster.find(params[:id])
+  end
+
   def create
     cluster_params = params.require(:cluster).permit(:name, :endpoint, :secrets, :hetzner_vswitch_id)
 
@@ -17,10 +21,6 @@ class ClustersController < ApplicationController
     else
       render :new, status: 422
     end
-  end
-
-  def edit
-    @cluster = Cluster.find(params[:id])
   end
 
   def update

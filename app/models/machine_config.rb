@@ -22,24 +22,16 @@ class MachineConfig < ApplicationRecord
     raise "can't generate config before assigning private_ip" if private_ip.blank?
 
     secrets_file = "#{Dir.tmpdir}/secrets-#{SecureRandom.hex}"
-    File.open(secrets_file, "w") do |file|
-      file.write server.cluster.secrets
-    end
+    File.write(secrets_file, server.cluster.secrets)
 
     patch_file = "#{Dir.tmpdir}/patch-#{SecureRandom.hex}"
-    File.open(patch_file, "w") do |file|
-      file.write replace_substitution_variables(config.patch)
-    end
+    File.write(patch_file, replace_substitution_variables(config.patch))
 
     patch_control_plane_file = "#{Dir.tmpdir}/patch-control-plane-#{SecureRandom.hex}"
-    File.open(patch_control_plane_file, "w") do |file|
-      file.write replace_substitution_variables(config.patch_control_plane)
-    end
+    File.write(patch_control_plane_file, replace_substitution_variables(config.patch_control_plane))
 
     patch_worker_file = "#{Dir.tmpdir}/patch-worker-#{SecureRandom.hex}"
-    File.open(patch_worker_file, "w") do |file|
-      file.write replace_substitution_variables(config.patch_worker)
-    end
+    File.write(patch_worker_file, replace_substitution_variables(config.patch_worker))
 
     command = %(
       talosctl gen config \

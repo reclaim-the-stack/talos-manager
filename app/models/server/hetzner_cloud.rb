@@ -44,7 +44,7 @@ class Server::HetznerCloud < Server
 
   def sync_with_provider
     if saved_change_to_name?
-      ::HetznerCloud.update_server(id, name: name)
+      ::HetznerCloud.update_server(id, name:)
     end
   end
 end

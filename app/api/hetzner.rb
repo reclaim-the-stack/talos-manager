@@ -159,7 +159,7 @@ module Hetzner
       method.downcase,
       "https://robot-ws.your-server.de/#{path}",
       body: params,
-      headers: headers,
+      headers:,
     )
 
     raise HttpError, "#{response.code}, #{response.body}" unless response.success?

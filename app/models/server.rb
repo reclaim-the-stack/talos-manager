@@ -19,7 +19,7 @@ class Server < ApplicationRecord
   # Implement #sync_with_provider in subclasses of Server
   after_save :sync_with_provider, if: :sync
 
-  after_update_commit -> {
+  after_update_commit lambda {
     if saved_change_to_name?
       broadcast_replace_to "servers", target: "SERVER-#{id}-NAME", partial: "servers/server_name", locals: { server: self }
     end
@@ -27,9 +27,9 @@ class Server < ApplicationRecord
       broadcast_replace_to "servers", target: "SERVER-#{id}-STATUS", partial: "servers/server_status", locals: { server: self }
     end
     if saved_change_to_name? ||
-      saved_change_to_last_configured_at? ||
-      saved_change_to_last_request_for_configuration_at? ||
-      saved_change_to_accessible?
+       saved_change_to_last_configured_at? ||
+       saved_change_to_last_request_for_configuration_at? ||
+       saved_change_to_accessible?
       broadcast_replace_to "servers", target: "SERVER-#{id}-MENU", partial: "servers/server_menu", locals: { server: self }
     end
   }
@@ -63,12 +63,13 @@ class Server < ApplicationRecord
     extract_command = talos_image_url.end_with?(".tar.gz") ? "tar xvfzO -" : "xz -d"
 
     Rails.logger.info "Bootstrapping #{ip} with talos image #{talos_image_url} on #{bootstrap_disk}"
-    ssh_exec_with_log! session, "wget #{talos_image_url} --quiet -O - | #{extract_command} | dd of=#{bootstrap_disk} status=progress"
+    ssh_exec_with_log! session,
+      "wget #{talos_image_url} --quiet -O - | #{extract_command} | dd of=#{bootstrap_disk} status=progress"
     ssh_exec_with_log! session, "sync"
 
     # assuming that p3 is the BOOT partition, can make sure with `gdisk /dev/nvme0n1` and `s` command
     ssh_exec_with_log! session, "mount #{bootstrap_disk}#{boot_partition} /mnt"
-    ssh_exec_with_log! session, "sed -i 's/vmlinuz/vmlinuz talos.config=https:\\/\\/#{HOST}\\/config/' "\
+    ssh_exec_with_log! session, "sed -i 's/vmlinuz/vmlinuz talos.config=https:\\/\\/#{HOST}\\/config/' " \
                                 "/mnt/grub/grub.cfg"
     ssh_exec_with_log! session, "umount /mnt"
 
@@ -91,13 +92,13 @@ class Server < ApplicationRecord
     File.write(talosconfig_path, cluster.talosconfig)
     members = `talosctl get members -o jsonpath={.spec.hostname} --talosconfig=#{talosconfig_path}`
     more_than_one_remaining = members.lines.length > 1
-    command = "talosctl reset "\
-              "--graceful=#{more_than_one_remaining} "\
-              "--wait=false "\
-              "--reboot "\
-              "--system-labels-to-wipe STATE "\
-              "--system-labels-to-wipe EPHEMERAL "\
-              "--talosconfig=#{talosconfig_path} "\
+    command = "talosctl reset " \
+              "--graceful=#{more_than_one_remaining} " \
+              "--wait=false " \
+              "--reboot " \
+              "--system-labels-to-wipe STATE " \
+              "--system-labels-to-wipe EPHEMERAL " \
+              "--talosconfig=#{talosconfig_path} " \
               "-n #{ip}"
     Rails.logger.info "class=Server method=reset name='#{name}' command='#{command}'"
     if (success = system(command))
@@ -115,7 +116,7 @@ class Server < ApplicationRecord
 
   def ssh_exec_with_log!(session, command)
     status = {}
-    channel = session.exec(command, status: status)
+    channel = session.exec(command, status:)
     channel.on_data { |_channel, data| $stdout.print(data) }
     channel.on_extended_data { |_channel, data| $stderr.print(data) }
     channel.wait
