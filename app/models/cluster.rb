@@ -42,7 +42,7 @@ class Cluster < ApplicationRecord
       raise "Failed to generate default secrets"
     end
   ensure
-    FileUtils.rm_f(random_tmp_file)
+    FileUtils.rm_f(random_tmp_file) if random_tmp_file
   end
 
   # Caution: Turns out talosctl gen config doesn't really validate secrets YAML all that much
@@ -69,6 +69,7 @@ class Cluster < ApplicationRecord
 
     errors.add(:endpoint, "must start with https://") unless endpoint.start_with?("https://")
     errors.add(:endpoint, "must end with an explicit port, eg. :6443") unless endpoint.match?(/:\d+$/)
+    URI.parse(endpoint)
   rescue URI::InvalidURIError
     errors.add(:endpoint, "must be a valid URL")
   end
