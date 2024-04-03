@@ -63,7 +63,7 @@ class MachineConfig < ApplicationRecord
       if wait_thread.value.success?
         stdout.read
       else
-        raise "Failed to generate talos configuration: #{stderr.read}"
+        raise "Failed to generate talos configuration.\nCommand:#{command}\nOutput: #{stderr.read}"
       end
     end
 
