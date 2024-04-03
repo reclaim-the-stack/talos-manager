@@ -38,12 +38,9 @@ class ConfigsController < ApplicationController
   end
 
   def show
-    uuid = params[:uuid]
     ip = request.remote_ip
 
     server = Server.find_by_ip!(ip)
-
-    server.update!(uuid: uuid) if uuid != server.uuid
 
     if server.machine_config
       # Using 1.second.ago seems silly but is required to show the correct status in the UI at the moment
@@ -56,7 +53,7 @@ class ConfigsController < ApplicationController
       sleep 15
 
       attempt = params[:attempt] || 0
-      redirect_to get_config_path(uuid: params[:uuid], attempt: attempt.to_i + 1)
+      redirect_to get_config_path(attempt: attempt.to_i + 1)
     end
   end
 
