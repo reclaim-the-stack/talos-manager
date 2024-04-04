@@ -95,9 +95,6 @@ GEM
       reline (>= 0.3.8)
     diff-lcs (1.5.1)
     dotenv (3.1.0)
-    dotenv-rails (3.1.0)
-      dotenv (= 3.1.0)
-      railties (>= 6.1)
     drb (2.2.1)
     erubi (1.12.0)
     ethon (0.16.0)
@@ -245,7 +242,7 @@ DEPENDENCIES
   bootsnap
   cloudflare-rails
   debug
-  dotenv-rails
+  dotenv
   importmap-rails
   net-ssh
   pg
