@@ -1,4 +1,11 @@
 <%= form_with model: model do |f| %>
+  <% if config_error = f.object.errors[:config].presence %>
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5" role="alert">
+      <p class="font-bold">Failed to generate Talos configuration</p>
+      <%= simple_format config_error.first %>
+    </div>
+  <% end %>
+
   <%= f.text_field :name, placeholder: "staging" %>
   <%# Hiding install_image since it doesn't actually do anything if maintenance mode is already %>
   <%# installed via a disk image (which we do when bootstrapping). Can change it back to text_field %>

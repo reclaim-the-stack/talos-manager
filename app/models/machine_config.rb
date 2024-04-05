@@ -4,6 +4,15 @@ require "open3"
 require "resolv"
 
 class MachineConfig < ApplicationRecord
+  class InvalidConfigError < StandardError
+    attr_reader :output
+
+    def initialize(message, output)
+      super message
+      @output = output
+    end
+  end
+
   belongs_to :config
   belongs_to :server
 
@@ -28,10 +37,10 @@ class MachineConfig < ApplicationRecord
     File.write(patch_file, replace_substitution_variables(config.patch))
 
     patch_control_plane_file = "#{Dir.tmpdir}/patch-control-plane-#{SecureRandom.hex}"
-    File.write(patch_control_plane_file, replace_substitution_variables(config.patch_control_plane))
+    File.write(patch_control_plane_file, replace_substitution_variables(config.patch_control_plane || ""))
 
     patch_worker_file = "#{Dir.tmpdir}/patch-worker-#{SecureRandom.hex}"
-    File.write(patch_worker_file, replace_substitution_variables(config.patch_worker))
+    File.write(patch_worker_file, replace_substitution_variables(config.patch_worker || ""))
 
     command = %(
       talosctl gen config \
@@ -55,7 +64,9 @@ class MachineConfig < ApplicationRecord
       if wait_thread.value.success?
         stdout.read
       else
-        raise "Failed to generate talos configuration.\nCommand:#{command}\nOutput: #{stderr.read}"
+        output = stderr.read
+        message = "Failed to generate talos configuration.\nCommand:#{command}\nOutput: #{output}"
+        raise InvalidConfigError.new(message, output)
       end
     end
 

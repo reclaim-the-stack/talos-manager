@@ -40,5 +40,8 @@ class Config < ApplicationRecord
     talos_validation = `talosctl validate -m metal --strict -c #{tmp_config_file} 2>&1`
 
     errors.add(:config, talos_validation) unless talos_validation.include?("is valid")
+  # Can be triggered by dummy_config.generate_config
+  rescue MachineConfig::InvalidConfigError => e
+    errors.add(:config, e.output)
   end
 end
