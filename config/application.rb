@@ -48,5 +48,8 @@ module DevopsTalosManager
     config.active_record.encryption.primary_key = ENV["AR_ENCRYPTION_PRIMARY_KEY"]
     config.active_record.encryption.deterministic_key = ENV["AR_ENCRYPTION_DETERMINISTIC_KEY"]
     config.active_record.encryption.key_derivation_salt = ENV["AR_ENCRYPTION_KEY_DERIVATION_SALT"]
+
+    # TODO: Remove after running Cluster.find_each(&:encrypt)
+    config.active_record.encryption.support_sha1_for_non_deterministic_encryption = true
   end
 end
