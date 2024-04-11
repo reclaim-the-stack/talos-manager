@@ -41,8 +41,8 @@ module DevopsTalosManager
 
     # Allow requests from the host specified in the HOST environment variable
     # (or HEROKU_APP_DEFAULT_DOMAIN_NAME if running on Heroku without a custom domain)
-    ::HOST = ENV["HOST"] || ENV["HEROKU_APP_DEFAULT_DOMAIN_NAME"]
-    config.hosts << HOST if HOST.present?
+    ::HOST = ENV["HOST"].presence || ENV["HEROKU_APP_DEFAULT_DOMAIN_NAME"].presence
+    config.hosts << HOST if HOST
 
     # Configure ActiveRecord encryption via environment variables
     config.active_record.encryption.primary_key = ENV["AR_ENCRYPTION_PRIMARY_KEY"]
