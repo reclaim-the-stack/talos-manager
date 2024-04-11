@@ -45,6 +45,8 @@ class Server < ApplicationRecord
   end
 
   def bootstrap!
+    raise "ERROR: Can't bootstrap without a HOST configured" unless HOST
+
     session = Net::SSH.start(ip, "root", key_data: [ENV.fetch("SSH_PRIVATE_KEY")])
     uuid = session.exec! "dmidecode -s system-uuid".chomp
     if uuid.include? "-000000000000"
