@@ -84,7 +84,7 @@ heroku config:set HOST=<your-custom-url>
 
 # 2. Deploy to a Heroku subdomain
 # For this you'll want to enable the runtime-dyno-metadata lab feature which will provide us
-# with the HEROKU_APP_DEFAULT_DOMAIN_NAME environment variable.
+# with the HEROKU_APP_DEFAULT_DOMAIN_NAME environment variable (after first deploy).
 heroku labs:enable runtime-dyno-metadata
 
 # Assumes you created the SSH key for bootstrapping according to the instructions above
