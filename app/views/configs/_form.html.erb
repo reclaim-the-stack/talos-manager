@@ -1,3 +1,40 @@
+<link href="https://cdn.jsdelivr.net/npm/vscode-codicons@0.0.17/dist/codicon.min.css" rel="stylesheet">
+<script type="module">
+  import * as monaco from "https://cdn.jsdelivr.net/npm/monaco-editor@latest/+esm"
+
+  document.querySelectorAll(".monaco-editor").forEach((container) => {
+    const target = document.getElementById(container.dataset.target)
+
+    const editor = monaco.editor.create(
+      container,
+      {
+        value: target.value,
+        theme: "vs-dark",
+        language: "yaml",
+        fontSize: 14,
+        fontFamily: '"Roboto Mono", monospace',
+        automaticLayout: true,
+        tabSize: 2,
+        fixedOverflowWidgets: true,
+        padding: { top: 12 },
+        minimap: { enabled: false },
+        inlineSuggest: { enabled: true },
+        quickSuggestions: { strings: true },
+        scrollBeyondLastLine: false,
+      },
+    )
+
+    editor.onDidChangeModelContent(() => {
+      target.value = editor.getValue()
+    })
+
+    editor.onDidContentSizeChange(() => {
+      const contentHeight = Math.max(editor.getContentHeight()) + 24
+	    container.style.height = `${contentHeight}px`;
+    })
+  })
+</script>
+
 <%= form_with model: model do |f| %>
   <% if config_error = f.object.errors[:config].presence %>
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5" role="alert">
@@ -19,8 +56,8 @@
     <span class="text-sm text-gray-400">Enables the --with-kubespan argument during config generation</span>
   <% end %>
 
-  <%= f.text_area :patch, required: false, class: "font-mono w-full text-sm", rows: 20, placeholder: "machine: # ...&#10;cluster: # ...".html_safe, hint: "Gets passed into the --config-patch argument for talosctl gen config." %>
-  <%= f.text_area :patch_control_plane, required: false, class: "font-mono w-full text-sm", rows: 5, placeholder: "machine: # ...&#10;cluster: # ...".html_safe, hint: "Gets passed into the --config-patch-control-plane argument for talosctl gen config." %>
-  <%= f.text_area :patch_worker, required: false, class: "font-mono w-full text-sm", rows: 5, placeholder: "machine: # ...&#10;cluster: # ...".html_safe, hint: "Gets passed into the --config-patch-worker argument for talosctl gen config." %>
+  <%= f.text_editor :patch, label: "Config Patch YAML", required: false, hint: "Gets passed into the --config-patch argument for talosctl gen config." %>
+  <%= f.text_editor :patch_control_plane, label: "Control Plane Config Patch YAML", required: false, hint: "Gets passed into the --config-patch-control-plane argument for talosctl gen config." %>
+  <%= f.text_editor :patch_worker, label: "Worker Config Patch YAML", required: false, hint: "Gets passed into the --config-patch-worker argument for talosctl gen config." %>
   <%= f.submit "Save" %>
 <% end %>

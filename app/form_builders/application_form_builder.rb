@@ -15,6 +15,18 @@ class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
     input_with_label_and_validation(attribute, options) { super }
   end
 
+  def text_editor(attribute, options = {})
+    options.merge!(type: "textarea")
+
+    text_area = method(:text_area).super_method.call(attribute, options.merge(class: "hidden"))
+    text_editor = input_with_label_and_validation(attribute, options) do
+      id = "#{object.model_name.param_key}_#{attribute}"
+      %(<div class="monaco-editor w-full mb-6" data-target="#{id}"></div>).html_safe
+    end
+
+    "#{text_area}#{text_editor}".html_safe
+  end
+
   def password_field(attribute, options = {})
     input_with_label_and_validation(attribute, options) { super }
   end

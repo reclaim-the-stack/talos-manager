@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html hidden>
+<html>
   <head>
     <title>Hetzner Talos Manager</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -10,10 +10,9 @@
 
     <%= javascript_importmap_tags %>
 
-    <script type="module">
-      import { setup } from 'https://cdn.skypack.dev/twind/shim'
-
-      setup({
+    <script src="https://cdn.twind.style" crossorigin></script>
+    <script>
+      twind.install({
         mode: 'silent', // change to 'warn' for non matching class warnings during development
         theme: {
           extend: {
