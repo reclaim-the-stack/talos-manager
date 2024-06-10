@@ -22,7 +22,7 @@ RSpec.describe Config do
               - 2a01:4ff:ff00::add:1
     YAML
 
-    config = Config.new(install_image: "image", kubernetes_version: "1.29.2", patch: invalid_nameservers_patch)
+    config = Config.new(install_image: "image", kubernetes_version: "1.30.1", patch: invalid_nameservers_patch)
     config.validate
 
     expect(config.errors[:config].to_sentence).to include "error parsing config JSON patch"
