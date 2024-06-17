@@ -13,6 +13,7 @@ class Cluster < ApplicationRecord
   validates_presence_of :name
   validates_presence_of :endpoint
   validates_presence_of :secrets
+  validates_format_of :name, with: /\A[a-z0-9-]+\z/, message: "may only contain lowercase letters, numbers and dashes"
   validate :validate_secrets_yaml
   validate :validate_endpoint_url
 
