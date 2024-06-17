@@ -1,8 +1,8 @@
 development:
-  adapter: postgresql
+  adapter: <%= ENV["DB_ADAPTER"] == "sqlite" ? "async" : "postgresql" %>
 
 test:
   adapter: test
 
 production:
-  adapter: postgresql
+  adapter: <%= ENV["DB_ADAPTER"] == "sqlite" ? "async" : "postgresql" %>
