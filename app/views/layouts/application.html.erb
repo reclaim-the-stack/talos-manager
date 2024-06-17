@@ -28,6 +28,13 @@
         },
       }
     </script>
+
+    <script type="module">
+      // https://caniuse.com/css-anchor-positioning
+      if (!("anchorName" in document.documentElement.style)) {
+        import("https://unpkg.com/@oddbird/css-anchor-positioning")
+      }
+    </script>
   </head>
 
   <body class="bg-mnd-white-dark">
