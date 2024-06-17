@@ -12,7 +12,7 @@ gem "pg"
 gem "propshaft"
 gem "puma"
 gem "rails"
-gem "sqlite3"
+gem "sqlite3", "~> 1.4" # locked for Rails 7.1 compatibility
 gem "stimulus-rails"
 gem "turbo-rails"
 gem "typhoeus"
