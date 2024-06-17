@@ -37,7 +37,8 @@ FROM base
 # libcurl required by typhoeus
 # wget for talosctl installation
 # curl is required for the heroku release command output
-RUN apk add wget libc6-compat tzdata libcurl libpq curl
+# sqlite-libs required by sqlite3 (only used if DB_ADAPTER=sqlite)
+RUN apk add wget libc6-compat tzdata libcurl libpq curl sqlite-libs
 
 COPY --from=gems /app /app
 COPY --from=talosctl /usr/local/bin/talosctl /usr/local/bin/talosctl
