@@ -1,4 +1,4 @@
-# This Dockerfile produces a production ready image for running in Kubernetes.
+# This Dockerfile produces a production ready image of talos-manager.
 
 ARG RUBY_VERSION=3.2.0
 FROM ruby:${RUBY_VERSION}-alpine as base
