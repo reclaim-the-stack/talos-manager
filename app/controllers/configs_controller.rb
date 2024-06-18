@@ -17,11 +17,7 @@ class ConfigsController < ApplicationController
       render plain: server.machine_config.generate_config
     else
       server.update!(last_configured_at: nil, last_request_for_configuration_at: Time.now)
-
-      sleep 15
-
-      attempt = params[:attempt] || 0
-      redirect_to get_config_path(attempt: attempt.to_i + 1)
+      render plain: "No configuration found for server with IP #{server.ip}", status: 420
     end
   end
 
