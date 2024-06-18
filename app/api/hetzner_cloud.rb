@@ -59,8 +59,9 @@ module HetznerCloud
   end
 
   # https://docs.hetzner.cloud/#servers-get-all-servers
+  # NOTE: Since pagination isn't implemented here we only support up to 50 servers.
   def self.servers
-    get("servers").fetch("servers")
+    get("servers", per_page: 50).fetch("servers")
   end
 
   def self.server(id)
@@ -79,10 +80,14 @@ module HetznerCloud
   end
 
   def self.request(method, path, params = nil)
+    url = "#{BASE_URL}/#{path}"
+    url += "?#{Rack::Utils.build_query(params)}" if method == "get" && params.present?
+    body = params&.to_json unless method == "get"
+
     response = Typhoeus.send(
       method.downcase,
-      "#{BASE_URL}/#{path}",
-      body: params&.to_json,
+      url,
+      body:,
       headers: {
         "Authorization" => "Bearer #{ENV.fetch('HETZNER_CLOUD_API_TOKEN')}",
         "Content-Type" => "application/json",
