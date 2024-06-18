@@ -1,7 +1,7 @@
 # This Dockerfile produces a production ready image of talos-manager.
 
 ARG RUBY_VERSION=3.2.0
-FROM ruby:${RUBY_VERSION}-alpine as base
+FROM ruby:${RUBY_VERSION}-slim as base
 
 WORKDIR /app
 
@@ -11,16 +11,20 @@ ENV BUNDLE_CLEAN=true
 
 FROM base as talosctl
 
+RUN apt-get update -qq && apt-get install --no-install-recommends -y wget
+
 ARG TALOS_VERSION=1.7.4
+# TODO: This should use TARGETPLATFORM to determine the correct binary to download
 RUN wget https://github.com/siderolabs/talos/releases/download/v${TALOS_VERSION}/talosctl-linux-amd64 -O /usr/local/bin/talosctl
 RUN chmod +x /usr/local/bin/talosctl
 
 FROM base as gems
 
 # git for git based Gemfile definitions
-# build-base for native extensions
-# postgresql-dev for pg gem
-RUN apk add git build-base postgresql-dev
+# build-essential + pkg-config for native extensions
+# libpq-dev for pg gem
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y build-essential pkg-config git libpq-dev
 
 COPY .ruby-version .
 COPY Gemfile* ./
@@ -31,14 +35,12 @@ RUN rm -rf vendor/bundle/ruby/*/cache
 
 FROM base
 
-# libc6-compat required by nokogiri aarch64-linux
-# libpq required by pg
-# tzdata required by tzinfo
-# libcurl required by typhoeus
 # wget for talosctl installation
-# curl is required for the heroku release command output
-# sqlite-libs required by sqlite3 (only used if DB_ADAPTER=sqlite)
-RUN apk add wget libc6-compat tzdata libcurl libpq curl sqlite-libs
+# curl is required for typhoeus and the heroku release command output
+# libsqlite3-0 for sqlite3
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y wget curl libsqlite3-0 postgresql-client file && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 COPY --from=gems /app /app
 COPY --from=talosctl /usr/local/bin/talosctl /usr/local/bin/talosctl
