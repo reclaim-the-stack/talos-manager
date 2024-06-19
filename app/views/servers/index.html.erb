@@ -5,19 +5,6 @@
   <%= button_to icon_reload, sync_servers_path, method: :post, class: "disabled:opacity-20 disabled:cursor-default", title: "Sync with Hetzner" %>
 </div>
 
-<%=
-  tag.div(
-    id: "server-actions-backdrop",
-    class: "bg-gray-200 hidden opacity-0 hidden absolute fixed top-0 left-0 w-full h-full pointer-events-auto",
-    onclick: <<~JS
-      document.querySelectorAll('[data-server-actions]').forEach(el => el.classList.add('hidden'))
-      document.getElementById('server-table').classList.remove('pointer-events-none')
-      document.getElementById('server-table').classList.add('pointer-events-auto')
-      this.classList.add('hidden')
-    JS
-  )
-%>
-
 <table id="server-table" class="mb-5">
   <thead class="text-lg text-left">
     <th class="">Name</th>
@@ -29,7 +16,7 @@
     <th class="w-4"></th>
   </thead>
   <tbody>
-    <% @servers.each_with_index do |server| %>
+    <% @servers.each do |server| %>
       <tr class="h-11 group hover:bg-gray-50">
         <td class="py-1">
           <%= turbo_frame_tag server, :name do %>
@@ -72,35 +59,14 @@
           <% end %>
         </td>
         <td class="relative">
-          <%=
-            link_to(
-              icon_ellipsis_vertical,
-              "#",
-              onclick: <<~JS,
-                // Hide and return if this popup menu is already visible
-                if (!this.nextElementSibling.classList.contains('hidden')) {
-                  document.getElementById('server-actions-backdrop').click()
-                  return false
-                }
-
-                // Hide all other popup menus
-                document.querySelectorAll('[data-server-actions]').forEach(el => el.classList.add('hidden'))
-
-                // Disable click events on other elements
-                document.getElementById('server-table').classList.remove('pointer-events-auto')
-                document.getElementById('server-table').classList.add('pointer-events-none')
-
-                // Show this popup menu
-                this.nextElementSibling.classList.remove('hidden')
-
-                // Show the backdrop which will close the popup menu when clicked
-                document.getElementById('server-actions-backdrop').classList.remove('hidden')
-
-                return false
-              JS
-            )
-          %>
-          <div style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.2)" data-server-actions class="rounded-lg bg-white w-[230px] py-3 right-[1.5rem] top-0 absolute hidden pointer-events-auto">
+          <% popover_id = "server-#{server.id}-popover" %>
+          <button popovertarget=<%= popover_id %> style="anchor-name: --<%= popover_id %>">
+            <%= icon_ellipsis_vertical %>
+          </button>
+          <div popover id="<%= popover_id %>"
+            class="rounded-lg bg-white absolute w-[230px] m-0 -ml-[235px] py-3 shadow-[0_0_10px_rgba(0,0,0,0.2)]"
+            style="position-anchor: --<%= popover_id %>; top: anchor(top); left: anchor(left)"
+          >
             <%= render "server_menu", server: %>
           </div>
         </td>
