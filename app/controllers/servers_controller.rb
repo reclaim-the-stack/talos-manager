@@ -42,7 +42,7 @@ class ServersController < ApplicationController
   def rescue
     server = Server.find(params[:id])
 
-    server.rescue
+    server.rescue!
 
     redirect_to servers_path, notice: "Server #{server.name} is rebooting in rescue mode"
   end

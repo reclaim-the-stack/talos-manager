@@ -2,6 +2,7 @@ source "https://rubygems.org"
 
 ruby "3.2.0"
 
+gem "aasm"
 gem "bootsnap", require: false
 gem "importmap-rails"
 gem "net-ssh"

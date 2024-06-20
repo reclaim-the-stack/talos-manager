@@ -17,7 +17,7 @@ class Server::HetznerCloud < Server
     session&.shutdown!
   end
 
-  def rescue
+  def before_rescue
     ::HetznerCloud.active_rescue_system(id)
 
     # Hetzner appears to temporarily lock the server immediately after enabling rescue mode.

@@ -17,7 +17,7 @@ class Server::HetznerDedicated < Server
     session&.shutdown!
   end
 
-  def rescue
+  def before_rescue
     Hetzner.active_rescue_system(id)
 
     if Hetzner.reset_state(id).fetch("operating_status") == "shut off"

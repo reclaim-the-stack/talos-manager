@@ -11,12 +11,11 @@ class ConfigsController < ApplicationController
     server = Server.find_by_ip!(ip)
 
     if server.machine_config
-      # Using 1.second.ago seems silly but is required to show the correct status in the UI at the moment
-      server.update!(last_request_for_configuration_at: 1.second.ago, last_configured_at: Time.now)
+      server.configure!
       headers["Content-Type"] = "text/yaml"
       render plain: server.machine_config.generate_config
     else
-      server.update!(last_configured_at: nil, last_request_for_configuration_at: Time.now)
+      server.request_configuration!
       render plain: "No configuration found for server with IP #{server.ip}", status: 420
     end
   end

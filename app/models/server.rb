@@ -7,6 +7,61 @@ class Server < ApplicationRecord
   has_one :machine_config, dependent: :destroy
   has_one :config, through: :machine_config
 
+  include AASM
+
+  aasm timestamps: true do
+    state :pending, initial: true
+    state :rescuing
+    state :failed_rescue
+    state :rescued
+    state :installing_talos
+    state :awaiting_configuration
+    state :configuring
+    state :configured
+    state :ready
+    state :inaccessible
+
+    event :rescue, before: :before_rescue do
+      transitions to: :rescuing
+    end
+
+    event :await_rescued do
+      transitions from: %i[rescuing failed_rescue], to: :rescued, guard: :bootstrappable?
+      transitions from: :rescuing, to: :failed_rescue, guard: :rescue_timeout?
+    end
+
+    event :install_talos, before: :bootstrap! do
+      transitions from: :rescued, to: :installing_talos
+    end
+
+    event :request_configuration do
+      before do
+        assign_attributes(last_configured_at: nil, last_request_for_configuration_at: Time.now)
+      end
+
+      transitions to: :awaiting_configuration
+    end
+
+    event :configure do
+      before do
+        # 1.second.ago seems silly but is required to show the correct status in the UI at the moment
+        assign_attributes(last_configured_at: Time.now, last_request_for_configuration_at: 1.second.ago)
+      end
+
+      transitions to: :configuring
+    end
+
+    event :await_configured do
+      transitions from: %i[configuring failed_configure], to: :configured, guard: :talos_accessible?
+      transitions from: :configuring, to: :failed_configure, guard: :configure_timeout?
+    end
+
+    event :await_ready do
+      transitions from: %i[configured failed_ready], to: :ready, guard: :ready?
+      transitions from: :configured, to: :failed_ready, guard: :ready_timeout?
+    end
+  end
+
   attr_accessor :sync # set to true to sync changed attributes to hetzner
 
   validates_uniqueness_of :name, allow_nil: true
@@ -85,8 +140,8 @@ class Server < ApplicationRecord
     update!(accessible: false)
   end
 
-  def rescue
-    raise "#rescue is not implemented for #{self.class.name}"
+  def before_rescue
+    raise "#before_rescue is not implemented for #{self.class.name}"
   end
 
   def reset
