@@ -57,7 +57,7 @@ class ClustersController < ApplicationController
 
     first_control_plane = @cluster.servers
       .where.associated(:machine_config)
-      .where("name ILIKE '%control-plane%'")
+      .where("LOWER(name) LIKE '%control-plane%'")
       .order(name: :asc)
       .first
 

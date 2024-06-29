@@ -122,6 +122,10 @@ docker push registry.heroku.com/<heroku-app-name>/web
 heroku container:release web --app <heroku-app-name>
 ```
 
+## Using SQLite instead of Postgres
+
+Set `DB_ADAPTER=sqlite` and `config/database.yml` will be configured to use SQLite.
+
 ## Config Patch Examples
 
 ### Basic

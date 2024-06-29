@@ -20,7 +20,7 @@ class Cluster < ApplicationRecord
   def talosconfig
     first_control_plane = servers
       .where.associated(:machine_config)
-      .where("name ILIKE '%control-plane%'")
+      .where("LOWER(name) LIKE '%control-plane%'")
       .order(name: :asc)
       .first
 
