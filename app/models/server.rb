@@ -44,6 +44,17 @@ class Server < ApplicationRecord
     raise "#bootstrappable? is not implemented for #{self.class.name}"
   end
 
+  # Equivalent of manually running the following via ssh:
+  # TALOS_IMAGE_URL=https://github.com/siderolabs/talos/releases/download/v1.7.5/metal-amd64.raw.xz
+  # DEVICE=nvme0n1
+  # HOST=example.com
+  #
+  # wget $TALOS_IMAGE_URL --quiet -O - | xz -d | dd of=/dev/$DEVICE status=progress
+  # sync
+  # mount /dev/${DEVICE}p3 /mnt
+  # sed -i 's/vmlinuz/vmlinuz talos.config=https:\/\/$HOST\/config/' /mnt/grub/grub.cfg
+  # umount /mnt
+  # reboot
   def bootstrap!
     raise "ERROR: Can't bootstrap without a HOST configured" unless HOST
 
