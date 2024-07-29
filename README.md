@@ -138,6 +138,9 @@ As a baseline config we recommend:
 ```yaml
 machine:
   install:
+    # NOTE: kernel args will not be applied on initial bootstrap. You must manually run `talosctl upgrade`
+    # on the node to apply these values. To verify which kernel args are currently applied you can run
+    # `talosctl read /proc/cmdline -n <node>`
     extraKernelArgs:
       - cpufreq.default_governor=performance
   network:
