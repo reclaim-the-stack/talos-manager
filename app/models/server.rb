@@ -52,7 +52,7 @@ class Server < ApplicationRecord
   # wget $TALOS_IMAGE_URL --quiet -O - | xz -d | dd of=/dev/$DEVICE status=progress
   # sync
   # mount /dev/${DEVICE}p3 /mnt
-  # sed -i 's/vmlinuz/vmlinuz talos.config=https:\/\/$HOST\/config/' /mnt/grub/grub.cfg
+  # sed -i "s/vmlinuz/vmlinuz talos.config=https:\/\/$HOST\/config/" /mnt/grub/grub.cfg
   # umount /mnt
   # reboot
   def bootstrap!
