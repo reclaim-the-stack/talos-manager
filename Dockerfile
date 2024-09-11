@@ -13,7 +13,7 @@ FROM base as talosctl
 
 RUN apt-get update -qq && apt-get install --no-install-recommends -y wget
 
-ARG TALOS_VERSION=1.7.6
+ARG TALOS_VERSION=1.8.0-beta.0
 # TODO: This should use TARGETPLATFORM to determine the correct binary to download
 RUN wget https://github.com/siderolabs/talos/releases/download/v${TALOS_VERSION}/talosctl-linux-amd64 -O /usr/local/bin/talosctl
 RUN chmod +x /usr/local/bin/talosctl
