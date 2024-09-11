@@ -1,7 +1,7 @@
 # Release command which handles initial database bootstrap as well as subsequent migrations. Based on:
 # https://gist.github.com/stevenharman/98576bf49b050b9e59fb26626b7cceff#file-bin-heroku_release-sh
 
-set -euo pipefail
+set -eu
 
 schema_version=$(bin/rails db:version | { grep "^Current version: [0-9]\\+$" || true; } | tr -s ' ' | cut -d ' ' -f3)
 
