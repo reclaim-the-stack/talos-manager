@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-ruby "3.2.0"
+ruby "3.3.5"
 
 # Keep dotenv at top to ensure ENV variables are loaded before other gems initialize
 gem "dotenv", require: "dotenv/load", groups: %i[development test]
@@ -8,11 +8,12 @@ gem "dotenv", require: "dotenv/load", groups: %i[development test]
 gem "bootsnap", require: false
 gem "importmap-rails"
 gem "net-ssh"
+gem "ostruct" # to supress deprecation warning, gem will not be part of Ruby 3.5
 gem "pg"
 gem "propshaft"
 gem "puma"
 gem "rails"
-gem "sqlite3", "~> 1.4" # locked for Rails 7.1 compatibility
+gem "sqlite3"
 gem "stimulus-rails"
 gem "turbo-rails"
 gem "typhoeus"
