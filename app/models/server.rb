@@ -1,6 +1,6 @@
 class Server < ApplicationRecord
-  TALOS_AMD64_IMAGE_URL = ENV["TALOS_AMD64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.7.6/metal-amd64.raw.xz".freeze
-  TALOS_ARM64_IMAGE_URL = ENV["TALOS_ARM64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.7.6/metal-arm64.raw.xz".freeze
+  TALOS_AMD64_IMAGE_URL = ENV["TALOS_AMD64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.8.1/metal-amd64.raw.zst".freeze
+  TALOS_ARM64_IMAGE_URL = ENV["TALOS_ARM64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.8.1/metal-arm64.raw.zst".freeze
 
   belongs_to :cluster, optional: true
 
@@ -45,11 +45,11 @@ class Server < ApplicationRecord
   end
 
   # Equivalent of manually running the following via ssh:
-  # TALOS_IMAGE_URL=https://github.com/siderolabs/talos/releases/download/v1.7.6/metal-amd64.raw.xz
+  # TALOS_IMAGE_URL=https://github.com/siderolabs/talos/releases/download/v1.8.1/metal-amd64.raw.zst
   # DEVICE=nvme0n1
   # HOST=example.com
   #
-  # wget $TALOS_IMAGE_URL --quiet -O - | xz -d | dd of=/dev/$DEVICE status=progress
+  # wget $TALOS_IMAGE_URL --quiet -O - | zstd -d | dd of=/dev/$DEVICE status=progress
   # sync
   # mount /dev/${DEVICE}p3 /mnt
   # sed -i "s/vmlinuz/vmlinuz talos.config=https:\/\/$HOST\/config/" /mnt/grub/grub.cfg
@@ -72,8 +72,15 @@ class Server < ApplicationRecord
 
     boot_partition = nvme ? "p3" : "3"
 
-    # Support Talos versions 1.3 and below which were packaged as tar.gz
-    extract_command = talos_image_url.end_with?(".tar.gz") ? "tar xvfzO -" : "xz -d"
+    # Talos versions 1.3 and below were packaged as tar.gz, 1.4 -> 1.7 as xz and 1.8.0+ as zst
+    extract_command =
+      if talos_image_url.end_with?(".tar.gz")
+        "tar xvfzO -"
+      elsif talos_image_url.end_with?(".xz")
+        "xz -d"
+      else
+        "zstd -d"
+      end
 
     Rails.logger.info "Bootstrapping #{ip} with talos image #{talos_image_url} on #{bootstrap_disk}"
     ssh_exec_with_log! session,
