@@ -1,6 +1,6 @@
 class Server < ApplicationRecord
-  TALOS_AMD64_IMAGE_URL = ENV["TALOS_AMD64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.8.1/metal-amd64.raw.zst".freeze
-  TALOS_ARM64_IMAGE_URL = ENV["TALOS_ARM64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.8.1/metal-arm64.raw.zst".freeze
+  TALOS_AMD64_IMAGE_URL = ENV["TALOS_AMD64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.8.2/metal-amd64.raw.zst".freeze
+  TALOS_ARM64_IMAGE_URL = ENV["TALOS_ARM64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.8.2/metal-arm64.raw.zst".freeze
 
   belongs_to :cluster, optional: true
 
@@ -45,7 +45,7 @@ class Server < ApplicationRecord
   end
 
   # Equivalent of manually running the following via ssh:
-  # TALOS_IMAGE_URL=https://github.com/siderolabs/talos/releases/download/v1.8.1/metal-amd64.raw.zst
+  # TALOS_IMAGE_URL=https://github.com/siderolabs/talos/releases/download/v1.8.2/metal-amd64.raw.zst
   # DEVICE=nvme0n1
   # HOST=example.com
   #
