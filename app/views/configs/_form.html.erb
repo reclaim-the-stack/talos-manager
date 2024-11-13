@@ -48,7 +48,7 @@
   <%# installed via a disk image (which we do when bootstrapping). Can change it back to text_field %>
   <%# when/if Talos starts making proper use of the configuration. %>
   <%= f.hidden_field :install_image, readonly: true, hint: "Gets passed into the --imagedisk argument for talosctl gen config." %>
-  <%= f.text_field :kubernetes_version, placeholder: "1.26.3", hint: "Gets passed into the --kubernetes-version argument for talosctl gen config." %>
+  <%= f.text_field :kubernetes_version, placeholder: "1.30.6", hint: "Gets passed into the --kubernetes-version argument for talosctl gen config on new clusters. For already running clusters, the kubernetes version found on existing control planes will be used instead, to avoid accidentally onboarding nodes with incompatible Kubernetes versions." %>
 
   <%= f.label :kubespan, class: "mb-5 block" do %>
     <h3 class="font-bold mb-1 text-gray-900">Enable Kubespan</h3>

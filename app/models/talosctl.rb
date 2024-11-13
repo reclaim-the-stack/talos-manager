@@ -1,5 +1,7 @@
 require "open3"
 
+# Wrapper around the talosctl command line tool to interact with already bootstrapped Talos clusters
+
 class Talosctl
   def initialize(config_string)
     @config_string = config_string
@@ -34,6 +36,8 @@ class Talosctl
       [wait_thread.value.success?, stdout.read, stderr.read]
     end
   end
+
+  private
 
   def config_file
     return @config_file if defined?(@config_file)

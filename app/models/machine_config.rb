@@ -42,11 +42,21 @@ class MachineConfig < ApplicationRecord
     patch_worker_file = "#{Dir.tmpdir}/patch-worker-#{SecureRandom.hex}"
     File.write(patch_worker_file, replace_substitution_variables(config.patch_worker || ""))
 
+    # Prefer the running kubernetes version over the configured one since bootstrapping
+    # outdated versions can lead to issues.
+    running_or_configured_kubernetes_version =
+      # Avoid infinite recursion since talosconfig is used to determine the running kubernetes version
+      if output_type == "talosconfig"
+        config.kubernetes_version
+      else
+        server.cluster.running_kubernetes_version || config.kubernetes_version
+      end
+
     command = %(
       talosctl gen config \
         --install-disk #{install_disk} \
         --install-image #{config.install_image} \
-        --kubernetes-version #{config.kubernetes_version} \
+        --kubernetes-version #{running_or_configured_kubernetes_version} \
         --config-patch @#{patch_file} \
         --config-patch-control-plane @#{patch_control_plane_file} \
         --config-patch-worker @#{patch_worker_file} \
