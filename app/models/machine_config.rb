@@ -75,18 +75,19 @@ class MachineConfig < ApplicationRecord
     File.delete(patch_control_plane_file)
     File.delete(patch_worker_file)
 
+    talosconfig = YAML.safe_load(config)
+
     # Initially talosconfig is generated with an endpoint of 127.0.0.1 and no nodes.
     # Hence we add the first control plane IP as both enpoint and node.
     if output_type == "talosconfig"
-      talosconfig = YAML.safe_load(config)
       context_name = talosconfig.fetch("context")
       context = talosconfig.fetch("contexts").fetch(context_name)
       context["endpoints"] = [server.ip]
       context["nodes"] = [server.ip]
-      config = talosconfig.to_yaml.delete_prefix("---\n")
     end
 
-    config
+    # NOTE: This also gives us consistent 2 space indentation
+    talosconfig.to_yaml.delete_prefix("---\n")
   end
 
   private
