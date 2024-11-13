@@ -9,7 +9,9 @@ class Server < ApplicationRecord
 
   attr_accessor :sync # set to true to sync changed attributes to hetzner
 
-  validates_uniqueness_of :name, allow_nil: true
+  # Only validate name if it changed to avoid UI editing issues in case the same name has been used
+  # at Hetzner in which case the sync will bypass the validation and add duplicates to the database.
+  validates_uniqueness_of :name, allow_nil: true, if: -> { name_changed? }
   validates_presence_of :ip
   validates_presence_of :ipv6
   validates_presence_of :product
