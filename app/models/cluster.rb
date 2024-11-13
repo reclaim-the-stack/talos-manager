@@ -18,17 +18,29 @@ class Cluster < ApplicationRecord
   validate :validate_endpoint_url
 
   def talosconfig
-    first_control_plane = servers
-      .where.associated(:machine_config)
-      .where("LOWER(name) LIKE '%control-plane%'")
-      .order(name: :asc)
-      .first
-
     if first_control_plane
       first_control_plane.machine_config.generate_config(output_type: "talosconfig")
     else
       raise NoControlPlaneError
     end
+  end
+
+  def first_control_plane
+    return @first_control_plane if defined?(@first_control_plane)
+
+    @first_control_plane = servers
+      .where.associated(:machine_config)
+      .where("LOWER(name) LIKE '%control-plane%'")
+      .order(name: :asc)
+      .first
+  end
+
+  def running_kubernetes_version
+    return @running_kubernetes_version if defined?(@running_kubernetes_version)
+
+    return unless first_control_plane&.configured?
+
+    @running_kubernetes_version = Talosctl.new(talosconfig).kubernetes_version
   end
 
   private

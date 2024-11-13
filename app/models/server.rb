@@ -46,6 +46,11 @@ class Server < ApplicationRecord
     raise "#bootstrappable? is not implemented for #{self.class.name}"
   end
 
+  # NOTE: Doesn't necessarily imply that the server was successfully bootstrapped after config was sent
+  def configured?
+    last_configured_at && last_configured_at > last_request_for_configuration_at
+  end
+
   # Equivalent of manually running the following via ssh:
   # TALOS_IMAGE_URL=https://github.com/siderolabs/talos/releases/download/v1.8.2/metal-amd64.raw.zst
   # DEVICE=nvme0n1
