@@ -2,6 +2,7 @@
 
 ARG RUBY_VERSION=3.3.5
 FROM ruby:${RUBY_VERSION}-slim as base
+ARG TARGETPLATFORM
 
 WORKDIR /app
 
@@ -14,9 +15,14 @@ FROM base as talosctl
 RUN apt-get update -qq && apt-get install --no-install-recommends -y wget
 
 ARG TALOS_VERSION=1.8.2
-# TODO: This should use TARGETPLATFORM to determine the correct binary to download
-RUN wget https://github.com/siderolabs/talos/releases/download/v${TALOS_VERSION}/talosctl-linux-amd64 -O /usr/local/bin/talosctl
-RUN chmod +x /usr/local/bin/talosctl
+# Determine the correct binary suffix based on the target platform
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+      export TALOS_SUFFIX="-arm64"; \
+    else \
+      export TALOS_SUFFIX="-amd64"; \
+    fi && \
+    wget https://github.com/siderolabs/talos/releases/download/v${TALOS_VERSION}/talosctl-linux${TALOS_SUFFIX} -O /usr/local/bin/talosctl && \
+    chmod +x /usr/local/bin/talosctl
 
 FROM base as gems
 
