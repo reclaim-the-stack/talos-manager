@@ -7,14 +7,16 @@ class ConfigsController < ApplicationController
 
   def show
     ip = request.remote_ip
-
     server = Server.find_by_ip!(ip)
 
     if server.machine_config
+      # Render config before updating in case it would fail for whatever reason
+      config = server.machine_config.generate_config
+
       # Using 1.second.ago seems silly but is required to show the correct status in the UI at the moment
       server.update!(last_request_for_configuration_at: 1.second.ago, last_configured_at: Time.now)
       headers["Content-Type"] = "text/yaml"
-      render plain: server.machine_config.generate_config
+      render plain: config
     else
       server.update!(last_configured_at: nil, last_request_for_configuration_at: Time.now)
       render plain: "No configuration found for server with IP #{server.ip}", status: 420
@@ -24,7 +26,7 @@ class ConfigsController < ApplicationController
   def new
     @config = Config.new(
       kubernetes_version: "1.30.1",
-      install_image: "ghcr.io/siderolabs/installer:v1.8.2",
+      install_image: "ghcr.io/siderolabs/installer:v1.9.5",
       kubespan: true,
     )
   end

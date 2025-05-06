@@ -23,7 +23,7 @@ RSpec.describe MachineConfig do
       server = Server.new(name: "worker-1", ip: "72.14.201.110", cluster:)
       config = Config.new(
         name: "config",
-        install_image: "ghcr.io/siderolabs/installer:v1.8.2",
+        install_image: "ghcr.io/siderolabs/installer:v1.9.5",
         kubernetes_version: "1.30.1",
         kubespan: true,
         patch: <<~YAML,
@@ -105,7 +105,7 @@ RSpec.describe MachineConfig do
               enabled: true
           install:
             disk: "/dev/nvme0n1"
-            image: ghcr.io/siderolabs/installer:v1.8.2
+            image: ghcr.io/siderolabs/installer:v1.9.5
             wipe: false
           features:
             rbac: true
