@@ -270,7 +270,7 @@ Downtime for the serving while solving this is fine, we won't be making use of t
 
 ### Upgrading Talos on a node
 
-Before upgrading, make sure to read the What's New and Upgrading sections on Talos documentation site since there may be breaking changes or new configuration options you need to be aware of:
+Before upgrading, make sure to read the What's New and Upgrading sections on Talos documentation site since there may be breaking changes or new configuration options you need to be aware of, eg:
 - Upgrading: https://www.talos.dev/v1.10/talos-guides/upgrading-talos/
 - What's New: https://www.talos.dev/v1.10/introduction/what-is-new/
 
