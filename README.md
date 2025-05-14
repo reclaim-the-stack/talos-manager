@@ -265,3 +265,68 @@ of this UUID and with the one present here it doesn't work.
 
 Downtime for the serving while solving this is fine, we won't be making use of the server until we get this solved.
 ```
+
+## Maintenance tips and tricks
+
+### Upgrading Talos on a node
+
+Before upgrading, make sure to read the What's New and Upgrading sections on Talos documentation site since there may be breaking changes or new configuration options you need to be aware of:
+- Upgrading: https://www.talos.dev/v1.10/talos-guides/upgrading-talos/
+- What's New: https://www.talos.dev/v1.10/introduction/what-is-new/
+
+Talos provides the `talosctl upgrade` command for upgrading the OS. However just running this in isolation will not provide a "graceful" experience. Our experience is that the following steps should be followed:
+
+1. [Control plane only] Forfeit ETCD leadership to avoid the cluster ending up in read-only mode until a new leader is elected.
+2. Drain the node, this will ensure that all ephemeral workloads are migrated to other nodes and that stateful workloads are stopped gracefully.
+3. Perform the upgrade.
+4. Uncordon the node to allow workloads to be scheduled on it again.
+
+Control plane example:
+
+```bash
+NODE=control-plane-1
+IMAGE=ghcr.io/siderolabs/installer:v1.10.1
+talosctl etcd forfeit-leadership -n $NODE &&
+ kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
+ time talosctl upgrade --debug --image $IMAGE -n $NODE &&
+ kubectl uncordon $NODE
+```
+
+NOTE: You can run `etcd forfeit-ledership` on any control plane node, if the node isn't the leader the command will be a no-op.
+
+Worker example:
+
+```bash
+NODE=worker-1
+IMAGE=ghcr.io/siderolabs/installer:v1.10.1
+talosctl reboot -n $NODE &&
+ kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
+ time talosctl upgrade --preserve --debug --image $IMAGE -n $NODE &&
+ kubectl uncordon $NODE
+```
+
+NOTE: If you're using Talos version 1.8 or later you can omit the `--preserve` flag.
+
+### Rebooting a node
+
+Just like with upgrades, we recommend forfeiting ETCD leadership and draining before rebooting.
+
+Control plane example:
+
+```bash
+NODE=control-plane-1
+talosctl etcd forfeit-leadership -n $NODE &&
+  kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
+  talosctl reboot -n $NODE &&
+  kubectl uncordon $NODE
+```
+
+Worker example:
+
+```bash
+NODE=worker-1
+talosctl reboot -n $NODE &&
+  kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
+  talosctl reboot -n $NODE &&
+  kubectl uncordon $NODE
+```
