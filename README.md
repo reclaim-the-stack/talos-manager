@@ -299,8 +299,7 @@ Worker example:
 ```bash
 NODE=worker-1
 IMAGE=ghcr.io/siderolabs/installer:v1.10.1
-talosctl reboot -n $NODE &&
- kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
+kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
  time talosctl upgrade --preserve --debug --image $IMAGE -n $NODE &&
  kubectl uncordon $NODE
 ```
@@ -325,8 +324,7 @@ Worker example:
 
 ```bash
 NODE=worker-1
-talosctl reboot -n $NODE &&
-  kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
+kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
   talosctl reboot -n $NODE &&
   kubectl uncordon $NODE
 ```
