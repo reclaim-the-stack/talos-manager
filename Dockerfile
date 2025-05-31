@@ -14,7 +14,7 @@ FROM base as talosctl
 
 RUN apt-get update -qq && apt-get install --no-install-recommends -y wget
 
-ARG TALOS_VERSION=1.9.5
+ARG TALOS_VERSION=1.10.3
 # Determine the correct binary suffix based on the target platform
 RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
       export TALOS_SUFFIX="-arm64"; \
