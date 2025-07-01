@@ -26,7 +26,7 @@ class ConfigsController < ApplicationController
   def new
     @config = Config.new(
       kubernetes_version: "1.30.1",
-      install_image: "ghcr.io/siderolabs/installer:v1.10.3",
+      install_image: "ghcr.io/siderolabs/installer:v1.9.5",
       kubespan: true,
     )
   end

@@ -282,7 +282,7 @@ Control plane example:
 
 ```bash
 NODE=control-plane-1
-IMAGE=ghcr.io/siderolabs/installer:v1.10.3
+IMAGE=ghcr.io/siderolabs/installer:v1.10.1
 talosctl etcd forfeit-leadership -n $NODE &&
  kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
  time talosctl upgrade --debug --image $IMAGE -n $NODE &&
@@ -294,8 +294,8 @@ NOTE: You can run `etcd forfeit-ledership` on any control plane node, if the nod
 Worker example:
 
 ```bash
-NODE=worker-2
-IMAGE=ghcr.io/siderolabs/installer:v1.10.3
+NODE=worker-1
+IMAGE=ghcr.io/siderolabs/installer:v1.10.1
 kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
  time talosctl upgrade --preserve --debug --image $IMAGE -n $NODE &&
  kubectl uncordon $NODE
