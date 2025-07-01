@@ -1,4 +1,11 @@
 module ApplicationHelper
+  def pretty_api_key_provider(provider)
+    icon = image_tag "provider_icons/#{provider}.png", class: "inline h-[18px] mr-2"
+    label = provider.titleize
+
+    "#{icon} #{label}".html_safe
+  end
+
   # Goal here is to avoid bloating the width of the Model column in the servers table
   def pretty_product(product)
     # eg. Dell PowerEdge™ R6615 DX182

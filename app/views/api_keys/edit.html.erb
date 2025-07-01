@@ -1,0 +1,22 @@
+<h1 class="text-4xl mb-10">Edit API Key</h1>
+
+<%= form_with model: @api_key, html: { autocomplete: "off" } do |f| %>
+  <%=
+    f.select(
+      :provider,
+      { "Hetzner Robot" => "hetzner_robot", "Hetzner Cloud" => "hetzner_cloud" },
+      {},
+      disabled: true,
+    )
+  %>
+  <% if f.object.provider == "hetzner_robot" %>
+    <%= f.text_field :name, required: true, label: "Username" %>
+    <%= f.password_field :secret, required: true, label: "Password", autocomplete: "new-password", value: f.object.secret %>
+  <% elsif f.object.provider == "hetzner_cloud" %>
+    <%= f.text_field :name, required: true, label: "Name", placeholder: "My Project", hint: "A descriptive name of the API key, eg. the name of the Hetzner console project.", autocomplete: "off" %>
+    <%= f.password_field :secret, required: true, label: "API Token", autocomplete: "new-password", value: f.object.secret %>
+  <% else %>
+    <% raise "Unknown provider" %>
+  <% end %>
+  <%= f.submit "Update API Key", class: "mt-5 bg-mnd-red hover:bg-mnd-red-dark text-white font-semibold p-3 rounded" %>
+<% end %>

@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   scope "admin" do
+    resources :api_keys, only: %i[new create edit update destroy]
     resources :configs
     resources :clusters do
       member do
@@ -19,6 +20,7 @@ Rails.application.routes.draw do
         post :reset
       end
     end
+    resource :settings, only: %i[show]
   end
 
   get "config", to: "configs#show", as: "get_config"
