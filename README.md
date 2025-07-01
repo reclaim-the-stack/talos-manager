@@ -24,7 +24,7 @@ Talos Manager will bootstrap servers by putting servers into Rescue Mode and the
 
 Note: Due to Ruby's `net-ssh` library not being compatible with OpenSSL3 private keys we need to make sure we generate the private key in PEM format.
 
-```
+```bash
 ssh-keygen -m PEM -t rsa -P "" -f ~/.ssh/talos-manager.pem -C talos-manager
 ```
 
@@ -34,15 +34,15 @@ Now add the public key (`cat ~/.ssh/talos-manager.pem.pub`) with the name `talos
 
 ### Deploying on Heroku
 
-First we'll create a Heroku application where we can deploy Talos Manager. For Postgres we'll use the `crunchy-postgres:hobby-1` costing $30/month. This plan provides continuous data protection and point in time recovery. If you plan to manually backup your postgres database you can also consider using `heroku-postgres:mini` at $5/month.
+First we'll create a Heroku application where we can deploy Talos Manager. For Postgres we default to `heroku-postgresql:standard-0` costing an annoying $50/month. This plan provides 4 day point in time recovery out of the box. If you're ok with [running some commands](https://devcenter.heroku.com/articles/heroku-postgres-backups#scheduled-backups) to setup daily backups of your database, feel free to go with `heroku-postgresql:essential-0` instead at $5/month.
 
-```
-heroku create --stack container --region <eu/us> --addons crunchy-postgres:hobby-1 [--team <heroku-account>] <name-of-application>
+```bash
+heroku create --stack container --region <eu/us> --addons heroku-postgresql:standard-0 [--team <heroku-account>] <name-of-application>
 ```
 
 Now clone the talos-manager repository and connect it to the heroku repository.
 
-```
+```bash
 git clone https://github.com/reclaim-the-stack/talos-manager.git
 cd talos-manager
 heroku git:remote -a <name-of-application>
@@ -50,7 +50,7 @@ heroku git:remote -a <name-of-application>
 
 Now we can configure the application.
 
-```
+```bash
 # We'll start by setting some standard Rails variables
 function random_string() { cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1; }
 
@@ -94,14 +94,11 @@ heroku config:set SSH_PRIVATE_KEY="$(cat ~/.ssh/talos-manager.pem)"
 heroku config:set BASIC_AUTH_PASSWORD=$(random_string)
 ```
 
-Confirm that the Crunchy Postgres cluster is in ready status. This can take a few minutes after initial creation.
+Confirm that the Postgres cluster is in ready status. This can take a few minutes after initial creation.
 
 ```
 # If you can successfully psql to the database you're good to go
 psql $(heroku config:get DATABASE_URL)
-
-# If psql failed you can track the cluster status in the crunchy postgres dashboard
-heroku addons:open crunchy-postgres
 ```
 
 Once Postgres is ready, we're can go ahead and git push to build and deploy the application 🚀
