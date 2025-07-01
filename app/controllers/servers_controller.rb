@@ -2,7 +2,7 @@ class ServersController < ApplicationController
   def index
     @servers = Server.all
       .includes(:config, :cluster)
-      .order(hetzner_vswitch_id: :asc, name: :asc)
+      .order(cluster_id: :asc, name: :asc)
   end
 
   def edit
@@ -21,7 +21,7 @@ class ServersController < ApplicationController
     if @server.update(server_params.merge(sync: true))
       @servers = Server.all
         .includes(:hetzner_vswitch, :config, :cluster)
-        .order(hetzner_vswitch_id: :asc, name: :asc)
+        .order(cluster_id: :asc, name: :asc)
       redirect_to servers_path
     else
       render :edit, status: :unprocessable_entity
