@@ -1,12 +1,14 @@
 <h1 class="text-4xl mb-10">Settings</h1>
 
+<hr class="mb-10">
+
 <div class="flex mb-10 items-center justify-between">
   <h2 class="text-2xl mb-5">API Keys</h2>
   <%= link_to "New API Key", new_api_key_path, class: "text-white rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold p-3" %>
 </div>
 
-<% if @api_keys.any? %>
-  <table id="server-table" class="mb-5">
+<% if @api_keys&.any? %>
+  <table id="server-table" class="mb-20">
     <thead class="text-lg text-left">
       <th class="">Provider</th>
       <th class="">Name</th>
@@ -32,3 +34,15 @@
     </tbody>
   </table>
 <% end %>
+
+<hr class="mb-10">
+
+<div class="mb-10">
+  <h2 class="text-2xl mb-5">Talos Linux Image Factory</h2>
+  <p>
+    <%= link_to "Talos Linux Image Factory", "https://factory.talos.dev/", class: "text-blue-600 hover:underline", target: "_blank" %>
+    is used to generate the Talos Linux bootstrap image. Modify these settings to change the default image used when creating new servers. Note that if you create your own factory schematic you must add <code class="bg-gray-100 p-1">talos.config=https://<%= ENV["HOST"] %>/config</code> to kernel command line arguments for your schematic to work.
+  </p>
+</div>
+
+<%= render partial: "talos_image_factory_settings/form", locals: { talos_image_factory_setting: @talos_image_factory_setting } %>

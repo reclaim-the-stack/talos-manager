@@ -50,6 +50,8 @@ class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
   def submit(label, options = {})
     options[:class] = SUBMIT_CLASSES
 
+    options[:class] = options[:class].sub("w-full", "w-auto") if options.delete(:auto_width)
+
     super
   end
 

@@ -1,7 +1,4 @@
 class Server < ApplicationRecord
-  TALOS_AMD64_IMAGE_URL = ENV["TALOS_AMD64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.9.5/metal-amd64.raw.zst".freeze
-  TALOS_ARM64_IMAGE_URL = ENV["TALOS_ARM64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.9.5/metal-arm64.raw.zst".freeze
-
   belongs_to :cluster, optional: true
   belongs_to :api_key
 
@@ -53,7 +50,7 @@ class Server < ApplicationRecord
   end
 
   # Equivalent of manually running the following via ssh:
-  # TALOS_IMAGE_URL=https://github.com/siderolabs/talos/releases/download/v1.9.5/metal-amd64.raw.zst
+  # TALOS_IMAGE_URL=https://github.com/siderolabs/talos/releases/download/v1.10.4/metal-amd64.raw.zst
   # DEVICE=nvme0n1
   # HOST=example.com
   #
@@ -73,33 +70,14 @@ class Server < ApplicationRecord
       raise "Invalid SMBIOS UUID, send this output to Hetzner support: #{system_data}"
     end
 
-    talos_image_url = architecture == "amd64" ? TALOS_AMD64_IMAGE_URL : TALOS_ARM64_IMAGE_URL
+    talos_image_url = TalosImageFactory.image_url(architecture:)
     nvme = session.exec!("ls /dev/nvme0n1 && echo 'has-nvme'").chomp.ends_with? "has-nvme"
 
     update!(bootstrap_disk: nvme ? "/dev/nvme0n1" : "/dev/sda", uuid:)
 
-    boot_partition = nvme ? "p3" : "3"
-
-    # Talos versions 1.3 and below were packaged as tar.gz, 1.4 -> 1.7 as xz and 1.8.0+ as zst
-    extract_command =
-      if talos_image_url.end_with?(".tar.gz")
-        "tar xvfzO -"
-      elsif talos_image_url.end_with?(".xz")
-        "xz -d"
-      else
-        "zstd -d"
-      end
-
     Rails.logger.info "Bootstrapping #{ip} with talos image #{talos_image_url} on #{bootstrap_disk}"
-    ssh_exec_with_log! session,
-      "wget #{talos_image_url} --quiet -O - | #{extract_command} | dd of=#{bootstrap_disk} status=progress"
+    ssh_exec_with_log! session, "wget #{talos_image_url} --quiet -O - | zstd -d | dd of=#{bootstrap_disk} status=progress"
     ssh_exec_with_log! session, "sync"
-
-    # assuming that p3 is the BOOT partition, can make sure with `gdisk /dev/nvme0n1` and `s` command
-    ssh_exec_with_log! session, "mount #{bootstrap_disk}#{boot_partition} /mnt"
-    ssh_exec_with_log! session, "sed -i 's/vmlinuz/vmlinuz talos.config=https:\\/\\/#{HOST}\\/config/' " \
-                                "/mnt/grub/grub.cfg"
-    ssh_exec_with_log! session, "umount /mnt"
 
     begin
       session.exec! "reboot"

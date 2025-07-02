@@ -21,6 +21,7 @@ Rails.application.routes.draw do
       end
     end
     resource :settings, only: %i[show]
+    resources :talos_image_factory_settings, only: %i[update]
   end
 
   get "config", to: "configs#show", as: "get_config"
