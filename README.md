@@ -101,7 +101,9 @@ Once the build has completed you should be able to access Talos Manager at `<nam
 
 #### Deploying with a specific talos version
 
-If you need to support a legacy version of Talos you can set the `TALOS_AMD64_IMAGE_URL` and `TALOS_ARM64_IMAGE_URL` ENV variables to point to the specific version you need. You will also need to manually build the docker container using the `TALOS_VERSION` build arg. Eg:
+Talos version can be configured on the Settings page of the application.
+
+However, to support configuration generation in legacy versions you may also need to manually build the docker container using the appropriate `TALOS_VERSION` build arg. Eg:
 
 ```
 docker build --platform linux/amd64 --build-arg TALOS_VERSION=1.3.7 -t registry.heroku.com/<heroku-app-name>/web .
@@ -272,7 +274,7 @@ Control plane example:
 
 ```bash
 NODE=control-plane-1
-IMAGE=ghcr.io/siderolabs/installer:v1.10.1
+IMAGE=ghcr.io/siderolabs/installer:v1.10.4
 talosctl etcd forfeit-leadership -n $NODE &&
  kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
  time talosctl upgrade --debug --image $IMAGE -n $NODE &&
@@ -285,7 +287,7 @@ Worker example:
 
 ```bash
 NODE=worker-1
-IMAGE=ghcr.io/siderolabs/installer:v1.10.1
+IMAGE=ghcr.io/siderolabs/installer:v1.10.4
 kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
  time talosctl upgrade --preserve --debug --image $IMAGE -n $NODE &&
  kubectl uncordon $NODE

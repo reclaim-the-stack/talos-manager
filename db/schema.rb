@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_06_30_185032) do
+ActiveRecord::Schema[7.2].define(version: 2025_07_02_112740) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -90,6 +90,13 @@ ActiveRecord::Schema[7.2].define(version: 2025_06_30_185032) do
     t.index ["hetzner_vswitch_id"], name: "index_servers_on_hetzner_vswitch_id"
     t.index ["ip"], name: "index_servers_on_ip", unique: true
     t.index ["type"], name: "index_servers_on_type"
+  end
+
+  create_table "talos_image_factory_settings", force: :cascade do |t|
+    t.string "version", null: false
+    t.string "schematic_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   add_foreign_key "clusters", "hetzner_vswitches"

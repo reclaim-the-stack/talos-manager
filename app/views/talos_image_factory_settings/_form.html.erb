@@ -1,0 +1,23 @@
+<%= turbo_frame_tag talos_image_factory_setting do %>
+  <%= form_with model: talos_image_factory_setting do |f| %>
+    <%= f.text_field :version, label: "Talos Version" %>
+    <%= f.text_field :schematic_id, label: "Schematic ID", required: false, hint: "Optionally use the Talos Linux Image Factory to create a custom schematic and paste the ID here. Useful for enabling extensions like nvidia drivers, mdadm etc. Don't forget to include the talos.config kernel command line argument as mentioned above." %>
+    <%= f.submit "Update Factory Image settings", auto_width: true %>
+  <% end %>
+
+  <%# Sloppy copy paste from the application/flash partial to work around Turbo's inability %>
+  <%# to break out of a frame on redirect. On a successful form submission we set flash.now[:notice] %>
+  <%# to ensure a toast is presented to the user. %>
+  <dialog class="bottom-0 w-full bg-transparent" <%= "open" if flash[:talos_image_factory_update_notice] %>>
+    <div
+      class="flex bg-white shadow rounded opacity-0 -bottom-20 left-8 fixed p-3 items-center justify-between"
+      style="animation: flash 10s; animation-iteration-count: 1;"
+    >
+      <div class="bg-green-100 rounded-lg text-green-600 p-2 ml-2 mr-4"><%= icon_checkmark %></div>
+      <p class="mr-3 text-gray-800"><%= flash[:talos_image_factory_update_notice] %></p>
+      <form method="dialog" class="flex items-center">
+        <button type="submit" class="text-gray-500 hover:text-gray-800"><%= icon_cross %></button>
+      </form>
+    </div>
+  </dialog>
+<% end %>
