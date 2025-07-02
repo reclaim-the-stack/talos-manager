@@ -18,16 +18,16 @@ class Server::HetznerCloud < Server
   end
 
   def rescue
-    ::HetznerCloud.active_rescue_system(id)
+    api_key.client.active_rescue_system(id)
 
     # Hetzner appears to temporarily lock the server immediately after enabling rescue mode.
     # Due to race conditions it's hard to detect this by fetching server status, so we just
     # wait a bit and retry if a "server is locked" error is returned.
     begin
-      if ::HetznerCloud.server(id).fetch("status") == "off"
-        ::HetznerCloud.power_on(id)
+      if api_key.client.server(id).fetch("status") == "off"
+        api_key.client.power_on(id)
       else
-        ::HetznerCloud.reset(id)
+        api_key.client.reset(id)
       end
     rescue ::HetznerCloud::HttpError => e
       if e.message.include?("locked")
@@ -44,7 +44,7 @@ class Server::HetznerCloud < Server
 
   def sync_with_provider
     if saved_change_to_name?
-      ::HetznerCloud.update_server(id, name:)
+      api_key.client.update_server(id, name:)
     end
   end
 end

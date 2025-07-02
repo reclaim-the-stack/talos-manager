@@ -3,6 +3,7 @@ class Server < ApplicationRecord
   TALOS_ARM64_IMAGE_URL = ENV["TALOS_ARM64_IMAGE_URL"] || "https://github.com/siderolabs/talos/releases/download/v1.9.5/metal-arm64.raw.zst".freeze
 
   belongs_to :cluster, optional: true
+  belongs_to :api_key
 
   has_one :machine_config, dependent: :destroy
   has_one :config, through: :machine_config

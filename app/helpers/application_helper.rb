@@ -1,4 +1,11 @@
 module ApplicationHelper
+  def pretty_api_key_provider(provider)
+    icon = image_tag "provider_icons/#{provider}.png", class: "inline h-[18px] mr-2"
+    label = provider.titleize
+
+    "#{icon} #{label}".html_safe
+  end
+
   # Goal here is to avoid bloating the width of the Model column in the servers table
   def pretty_product(product)
     # eg. Dell PowerEdge™ R6615 DX182
@@ -6,6 +13,26 @@ module ApplicationHelper
 
     # Most products don't need this but it cleans up eg. AX41-NVMe
     product.split("-").first
+  end
+
+  # From a predefined shape in https://mediamodifier.com/svg-editor
+  def icon_onboarding_arrow(klass)
+    %(
+      <svg class="#{klass}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 76.394 64.018">
+        <path
+          d="M36.285 55.915
+            L76.394 32.754
+            L43.642 0
+            L43.642 15.657
+            C7.158 13.967 0 34.941 3.48 64.018
+            C9.347 43.689 20.627 32.705 39.765 35.389
+            L36.285 55.915
+            Z"
+          fill="#bfdbfe"
+          fill-rule="nonzero"
+        />
+      </svg>
+    ).html_safe
   end
 
   # https://heroicons.com/

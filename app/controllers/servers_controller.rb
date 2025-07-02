@@ -60,7 +60,7 @@ class ServersController < ApplicationController
   end
 
   def sync
-    Hetzner.sync_to_activerecord
+    HetznerRobot.sync_to_activerecord
     HetznerCloud.sync_to_activerecord
 
     # Set server accessible status based on SSH connectability

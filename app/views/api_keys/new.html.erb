@@ -1,0 +1,27 @@
+<h1 class="text-4xl mb-10">New API Key</h1>
+
+<%= form_with model: @api_key, html: { autocomplete: "off" } do |f| %>
+  <%=
+    f.select(
+      :provider,
+      { "Hetzner Robot" => "hetzner_robot", "Hetzner Cloud" => "hetzner_cloud" },
+      { prompt: "Select a provider..." },
+      required: false,
+      onchange: "window.location.href = `#{new_api_key_path}?provider=${this.value}`",
+    )
+  %>
+  <% if f.object.provider == "hetzner_robot" %>
+    <p class="text-sm text-gray-600 mb-5">
+      Note: You can manage your Hetzner Robot password under <i>Webservice and app settings</i> at <a href="https://robot.hetzner.com/preferences/index" target="_blank" class="text-blue-600 hover:underline">https://robot.hetzner.com/preferences/index</a>.
+    </p>
+    <%= f.text_field :name, required: true, label: "Username" %>
+    <%= f.password_field :secret, required: true, label: "Password", autocomplete: "new-password" %>
+  <% elsif f.object.provider == "hetzner_cloud" %>
+    <p class="text-sm text-gray-600 mb-5">
+      Note: Create API tokens by selecting a project in <a href="https://console.hetzner.com/projects" target="_blank" class="text-blue-600 hover:underline">Hetzner Console</a>. Then go to Security -> API Tokens and generate an API token with Read & Write permissions.
+    </p>
+    <%= f.text_field :name, required: true, label: "Name", placeholder: "my-project", hint: "A descriptive name of the API key, eg. the name of the Hetzner console project.", autocomplete: "off" %>
+    <%= f.password_field :secret, required: true, label: "API Token", autocomplete: "new-password" %>
+  <% end %>
+  <%= f.submit "Create API Key", class: "mt-5 bg-mnd-red hover:bg-mnd-red-dark text-white font-semibold p-3 rounded", disabled: f.object.provider.blank? %>
+<% end %>

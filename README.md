@@ -65,16 +65,6 @@ heroku config:set \
 # Rails expects DATABASE_URL to connect to Postgres but crunchy uses CRUNCHY_DATABASE_URL
 heroku config:set DATABASE_URL=$(heroku config:get CRUNCHY_DATABASE_URL)
 
-# Manage Hetzner cloud API token at:
-# https://console.hetzner.cloud -> Project -> Security -> API Tokens
-# If you're not planning to use Hetzner cloud servers you can skip this part.
-heroku config:set HETZNER_CLOUD_API_TOKEN=<hetzner-cloud-api-token>
-
-# Manage Hetzner webservice API credentials at:
-# https://robot.hetzner.com/preferences/index -> Webservice and app settings
-# If you're not planning to use dedicated servers you can skip this part.
-heroku config:set HETZNER_WEBSERVICE_USER=<username> HETZNER_WEBSERVICE_PASSWORD=<password>
-
 # For application host you have two options:
 
 # 1. Deploy to your own domain

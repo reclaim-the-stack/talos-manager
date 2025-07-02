@@ -10,9 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_11_13_101225) do
+ActiveRecord::Schema[7.2].define(version: 2025_06_30_185032) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "api_keys", force: :cascade do |t|
+    t.string "provider", null: false
+    t.string "name", null: false
+    t.string "secret", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_api_keys_on_name", unique: true
+  end
 
   create_table "clusters", force: :cascade do |t|
     t.string "name", null: false
@@ -75,6 +84,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_13_101225) do
     t.string "type", default: "Server::HetznerDedicated", null: false
     t.string "bootstrap_disk"
     t.string "architecture", default: "amd64", null: false
+    t.bigint "api_key_id", null: false
+    t.index ["api_key_id"], name: "index_servers_on_api_key_id"
     t.index ["cluster_id"], name: "index_servers_on_cluster_id"
     t.index ["hetzner_vswitch_id"], name: "index_servers_on_hetzner_vswitch_id"
     t.index ["ip"], name: "index_servers_on_ip", unique: true
@@ -84,6 +95,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_13_101225) do
   add_foreign_key "clusters", "hetzner_vswitches"
   add_foreign_key "machine_configs", "configs"
   add_foreign_key "machine_configs", "servers"
+  add_foreign_key "servers", "api_keys"
   add_foreign_key "servers", "clusters"
   add_foreign_key "servers", "hetzner_vswitches"
 end

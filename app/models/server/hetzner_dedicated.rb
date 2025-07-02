@@ -18,18 +18,18 @@ class Server::HetznerDedicated < Server
   end
 
   def rescue
-    Hetzner.active_rescue_system(id)
+    api_key.client.active_rescue_system(id)
 
-    if Hetzner.reset_state(id).fetch("operating_status") == "shut off"
-      Hetzner.press_power_button(id)
+    if api_key.client.reset_state(id).fetch("operating_status") == "shut off"
+      api_key.client.press_power_button(id)
     else
-      Hetzner.reset(id)
+      api_key.client.reset(id)
     end
   end
 
   def sync_with_provider
     if saved_change_to_name?
-      Hetzner.update_server(id, server_name: name)
+      api_key.client.update_server(id, server_name: name)
     end
 
     if saved_change_to_hetzner_vswitch_id?
@@ -37,11 +37,11 @@ class Server::HetznerDedicated < Server
 
       # The server was connected to a vswitch and we need to disconnect it
       if initial_vswitch_id
-        Hetzner.remove_server_from_vswitch(initial_vswitch_id, id)
+        api_key.client.remove_server_from_vswitch(initial_vswitch_id, id)
       end
 
       if new_vswitch_id
-        Hetzner.add_server_to_vswitch(new_vswitch_id, id)
+        api_key.client.add_server_to_vswitch(new_vswitch_id, id)
       end
     end
   end
