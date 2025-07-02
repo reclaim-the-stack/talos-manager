@@ -25,7 +25,7 @@
           <% end %>
         </td>
         <td><%= server.ip %></td>
-        <td><%= server.product.split("-").first %></td>
+        <td><%= pretty_product(server.product) %></td>
         <td>
           <%= turbo_frame_tag server, :cluster do %>
             <%= server.cluster&.name || tag.span("none", class: "text-gray-400") %>
