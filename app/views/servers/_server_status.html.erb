@@ -2,7 +2,14 @@
   <div class="flex items-center">
     <% if server.last_request_for_configuration_at %>
       <% if server.configured? %>
-        <span class="block h-4 w-4 mr-4 rounded-full bg-green-400"></span>
+        <% if server.config %>
+          <span class="block h-4 w-4 mr-4 rounded-full bg-green-400"></span>
+        <% else %>
+          <span
+            class="block h-4 w-4 mr-4 rounded-full border-1 bg-green-100"
+            title="The last applied configuration was deleted."
+          ></span>
+        <% end %>
       <% elsif server.last_request_for_configuration_at > 1.minutes.ago %>
         <span class="animate-ping duration-700 block h-4 w-4 mr-4 rounded-full bg-yellow-400 opacity-75"></span>
       <% else %>
