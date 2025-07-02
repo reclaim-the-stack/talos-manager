@@ -1,5 +1,5 @@
 class ApiKey < ApplicationRecord
-  has_many :servers
+  has_many :servers, dependent: :delete_all
 
   validates_presence_of :provider, :name, :secret
   validates_inclusion_of :provider, in: %w[hetzner_cloud hetzner_robot]

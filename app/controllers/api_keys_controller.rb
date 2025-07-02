@@ -1,7 +1,6 @@
 class ApiKeysController < ApplicationController
   def new
-    provider = params[:provider] || "hetzner_robot"
-    @api_key = ApiKey.new(provider:)
+    @api_key = ApiKey.new(provider: params[:provider])
   end
 
   def create

@@ -24,7 +24,7 @@
           <td>
             <div class="flex gap-3">
             <%= link_to "Edit", edit_api_key_path(api_key), class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2" %>
-            <%= button_to icon_trash("w-5"), api_key_path(api_key), method: :delete, class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2", data: { turbo_confirm: "Are you sure you want to delete the #{api_key.provider.titleize} API key #{api_key.name}?" } %>
+            <%= button_to icon_trash("w-5"), api_key_path(api_key), method: :delete, class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2", data: { turbo_confirm: "Deleting the #{api_key.provider.titleize} API key #{api_key.name} will also delete its associated servers from the servers list. Proceed?" } %>
             </div>
           </td>
         </tr>

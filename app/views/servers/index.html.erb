@@ -2,7 +2,20 @@
 
 <div class="flex justify-between">
   <h1 class="text-4xl mb-10">Servers</h1>
-  <%= button_to icon_reload, sync_servers_path, method: :post, class: "disabled:opacity-20 disabled:cursor-default", title: "Sync with Hetzner" %>
+  <div>
+    <%= button_to icon_reload, sync_servers_path, method: :post, class: "disabled:opacity-20 disabled:cursor-default", title: "Sync with Hetzner" %>
+
+    <%# onboarding box for the sync button in case there are API keys added but no servers %>
+    <% if ApiKey.any? && Server.none? %>
+      <div class="relative">
+        <div class="absolute w-[200px] top-[30px] -left-[130px] rounded-lg shadow-md p-3 text-sm z-10 bg-blue-50 text-blue-800 border border-blue-200">
+          <p class="mb-2">Hit this button to sync servers from Hetzner using the API keys you've added in Settings.</p>
+          <p class="mb-2">Hit it again whenever you add or remove servers inside Hetzner to keep your servers up to date.</p>
+          <%= icon_onboarding_arrow "absolute h-[60px] left-[40px] -top-[60px] transform origin-center -rotate-[20deg]" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
 </div>
 
 <table id="server-table" class="mb-5">

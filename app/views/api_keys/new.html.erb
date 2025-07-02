@@ -5,9 +5,8 @@
     f.select(
       :provider,
       { "Hetzner Robot" => "hetzner_robot", "Hetzner Cloud" => "hetzner_cloud" },
-      { include_blank: false },
+      { prompt: "Select a provider..." },
       required: false,
-      autocomplete: "off",
       onchange: "window.location.href = `#{new_api_key_path}?provider=${this.value}`",
     )
   %>
@@ -23,8 +22,6 @@
     </p>
     <%= f.text_field :name, required: true, label: "Name", placeholder: "my-project", hint: "A descriptive name of the API key, eg. the name of the Hetzner console project.", autocomplete: "off" %>
     <%= f.password_field :secret, required: true, label: "API Token", autocomplete: "new-password" %>
-  <% else %>
-    <% raise "Unknown provider" %>
   <% end %>
-  <%= f.submit "Create API Key", class: "mt-5 bg-mnd-red hover:bg-mnd-red-dark text-white font-semibold p-3 rounded" %>
+  <%= f.submit "Create API Key", class: "mt-5 bg-mnd-red hover:bg-mnd-red-dark text-white font-semibold p-3 rounded", disabled: f.object.provider.blank? %>
 <% end %>

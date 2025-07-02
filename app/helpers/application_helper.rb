@@ -15,6 +15,26 @@ module ApplicationHelper
     product.split("-").first
   end
 
+  # From a predefined shape in https://mediamodifier.com/svg-editor
+  def icon_onboarding_arrow(klass)
+    %(
+      <svg class="#{klass}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 76.394 64.018">
+        <path
+          d="M36.285 55.915
+            L76.394 32.754
+            L43.642 0
+            L43.642 15.657
+            C7.158 13.967 0 34.941 3.48 64.018
+            C9.347 43.689 20.627 32.705 39.765 35.389
+            L36.285 55.915
+            Z"
+          fill="#bfdbfe"
+          fill-rule="nonzero"
+        />
+      </svg>
+    ).html_safe
+  end
+
   # https://heroicons.com/
   def icon_edit
     %(<svg class="inline h-[18px]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>).html_safe
