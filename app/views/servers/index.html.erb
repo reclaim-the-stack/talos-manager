@@ -29,6 +29,7 @@
     <th class="w-4"></th>
   </thead>
   <tbody>
+    <% no_clusters = Cluster.none? %>
     <% @servers.each do |server| %>
       <tr class="h-11 group hover:bg-gray-50">
         <td class="py-1">
@@ -42,7 +43,7 @@
         <td>
           <%= turbo_frame_tag server, :cluster do %>
             <%= server.cluster&.name || tag.span("none", class: "text-gray-400") %>
-            <%= link_to icon_edit, edit_server_path(server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
+            <%= link_to icon_edit, edit_server_path(server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" unless no_clusters %>
           <% end %>
         </td>
         <%= render "server_status", server: %>

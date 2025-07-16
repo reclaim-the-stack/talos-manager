@@ -54,7 +54,7 @@
         <%= link_to "Settings", settings_path, class: "text-l hover:underline underline-offset-2 mr-5 #{'underline' if params[:controller] == 'settings'}" %>
 
         <%# onboarding arrow + info box pointing to the settings link in case no api keys have been added %>
-        <% if params[:controller] != "settings" && ApiKey.none? %>
+        <% if ["settings", "api_keys"].exclude?(params[:controller]) && ApiKey.none? %>
           <div class="relative">
             <div class="absolute w-[200px] top-[42px] -left-[210px] rounded-lg shadow-md p-3 text-sm z-10 bg-blue-50 text-blue-800 border border-blue-200">
               <p class="mb-2">Head to Settings to add your first API key to get started.</p>
