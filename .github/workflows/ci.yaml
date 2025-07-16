@@ -1,6 +1,17 @@
 on: push
 
 jobs:
+  specs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - run: .github/specs
+        shell: script --return --quiet --command "bash {0}" # enable TTY for color output
+
   build:
     runs-on: ubuntu-latest
     permissions:

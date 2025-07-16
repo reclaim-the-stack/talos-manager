@@ -1,6 +1,6 @@
 # This Dockerfile produces a production ready image of talos-manager.
 
-ARG RUBY_VERSION=3.3.5
+ARG RUBY_VERSION=3.4.4
 FROM ruby:${RUBY_VERSION}-slim as base
 ARG TARGETPLATFORM
 
@@ -29,8 +29,9 @@ FROM base as gems
 # git for git based Gemfile definitions
 # build-essential + pkg-config for native extensions
 # libpq-dev for pg gem
+# libyaml-dev for psych
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential pkg-config git libpq-dev
+    apt-get install --no-install-recommends -y build-essential pkg-config git libpq-dev libyaml-dev
 
 COPY .ruby-version .
 COPY Gemfile* ./
