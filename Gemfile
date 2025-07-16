@@ -8,7 +8,6 @@ gem "dotenv", require: "dotenv/load", groups: %i[development test]
 gem "bootsnap", require: false
 gem "importmap-rails"
 gem "net-ssh"
-gem "ostruct" # to supress deprecation warning, gem will not be part of Ruby 3.5
 gem "pg"
 gem "propshaft"
 gem "puma"
@@ -20,7 +19,7 @@ gem "typhoeus"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
-  gem "debug", platforms: %i[mri mingw x64_mingw]
+  gem "debug", platforms: %i[mri windows]
   gem "rspec-rails"
 end
 
