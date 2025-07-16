@@ -1,0 +1,4 @@
+hetzner_cloud:
+  provider: hetzner_cloud
+  name: hetzner-cloud
+  secret: token

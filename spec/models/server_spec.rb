@@ -1,11 +1,14 @@
 RSpec.describe Server do
   it "validates uniqueness of name but only if it changed (to allow other attributes to be updated while duplicates exists)" do
+    api_key = api_keys(:hetzner_cloud)
+
     common_attributes = {
       name: "worker-1",
       ipv6: "::1",
       product: "P",
       status: "running",
       data_center: "DC1",
+      api_key_id: api_key.id,
     }
     Server.insert_all!(
       [
