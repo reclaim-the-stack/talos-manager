@@ -32,7 +32,7 @@ class ServersController < ApplicationController
     server = Server.find(params[:id])
 
     # pretend it's not accessible while bootstrapping to hide bootstrap button
-    server.update!(accessible: false)
+    server.update!(accessible: false, last_request_for_configuration_at: nil, last_configured_at: nil)
 
     ServerBootstrapJob.perform_later(server.id)
 
@@ -74,5 +74,14 @@ class ServersController < ApplicationController
     Server.where.not(id: accessible_servers_ids).update!(accessible: false)
 
     redirect_to servers_path, notice: "Synced servers"
+  end
+
+  def reboot_command
+    @server = Server.find(params[:id])
+  end
+
+  def upgrade_command
+    @server = Server.find(params[:id])
+    @talos_image_factory_setting = TalosImageFactorySetting.sole
   end
 end

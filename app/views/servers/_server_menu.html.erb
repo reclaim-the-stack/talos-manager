@@ -1,3 +1,4 @@
+<% assumed_running = server.last_configured_at && server.cluster %>
 <span id="SERVER-<%= server.id %>-MENU">
   <%=
     button_to(
@@ -20,13 +21,34 @@
   %>
   <%=
     button_to(
-      "#{'↩️ ' if server.last_configured_at? && server.cluster}Reset to maintenance mode",
+      "#{'↩️ ' if assumed_running}Reset to maintenance mode",
       reset_server_path(server),
       method: :post,
-      disabled: !server.last_configured_at? || !server.cluster,
+      disabled: !assumed_running,
       class: "text-sm text-left w-full py-2 px-4 hover:bg-gray-200 disabled:bg-white disabled:cursor-default disabled:text-gray-400",
-      title: server.last_configured_at? ? "" : "Server must configured to be reset",
+      title: assumed_running ? "" : "Server must configured to be reset",
       data: { turbo_confirm: "This will wipe all data on '#{server.name}' and boot it into maintenance mode where it will start requesting configuration again, proceed?" }
+    )
+  %>
+
+  <hr class="my-3 mx-3 border-gray-300 border-dashed" />
+
+  <%=
+    link_to(
+      "#{'📋 ' if assumed_running}Get reboot command",
+      assumed_running ? reboot_command_server_path(server) : "#",
+      data: { turbo_frame: "servers-actions-dialog" },
+      class: "inline-block text-sm text-left w-full py-2 px-4 #{assumed_running ? 'hover:bg-gray-200' : 'bg-white cursor-default text-gray-400'}",
+      title: assumed_running ? "" : "Server must configured to be rebooted",
+    )
+  %>
+  <%=
+    link_to(
+      "#{'📋 ' if assumed_running}Get upgrade command",
+      assumed_running ? upgrade_command_server_path(server) : "#",
+      data: { turbo_frame: "servers-actions-dialog" },
+      class: "inline-block text-sm text-left w-full py-2 px-4 #{assumed_running ? 'hover:bg-gray-200' : 'bg-white cursor-default text-gray-400'}",
+      title: assumed_running ? "" : "Server must configured to be upgraded",
     )
   %>
 </span>

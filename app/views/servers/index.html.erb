@@ -1,5 +1,7 @@
 <%= turbo_stream_from "servers" %>
 
+<%= turbo_frame_tag "servers-actions-dialog" %>
+
 <div class="flex justify-between">
   <h1 class="text-4xl mb-10">Servers</h1>
   <div>
@@ -78,7 +80,7 @@
             <%= icon_ellipsis_vertical %>
           </button>
           <div popover id="<%= popover_id %>"
-            class="rounded-lg bg-white absolute w-[230px] m-0 -ml-[235px] py-3 shadow-[0_0_10px_rgba(0,0,0,0.2)]"
+            class="rounded-lg bg-white absolute w-[242px] m-0 -ml-[247px] py-3 shadow-[0_0_10px_rgba(0,0,0,0.2)]"
             style="position-anchor: --<%= popover_id %>; top: anchor(top); left: anchor(left)"
           >
             <%= render "server_menu", server: %>

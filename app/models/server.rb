@@ -50,15 +50,11 @@ class Server < ApplicationRecord
   end
 
   # Equivalent of manually running the following via ssh:
-  # TALOS_IMAGE_URL=https://github.com/siderolabs/talos/releases/download/v1.10.4/metal-amd64.raw.zst
+  # TALOS_IMAGE_URL=https://factory.talos.dev/image/<schematic-id>/v1.10.5/metal-amd64.raw.zst
   # DEVICE=nvme0n1
-  # HOST=example.com
   #
   # wget $TALOS_IMAGE_URL --quiet -O - | zstd -d | dd of=/dev/$DEVICE status=progress
   # sync
-  # mount /dev/${DEVICE}p3 /mnt
-  # sed -i "s/vmlinuz/vmlinuz talos.config=https:\/\/$HOST\/config/" /mnt/grub/grub.cfg
-  # umount /mnt
   # reboot
   def bootstrap!
     raise "ERROR: Can't bootstrap without a HOST configured" unless HOST
@@ -70,7 +66,7 @@ class Server < ApplicationRecord
       raise "Invalid SMBIOS UUID, send this output to Hetzner support: #{system_data}"
     end
 
-    talos_image_url = TalosImageFactory.image_url(architecture:)
+    talos_image_url = TalosImageFactorySetting.sole.bootstrap_image_url(architecture:)
     nvme = session.exec!("ls /dev/nvme0n1 && echo 'has-nvme'").chomp.ends_with? "has-nvme"
 
     update!(bootstrap_disk: nvme ? "/dev/nvme0n1" : "/dev/sda", uuid:)

@@ -18,6 +18,9 @@ Rails.application.routes.draw do
         post :bootstrap
         post :rescue
         post :reset
+
+        get :reboot_command
+        get :upgrade_command
       end
     end
     resource :settings, only: %i[show]
