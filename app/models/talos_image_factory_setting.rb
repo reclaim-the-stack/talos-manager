@@ -12,13 +12,13 @@ class TalosImageFactorySetting < ApplicationRecord
   validate :validate_schematic, if: -> { schematic_id.present? && schematic_id_changed? }
 
   def bootstrap_image_url(architecture: "amd64", platform: "metal")
-    schematic_id ||= TalosImageFactory.create_schematic_with_talos_config.fetch("id")
+    schematic_id = self.schematic_id || TalosImageFactory.create_schematic_with_talos_config.fetch("id")
 
     "#{TalosImageFactory::BASE_URL}/image/#{schematic_id}/#{version}/#{platform}-#{architecture}.raw.zst"
   end
 
   def upgrade_image_url(platform: "metal")
-    schematic_id ||= TalosImageFactory.create_schematic_with_talos_config.fetch("id")
+    schematic_id = self.schematic_id || TalosImageFactory.create_schematic_with_talos_config.fetch("id")
 
     "factory.talos.dev/#{platform}-installer/#{schematic_id}:#{version}"
   end
