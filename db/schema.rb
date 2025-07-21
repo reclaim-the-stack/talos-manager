@@ -10,9 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_07_02_112740) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_22_135751) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension "pg_catalog.plpgsql"
 
   create_table "api_keys", force: :cascade do |t|
     t.string "provider", null: false
@@ -85,6 +85,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_02_112740) do
     t.string "bootstrap_disk"
     t.string "architecture", default: "amd64", null: false
     t.bigint "api_key_id", null: false
+    t.string "bootstrap_disk_wwid"
     t.index ["api_key_id"], name: "index_servers_on_api_key_id"
     t.index ["cluster_id"], name: "index_servers_on_cluster_id"
     t.index ["hetzner_vswitch_id"], name: "index_servers_on_hetzner_vswitch_id"
