@@ -1,0 +1,53 @@
+{
+   "blockdevices": [
+      {
+         "name": "loop0",
+         "type": "loop",
+         "size": 3618698752,
+         "uuid": "ecb47d72-4974-4f1c-a2e8-59dfcac7c374",
+         "model": null,
+         "wwn": null
+      },{
+         "name": "nvme2n1",
+         "type": "disk",
+         "size": 3840755982336,
+         "uuid": "1a462672-bd83-888c-df8f-a57e6b38f998",
+         "model": "SAMSUNG MZQLB3T8HALS-00007",
+         "wwn": "eui.34333830521232390025384100000002",
+         "children": [
+            {
+               "name": "md0",
+               "type": "raid0",
+               "size": 7681240727552,
+               "uuid": null,
+               "model": null,
+               "wwn": null
+            }
+         ]
+      },{
+         "name": "nvme1n1",
+         "type": "disk",
+         "size": 960197124096,
+         "uuid": null,
+         "model": "SAMSUNG MZQL2960HCJR-00A07",
+         "wwn": "eui.36344630528029720025384500000002"
+      },{
+         "name": "nvme0n1",
+         "type": "disk",
+         "size": 3840755982336,
+         "uuid": "1a462672-bd83-888c-df8f-a57e6b38f998",
+         "model": "SAMSUNG MZQL23T8HCLS-00A07",
+         "wwn": "eui.36344830544106740025384500000002",
+         "children": [
+            {
+               "name": "md0",
+               "type": "raid0",
+               "size": 7681240727552,
+               "uuid": null,
+               "model": null,
+               "wwn": null
+            }
+         ]
+      }
+   ]
+}

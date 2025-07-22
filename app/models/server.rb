@@ -67,9 +67,24 @@ class Server < ApplicationRecord
     end
 
     talos_image_url = TalosImageFactorySetting.sole.bootstrap_image_url(architecture:)
-    nvme = session.exec!("ls /dev/nvme0n1 && echo 'has-nvme'").chomp.ends_with? "has-nvme"
+    blockdevices = JSON.parse(session.exec!("lsblk --output NAME,TYPE,SIZE,UUID,MODEL,WWN --bytes --json")).fetch("blockdevices")
+    disks = blockdevices.select { it.fetch("type") == "disk" }
 
-    update!(bootstrap_disk: nvme ? "/dev/nvme0n1" : "/dev/sda", uuid:)
+    # Exclude disks with children (partitions or RAID devices)
+    noneligble, eligble = disks.partition { |disk| disk.key?("children") }
+
+    Rails.logger.info "Ignoring non-eligible disks: #{noneligble.map { it.fetch('name') }.join(', ')}"
+    raise "No eligible disks found for bootstrapping" if eligble.empty?
+
+    Rails.logger.info "Eligible disks for bootstrapping: #{eligble.map { it.fetch('name') }.join(', ')}"
+
+    eligble.sort_by! { it.fetch("name") }
+    first_nvme = eligble.find { it.fetch("name").start_with?("nvme") }
+    bootstrap_disk_data = first_nvme || eligble.first
+    bootstrap_disk = "/dev/#{bootstrap_disk_data.fetch('name')}"
+    bootstrap_disk_wwid = bootstrap_disk_data.fetch("wwn")
+
+    update!(bootstrap_disk:, bootstrap_disk_wwid:, uuid:)
 
     Rails.logger.info "Bootstrapping #{ip} with talos image #{talos_image_url} on #{bootstrap_disk}"
     ssh_exec_with_log! session, "wget #{talos_image_url} --quiet -O - | zstd -d | dd of=#{bootstrap_disk} status=progress"

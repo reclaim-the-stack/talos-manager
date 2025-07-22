@@ -108,6 +108,7 @@ class MachineConfig < ApplicationRecord
       .gsub("${private_ip}", private_ip)
       .gsub("${public_ip}", server.ip)
       .gsub("${vlan}", server.cluster.hetzner_vswitch&.vlan.to_s)
+      .gsub("${bootstrap_disk_wwid}", server.bootstrap_disk_wwid.to_s)
   end
 
   def validate_hostname_format
