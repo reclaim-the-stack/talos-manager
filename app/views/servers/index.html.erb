@@ -40,7 +40,23 @@
             <%= link_to icon_edit, edit_server_path(server), class: "ml-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-gray-900" %>
           <% end %>
         </td>
-        <td><%= server.ip %></td>
+        <td>
+          <span class="relative group/ip">
+            <span data-tooltip class="absolute whitespace-nowrap w-[100px] text-center bg-gray-800 rounded text-white text-sm p-1 -top-[35px] opacity-0 invisible group-hover/ip:opacity-100 group-hover/ip:visible transition-opacity duration-500 ease-in-out">Click to copy</span>
+            <span
+              class="cursor-pointer hover:border-b hover:border-gray-400"
+              onclick="
+                const tooltip = this.parentElement.querySelector('[data-tooltip]')
+                navigator.clipboard.writeText('<%= server.ip %>').then(() => {
+                  tooltip.innerText = 'Copied!'
+                  setTimeout(() => { tooltip.innerText = 'Click to copy' }, 2000)
+                })
+              "
+            >
+              <%= server.ip %>
+            </span>
+          </span>
+        </td>
         <td><%= pretty_product(server.product) %></td>
         <td>
           <%= turbo_frame_tag server, :cluster do %>
