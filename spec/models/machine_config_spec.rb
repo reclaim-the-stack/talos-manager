@@ -20,7 +20,7 @@ RSpec.describe MachineConfig do
         hetzner_vswitch:,
         secrets: File.read("spec/fixtures/files/secrets.yaml"),
       )
-      server = Server.new(name: "worker-1", ip: "72.14.201.110", cluster:)
+      server = Server.new(name: "worker-1", ip: "72.14.201.110", cluster:, bootstrap_disk_wwid: "lol")
       config = Config.new(
         name: "config",
         install_image: "ghcr.io/siderolabs/installer:v1.10.4",
@@ -28,6 +28,9 @@ RSpec.describe MachineConfig do
         kubespan: true,
         patch: <<~YAML,
           machine:
+            install:
+              diskSelector:
+                wwid: ${bootstrap_disk_wwid}
             network:
               hostname: ${hostname}
               interfaces:
@@ -105,6 +108,8 @@ RSpec.describe MachineConfig do
               enabled: true
           install:
             disk: "/dev/nvme0n1"
+            diskSelector:
+              wwid: lol
             image: ghcr.io/siderolabs/installer:v1.10.4
             wipe: false
           features:
