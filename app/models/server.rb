@@ -100,6 +100,16 @@ class Server < ApplicationRecord
     update!(accessible: false)
   end
 
+  def talosctl
+    raise "ERROR: Can't use talosctl without a cluster" unless cluster
+
+    @talosctl ||= Talosctl.new(cluster.talosconfig)
+  end
+
+  def kubectl
+    @kubectl ||= Kubectl.new(talosctl.kubeconfig)
+  end
+
   def rescue
     raise "#rescue is not implemented for #{self.class.name}"
   end
@@ -120,7 +130,7 @@ class Server < ApplicationRecord
     Rails.logger.info "class=Server method=reset name='#{name}' command='#{command}'"
     if (success = system(command))
       machine_config&.destroy!
-      update!(last_configured_at: nil, last_request_for_configuration_at: nil)
+      update!(last_configured_at: nil, last_request_for_configuration_at: nil, label_and_taint_job_completed_at: nil)
     end
     success
   end

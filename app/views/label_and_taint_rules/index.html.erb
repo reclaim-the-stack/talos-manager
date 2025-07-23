@@ -1,0 +1,35 @@
+<div class="flex mb-10 items-center justify-between">
+  <h1 class="text-4xl">Label and Taint Rules</h1>
+  <%= link_to "New Rule", new_label_and_taint_rule_path, class: "text-white rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold p-3" %>
+</div>
+
+<p class="mb-10">
+  Label and Taint rules will be applied to servers after they have been configured and successfully joined a cluster. Use them to avoid having to manually apply labels like <code>node-role.kubernetes.io/database=</code> to database nodes etc.
+</p>
+
+<% if @label_and_taint_rules.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th class="text-left">Match</th>
+        <th class="text-left">Labels</th>
+        <th class="text-left">Taints</th>
+        <th class="text-left">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% none = %(<span class="text-gray-400">none</span>).html_safe %>
+      <% @label_and_taint_rules.each do |label_and_taint_rule| %>
+        <tr class="h-11 hover:bg-gray-50">
+          <td class="mr-5"><%= label_and_taint_rule.match %></td>
+          <td class="mr-5"><%= label_and_taint_rule.labels.to_sentence.presence || none %></td>
+          <td class="mr-5"><%= label_and_taint_rule.taints.to_sentence.presence || none %></td>
+          <td class="flex gap-2">
+            <%= link_to "Edit", edit_label_and_taint_rule_path(label_and_taint_rule), class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2" %>
+            <%= button_to icon_trash("w-5"), label_and_taint_rule_path(label_and_taint_rule), method: :delete, data: { turbo_confirm: "Sure you want to destroy the label and taint rule matching #{label_and_taint_rule.match}?" }, class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

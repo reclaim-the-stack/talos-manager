@@ -3,6 +3,8 @@ require "open3"
 # Wrapper around the talosctl command line tool to interact with already bootstrapped Talos clusters
 
 class Talosctl
+  ConnectionRefusedError = Class.new(StandardError)
+
   def initialize(config_string)
     @config_string = config_string
   end
@@ -28,13 +30,25 @@ class Talosctl
     version
   end
 
+  def kubeconfig
+    success, stdout, stderr = run("kubeconfig --merge=false -")
+    raise "Failed to get kubeconfig: #{stderr}" unless success
+
+    stdout
+  end
+
   def run(command)
     command = "talosctl --talosconfig=#{config_file.path} #{command}"
-    Rails.logger.info "Running command: #{command}"
+    Rails.logger.info "[Talosctl] Running command: #{command}"
 
-    Open3.popen3(command) do |_stdin, stdout, stderr, wait_thread|
-      [wait_thread.value.success?, stdout.read, stderr.read]
-    end
+    success, stdout, stderr =
+      Open3.popen3(command) do |_stdin, stdout, stderr, wait_thread|
+        [wait_thread.value.success?, stdout.read, stderr.read]
+      end
+
+    raise ConnectionRefusedError, stderr if !success && stderr.include?("connection refused")
+
+    [success, stdout, stderr]
   end
 
   private

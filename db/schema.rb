@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_22_135751) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_23_140542) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -53,6 +53,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_22_135751) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "label_and_taint_rules", force: :cascade do |t|
+    t.string "match", null: false
+    t.string "labels", default: [], null: false, array: true
+    t.string "taints", default: [], null: false, array: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "machine_configs", force: :cascade do |t|
     t.integer "config_id", null: false
     t.integer "server_id", null: false
@@ -86,6 +94,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_22_135751) do
     t.string "architecture", default: "amd64", null: false
     t.bigint "api_key_id", null: false
     t.string "bootstrap_disk_wwid"
+    t.datetime "label_and_taint_job_completed_at"
     t.index ["api_key_id"], name: "index_servers_on_api_key_id"
     t.index ["cluster_id"], name: "index_servers_on_cluster_id"
     t.index ["hetzner_vswitch_id"], name: "index_servers_on_hetzner_vswitch_id"

@@ -145,6 +145,10 @@ class MachineConfig < ApplicationRecord
   end
 
   def set_configured
-    server.update!(last_configured_at: Time.now, last_request_for_configuration_at: Time.at(0))
+    server.update!(
+      last_configured_at: Time.now,
+      last_request_for_configuration_at: Time.at(0),
+      label_and_taint_job_completed_at: Time.at(0),
+    )
   end
 end
