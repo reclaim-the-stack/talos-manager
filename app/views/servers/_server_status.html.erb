@@ -3,7 +3,8 @@
     <% if server.last_request_for_configuration_at %>
       <% if server.configured? %>
         <% if server.config %>
-          <span class="block h-4 w-4 mr-4 rounded-full bg-green-400"></span>
+          <% in_cluster_border = "border-2 border-green-500" if server.label_and_taint_job_completed_at %>
+          <span class="block h-4 w-4 mr-4 rounded-full bg-green-400 <%= in_cluster_border %>"></span>
         <% else %>
           <span
             class="block h-4 w-4 mr-4 rounded-full border-1 bg-green-100"

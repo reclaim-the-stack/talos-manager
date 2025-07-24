@@ -32,7 +32,12 @@ class ServersController < ApplicationController
     server = Server.find(params[:id])
 
     # pretend it's not accessible while bootstrapping to hide bootstrap button
-    server.update!(accessible: false, last_request_for_configuration_at: nil, last_configured_at: nil)
+    server.update!(
+      accessible: false,
+      last_request_for_configuration_at: nil,
+      last_configured_at: nil,
+      label_and_taint_job_completed_at: nil,
+    )
 
     ServerBootstrapJob.perform_later(server.id)
 

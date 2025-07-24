@@ -42,6 +42,10 @@ RUN rm -rf vendor/bundle/ruby/*/cache
 
 FROM base
 
+# kubectl for kubernetes integration
+
+COPY --from=bitnami/kubectl:1.33.3 /opt/bitnami/kubectl/bin/kubectl /usr/local/bin/kubectl
+
 # wget for talosctl installation
 # curl is required for typhoeus and the heroku release command output
 # libsqlite3-0 for sqlite3
