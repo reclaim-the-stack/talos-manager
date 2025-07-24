@@ -1,7 +1,7 @@
 <%= form_with model: model do |f| %>
   <%= f.text_field :match, placeholder: "database", autofocus: model.new_record?, hint: "The match will be applied to server names via a simple inclusion check. Eg. 'database' will match 'database-6' as well as 'staging-database-3'." %>
-  <%= f.text_field :labels_comma_separated, label: "Labels", placeholder: "node-role.kubernetes.io/database=", required: false, hint: "Multiple labels can be separated by comma." %>
-  <%= f.text_field :taints_comma_separated, label: "Taints", placeholder: "role=database:NoSchedule", required: false, hint: "Multiple taints can be separated by comma." %>
+  <%= f.text_field :labels, placeholder: "node-role.kubernetes.io/database=", required: false, hint: "Multiple labels can be separated by comma." %>
+  <%= f.text_field :taints, placeholder: "role=database:NoSchedule", required: false, hint: "Multiple taints can be separated by comma." %>
 
   <%= f.submit "Save" %>
 <% end %>

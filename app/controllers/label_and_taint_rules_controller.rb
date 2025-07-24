@@ -11,9 +11,7 @@ class LabelAndTaintRulesController < ApplicationController
   end
 
   def create
-    label_and_taint_rule_params = params.expect(
-      label_and_taint_rule: %i[match labels_comma_separated taints_comma_separated]
-    )
+    label_and_taint_rule_params = params.expect(label_and_taint_rule: %i[match labels taints])
 
     @label_and_taint_rule = LabelAndTaintRule.new(label_and_taint_rule_params)
 
@@ -31,9 +29,7 @@ class LabelAndTaintRulesController < ApplicationController
   def update
     @label_and_taint_rule = LabelAndTaintRule.find(params[:id])
 
-    label_and_taint_rule_params = params.expect(
-      label_and_taint_rule: %i[match labels_comma_separated taints_comma_separated]
-    )
+    label_and_taint_rule_params = params.expect(label_and_taint_rule: %i[match labels taints])
 
     if @label_and_taint_rule.update(label_and_taint_rule_params)
       redirect_to label_and_taint_rules_path, notice: "Label and Taint Rule updated successfully."

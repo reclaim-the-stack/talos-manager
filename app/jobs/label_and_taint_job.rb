@@ -44,7 +44,7 @@ class LabelAndTaintJob < ApplicationJob
       Rails.logger.info "No matching label and taint rules found for server #{server.name}"
     end
 
-    labels = matching_rules.flat_map(&:labels).compact.uniq
+    labels = matching_rules.flat_map(&:labels_as_array).compact.uniq
     if labels.any?
       success, _, stderr = kubectl.run("label node #{server.name} --overwrite #{labels.join(' ')}")
 
@@ -53,7 +53,7 @@ class LabelAndTaintJob < ApplicationJob
       end
     end
 
-    taints = matching_rules.flat_map(&:taints).compact.uniq
+    taints = matching_rules.flat_map(&:taints_as_array).compact.uniq
     if taints.any?
       success, _, stderr = kubectl.run("taint node #{server.name} #{taints.join(' ')}")
       unless success

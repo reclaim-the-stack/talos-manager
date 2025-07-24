@@ -2,12 +2,12 @@ RSpec.describe LabelAndTaintJob do
   it "applies labels and taints to a server via kubectl and updates label_and_taint_job_completed_at" do
     LabelAndTaintRule.create!(
       match: "worker",
-      labels: %w[node-role.kubernetes.io/worker=],
+      labels: "node-role.kubernetes.io/worker=",
     )
     LabelAndTaintRule.create!(
       match: "database",
-      labels: %w[node-role.kubernetes.io/database=],
-      taints: %w[role=database:NoSchedule],
+      labels: "node-role.kubernetes.io/database=",
+      taints: "role=database:NoSchedule",
     )
 
     api_key = api_keys(:hetzner_cloud)

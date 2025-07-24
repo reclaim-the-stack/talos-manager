@@ -4,28 +4,20 @@ class LabelAndTaintRule < ApplicationRecord
   validate :validate_labels
   validate :validate_taints
 
-  def labels_comma_separated
-    labels.join(",")
+  def labels_as_array
+    labels.to_s.split(",")
   end
 
-  def labels_comma_separated=(value)
-    self.labels = value.split(",").map(&:strip).compact_blank
-  end
-
-  def taints_comma_separated
-    taints.join(",")
-  end
-
-  def taints_comma_separated=(value)
-    self.taints = value.split(",").map(&:strip).compact_blank
+  def taints_as_array
+    taints.to_s.split(",")
   end
 
   private
 
   def at_least_one_label_or_taint
     if labels.blank? && taints.blank?
-      errors.add(:labels_comma_separated, "At least one label or taint must be provided.")
-      errors.add(:taints_comma_separated, "At least one label or taint must be provided.")
+      errors.add(:labels, "must have at least one label or taint")
+      errors.add(:taints, "must have at least one label or taint")
     end
   end
 
@@ -48,9 +40,9 @@ class LabelAndTaintRule < ApplicationRecord
   #   - unless empty, must begin and end with an alphanumeric character ([a-z0-9A-Z]),
   #   - could contain dashes (-), underscores (_), dots (.), and alphanumerics between.
   def validate_labels
-    labels.each do |label|
+    labels_as_array.each do |label|
       error = validate_label(label)
-      errors.add(:labels_comma_separated, error) if error
+      errors.add(:labels, error) if error
     end
   end
 
@@ -61,21 +53,21 @@ class LabelAndTaintRule < ApplicationRecord
   # The value is optional. If given, it must begin with a letter or number, and may contain letters, numbers, hyphens, dots, and underscores, up to 63 characters.
   # The effect must be NoSchedule, PreferNoSchedule or NoExecute.
   def validate_taints
-    taints.each do |taint|
+    taints_as_array.each do |taint|
       if taint.exclude?(":")
-        errors.add(:taints_comma_separated, "must be in the format of key=value:Effect")
+        errors.add(:taints, "must be in the format of key=value:Effect")
         return
       end
 
       label, effect = taint.split(":", 2)
 
       if %w[NoSchedule PreferNoSchedule NoExecute].exclude?(effect)
-        errors.add(:taints_comma_separated, "effect must be one of: NoSchedule, PreferNoSchedule, NoExecute")
+        errors.add(:taints, "effect must be one of: NoSchedule, PreferNoSchedule, NoExecute")
         return
       end
 
       error = validate_label(label)
-      errors.add(:taints_comma_separated, error) if error
+      errors.add(:taints, error) if error
     end
   end
 
