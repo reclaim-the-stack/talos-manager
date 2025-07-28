@@ -6,7 +6,7 @@ class BackfillApiKeysFromEnv < ActiveRecord::Migration[7.2]
       api_key = ApiKey.new(
         provider: "hetzner_robot",
         name: ENV["HETZNER_WEBSERVICE_USER"],
-        secret: ENV["HETZNER_WEBSERVICE_PASSWORD"]
+        secret: ENV["HETZNER_WEBSERVICE_PASSWORD"],
       )
 
       if api_key.save
@@ -20,7 +20,7 @@ class BackfillApiKeysFromEnv < ActiveRecord::Migration[7.2]
       api_key = ApiKey.new(
         provider: "hetzner_cloud",
         name: "Hetzner Cloud", # Assuming a default name for the cloud API key
-        secret: ENV["HETZNER_CLOUD_API_TOKEN"]
+        secret: ENV["HETZNER_CLOUD_API_TOKEN"],
       )
 
       if api_key.save
@@ -31,7 +31,7 @@ class BackfillApiKeysFromEnv < ActiveRecord::Migration[7.2]
     end
 
     if Server.where(api_key_id: nil).exists?
-      raise "Unexpected state: Some servers do not have an API key assigned. Please check your environment variables and ensure all servers are associated with an API key."
+      raise "Unexpected state: Some servers do not have an API key assigned. Please check your environment variables and ensure all servers are associated with an API key." # rubocop:disable Layout/LineLength
     end
 
     # Now that we've backfilled servers with API key references, we can add NOT NULL

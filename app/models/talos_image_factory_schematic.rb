@@ -14,7 +14,7 @@ class TalosImageFactorySchematic < ApplicationRecord
         YAML.load(body)
       rescue Psych::SyntaxError => e
         errors.add(:body, "is not valid YAML: #{e.message}")
-        return
+        return # rubocop:disable Lint/NoReturnInBeginEndBlocks
       end
 
     unless deserialized_body.is_a?(Hash)
@@ -34,7 +34,7 @@ class TalosImageFactorySchematic < ApplicationRecord
         TalosImageFactory.create_schematic(deserialized_body)
       rescue TalosImageFactory::HttpError => e
         errors.add(:body, "POST to Talos Image Factory failed: #{e.message}")
-        return
+        return # rubocop:disable Lint/NoReturnInBeginEndBlocks
       end
 
     self.body = deserialized_body.to_yaml.delete_prefix("---\n")

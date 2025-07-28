@@ -27,7 +27,7 @@ class ChangeTaintsAndLabelsToRegularStrings < ActiveRecord::Migration[8.0]
 
     existing.each do |row|
       id, labels, taints = row
-      LabelAndTaintRule.where(id:).update_all(labels: labels.split(','), taints: taints.split(','))
+      LabelAndTaintRule.where(id:).update_all(labels: labels.split(","), taints: taints.split(","))
     end
   end
 end

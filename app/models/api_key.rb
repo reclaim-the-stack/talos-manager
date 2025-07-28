@@ -10,7 +10,8 @@ class ApiKey < ApplicationRecord
   encrypts :secret
 
   def client
-    @client ||= case provider
+    @client ||=
+      case provider
       when "hetzner_cloud" then HetznerCloud.new(api_key: secret)
       when "hetzner_robot" then HetznerRobot.new(username: name, password: secret)
       else

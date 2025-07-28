@@ -40,7 +40,7 @@ module TalosImageFactory
     create_schematic(
       customization: {
         extraKernelArgs: [
-          "talos.config=https://#{ENV.fetch("HOST")}/config",
+          "talos.config=https://#{ENV.fetch('HOST')}/config",
         ],
       },
     )
