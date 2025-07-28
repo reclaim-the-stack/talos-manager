@@ -1,6 +1,7 @@
 class Server < ApplicationRecord
   belongs_to :cluster, optional: true
   belongs_to :api_key
+  belongs_to :talos_image_factory_schematic, optional: true
 
   has_one :machine_config, dependent: :destroy
   has_one :config, through: :machine_config
@@ -56,7 +57,7 @@ class Server < ApplicationRecord
   # wget $TALOS_IMAGE_URL --quiet -O - | zstd -d | dd of=/dev/$DEVICE status=progress
   # sync
   # reboot
-  def bootstrap!
+  def bootstrap!(talos_version:)
     raise "ERROR: Can't bootstrap without a HOST configured" unless HOST
 
     session = Net::SSH.start(ip, "root", key_data: [ENV.fetch("SSH_PRIVATE_KEY")])
@@ -66,7 +67,7 @@ class Server < ApplicationRecord
       raise "Invalid SMBIOS UUID, send this output to Hetzner support: #{system_data}"
     end
 
-    talos_image_url = TalosImageFactorySetting.sole.bootstrap_image_url(architecture:)
+    talos_image_url = bootstrap_image_url(talos_version:)
     blockdevices = JSON.parse(session.exec!("lsblk --output NAME,TYPE,SIZE,UUID,MODEL,WWN --bytes --json")).fetch("blockdevices")
     disks = blockdevices.select { it.fetch("type") == "disk" }
 
@@ -133,6 +134,20 @@ class Server < ApplicationRecord
       update!(last_configured_at: nil, last_request_for_configuration_at: nil, label_and_taint_job_completed_at: nil)
     end
     success
+  end
+
+  def bootstrap_image_url(platform: "metal", talos_version: TalosImageFactorySetting.singleton.version)
+    schematic_id =
+      talos_image_factory_schematic&.schematic_id || TalosImageFactory.create_schematic_with_talos_config.fetch("id")
+
+    "#{TalosImageFactory::BASE_URL}/image/#{schematic_id}/#{talos_version}/#{platform}-#{architecture}.raw.zst"
+  end
+
+  def upgrade_image_url(platform: "metal", talos_version: TalosImageFactorySetting.singleton.version)
+    schematic_id =
+      talos_image_factory_schematic&.schematic_id || TalosImageFactory.create_schematic_with_talos_config.fetch("id")
+
+    "factory.talos.dev/#{platform}-installer/#{schematic_id}:#{talos_version}"
   end
 
   private

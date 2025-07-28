@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_24_070230) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_28_075647) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -95,11 +95,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_24_070230) do
     t.bigint "api_key_id", null: false
     t.string "bootstrap_disk_wwid"
     t.datetime "label_and_taint_job_completed_at"
+    t.bigint "talos_image_factory_schematic_id"
     t.index ["api_key_id"], name: "index_servers_on_api_key_id"
     t.index ["cluster_id"], name: "index_servers_on_cluster_id"
     t.index ["hetzner_vswitch_id"], name: "index_servers_on_hetzner_vswitch_id"
     t.index ["ip"], name: "index_servers_on_ip", unique: true
+    t.index ["talos_image_factory_schematic_id"], name: "index_servers_on_talos_image_factory_schematic_id"
     t.index ["type"], name: "index_servers_on_type"
+  end
+
+  create_table "talos_image_factory_schematics", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "body", null: false
+    t.string "schematic_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_talos_image_factory_schematics_on_name", unique: true
   end
 
   create_table "talos_image_factory_settings", force: :cascade do |t|
@@ -115,4 +126,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_24_070230) do
   add_foreign_key "servers", "api_keys"
   add_foreign_key "servers", "clusters"
   add_foreign_key "servers", "hetzner_vswitches"
+  add_foreign_key "servers", "talos_image_factory_schematics"
 end

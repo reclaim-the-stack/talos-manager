@@ -60,7 +60,7 @@ class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
   def input_with_label_and_validation(attribute, options = {})
     options[:class] = "#{INPUT_CLASSES} #{options[:class]}"
     options[:required] = true unless options.key?(:required)
-    validation_errors = object.errors[attribute].to_sentence.presence
+    validation_errors = object && object.errors[attribute].to_sentence.presence
     validation_errors[0] = validation_errors[0].upcase if validation_errors
 
     hint_margins = options.delete(:type) == "textarea" ? "-mt-4 mb-5" : "-mt-2 mb-4"

@@ -3,7 +3,7 @@ RSpec.describe Server do
     api_key = api_keys(:hetzner_cloud)
 
     common_attributes = {
-      name: "worker-1",
+      name: "unique-worker-1",
       ipv6: "::1",
       product: "P",
       status: "running",
@@ -19,30 +19,19 @@ RSpec.describe Server do
 
     server = Server.first
     server.update!(status: "stopping") # we can update status even though name is not unique
-    server.update!(name: "worker-2")
+    server.update!(name: "unique-worker-2")
 
-    server.update(name: "worker-1") # we can't update name to an existing one
+    server.update(name: "unique-worker-1") # we can't update name to an existing one
 
     expect(server.errors[:name]).to include "has already been taken"
   end
 
   describe "#bootstrap!" do
     it "writes a Talos image to an eligble disk, saves metadata and reboots" do
-      talos_image_factory_settings = TalosImageFactorySetting.create!
-      talos_image_factory_settings.update_column :schematic_id, "schematic-id" # bypass validation request
+      talos_version = "v1.10.5"
 
-      api_key = api_keys(:hetzner_cloud)
-
-      server = Server.create!(
-        accessible: true,
-        api_key_id: api_key.id,
-        data_center: "DC1",
-        ip: "10.10.10.10",
-        ipv6: "::1",
-        name: "worker-1",
-        product: "P",
-        status: "running",
-      )
+      server = servers(:cloud_bootstrappable)
+      server.update! talos_image_factory_schematic: talos_image_factory_schematics(:default)
 
       ssh_session_mock = instance_double(Net::SSH::Connection::Session)
       expect(ssh_session_mock).to receive(:exec!)
@@ -57,7 +46,7 @@ RSpec.describe Server do
       expect(ssh_channel_mock).to receive(:on_extended_data).at_least(:once)
       expect(ssh_channel_mock).to receive(:wait).at_least(:once)
 
-      image = talos_image_factory_settings.bootstrap_image_url
+      image = server.bootstrap_image_url(talos_version:)
       expect(ssh_session_mock).to receive(:exec)
         .with("wget #{image} --quiet -O - | zstd -d | dd of=/dev/nvme1n1 status=progress", status: {}) do |_command, options|
           options[:status][:exit_code] = 0
@@ -74,7 +63,7 @@ RSpec.describe Server do
 
       expect(Net::SSH).to receive(:start).and_return(ssh_session_mock)
 
-      server.bootstrap!
+      server.bootstrap!(talos_version:)
 
       expect(server.reload).to have_attributes(
         accessible: false,

@@ -1,6 +1,6 @@
 class LabelAndTaintRulesController < ApplicationController
   def index
-    @label_and_taint_rules = LabelAndTaintRule.all
+    @label_and_taint_rules = LabelAndTaintRule.order(:id).all
   end
 
   def show

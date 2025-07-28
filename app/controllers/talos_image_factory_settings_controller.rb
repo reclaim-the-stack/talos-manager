@@ -1,6 +1,6 @@
 class TalosImageFactorySettingsController < ApplicationController
   def update
-    @talos_image_factory_setting = TalosImageFactorySetting.first_or_create!
+    @talos_image_factory_setting = TalosImageFactorySetting.singleton
 
     talos_image_factory_setting_params = params.require(:talos_image_factory_setting).permit(
       :version,

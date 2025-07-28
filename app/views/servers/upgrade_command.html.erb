@@ -1,10 +1,10 @@
 <%= turbo_frame_tag "servers-actions-dialog" do %>
-  <dialog id="server-actions-dialog" class="backdrop:backdrop-blur-sm backdrop:bg-gray-100 backdrop:bg-opacity-30 p-6 rounded-lg shadow-lg">
+  <dialog id="server-actions-dialog" class="max-w-[60rem] backdrop:backdrop-blur-sm backdrop:bg-gray-100 backdrop:bg-opacity-30 p-6 rounded-lg shadow-lg">
     <form method="dialog" class="flex mb-4">
       <h2 class="text-2xl">Reboot Command</h2>
       <button class="ml-auto text-gray-500 hover:text-gray-700"><%= icon_close %></button>
     </form>
-    <p class="text-gray-600 mb-4">Use the following command to upgrade the server to <%= @talos_image_factory_setting.version %>:</p>
+    <p class="text-gray-600 mb-4">Use the following command to upgrade the server to <%= TalosImageFactorySetting.singleton.version %>:</p>
 
     <div class="relative group">
       <span class="absolute opacity-0 group-hover:opacity-100 right-1 top-1 text-white text-sm py-1 px-3 rounded transition-opacity duration-300 pointer-events-none z-10">Click to copy</span>
@@ -19,16 +19,21 @@
         "
       >
         <code class="whitespace-pre-wrap">WORKER=<%= @server.name %>
-IMAGE=<%= @talos_image_factory_setting.upgrade_image_url %>
+IMAGE=<%= @server.upgrade_image_url %>
 kubectl drain $WORKER --ignore-daemonsets --delete-local-data &&
   time talosctl upgrade --preserve --debug -n $WORKER &&
   kubectl uncordon $WORKER</code>
       </div>
     </div>
 
-    <p class="text-gray-600 mb-4">If you want to change the target Talos Version or factory schematic ID head over to the <%= link_to "Settings", settings_path, class: "text-blue-600 hover:underline", target: "_top" %> page.</p>
+    <p class="text-gray-600 mb-4">
+      <% unless @server.talos_image_factory_schematic %>
+        Since this server wasn't bootstrapped with a specific schematic, it will use the default Talos Image Factory Schematic.
+      <% end %>
+      If you want to change the target Talos Version head over to the <%= link_to "Settings", settings_path, class: "text-blue-600 hover:underline", target: "_top" %> page.
+    </p>
 
-    <p class="text-gray-600 max-w-[60rem]">
+    <p class="text-gray-600">
       If you are upgrading a node containing databases you may want to manually execute a failover via <code class="p-1 bg-gray-100 rounded-sm">k node:failover <%= @server.name %> first</code> to ensure there are no masters on the node before it reboots for more control.
     </p>
   </dialog>

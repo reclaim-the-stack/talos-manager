@@ -1,8 +1,17 @@
 <%= turbo_frame_tag talos_image_factory_setting do %>
   <%= form_with model: talos_image_factory_setting do |f| %>
-    <%= f.text_field :version, label: "Talos Version" %>
-    <%= f.text_field :schematic_id, label: "Schematic ID", required: false, hint: "Optionally use the Talos Linux Image Factory to create a custom schematic and paste the ID here. Useful for enabling extensions like nvidia drivers, mdadm etc. Don't forget to include the talos.config kernel command line argument as mentioned above." %>
-    <%= f.submit "Update Factory Image settings", auto_width: true %>
+    <%= f.select :version, sorted_talos_versions, { include_blank: false }, label: "Default Talos Version", required: false %>
+    <%=
+      f.select(
+        :schematic_id,
+        TalosImageFactorySchematic.order(:name).pluck(:name, :id),
+        { include_blank: "none" },
+        label: "Default Talos Schematic",
+        required: false,
+        hint: "Use the #{link_to('Talos Schematics', talos_image_factory_schematics_path, class: 'text-blue-600 hover:underline')} page to create custom schematics.",
+      )
+    %>
+    <%= f.submit "Update Default Bootstrap settings", auto_width: true %>
   <% end %>
 
   <%# Sloppy copy paste from the application/flash partial to work around Turbo's inability %>
