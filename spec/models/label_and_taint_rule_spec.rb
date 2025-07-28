@@ -33,7 +33,7 @@ RSpec.describe LabelAndTaintRule do
     expect(latr.errors[:labels]).to include "must include an equals sign to separate key and value"
 
     # Invalid label: key too long
-    latr.labels = "a" * 317 + "=value"
+    latr.labels = "#{'a' * 317}=value"
     latr.validate
     expect(latr.errors[:labels]).to include "keys must be between 1 and 316 characters long"
 
@@ -77,7 +77,7 @@ RSpec.describe LabelAndTaintRule do
     expect(latr.errors[:taints]).to include "keys must consist of alphanumeric characters, '-', '_', '/' or '.', and must start and end with an alphanumeric character (this validation is stricter than Kubernetes itself but let's be reasonable)." # rubocop:disable Layout/LineLength
 
     # Invalid taint: key too long
-    latr.taints = "a" * 317 + "=value:NoSchedule"
+    latr.taints = "#{'a' * 317}=value:NoSchedule"
     latr.validate
     expect(latr.errors[:taints]).to include "keys must be between 1 and 316 characters long"
 

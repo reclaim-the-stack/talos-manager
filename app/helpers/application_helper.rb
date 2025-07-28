@@ -1,4 +1,5 @@
 module ApplicationHelper
+  # rubocop:disable Layout/LineLength
   def sorted_talos_versions
     # ["v1.8.1", "v1.8.2", "v1.9.0", ...]
     available_versions = TalosImageFactory.available_versions
@@ -22,7 +23,7 @@ module ApplicationHelper
   # Goal here is to avoid bloating the width of the Model column in the servers table
   def pretty_product(product)
     # eg. Dell PowerEdge™ R6615 DX182
-    return product.split(" ").last if product.start_with?("Dell")
+    return product.split.last if product.start_with?("Dell")
 
     # Most products don't need this but it cleans up eg. AX41-NVMe
     product.split("-").first
@@ -92,4 +93,5 @@ module ApplicationHelper
   def icon_ellipsis_vertical
     %(<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" /></svg>).html_safe
   end
+  # rubocop:enable Layout/LineLength
 end

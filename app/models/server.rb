@@ -68,8 +68,8 @@ class Server < ApplicationRecord
     end
 
     talos_image_url = bootstrap_image_url(talos_version:)
-    blockdevices = JSON.parse(session.exec!("lsblk --output NAME,TYPE,SIZE,UUID,MODEL,WWN --bytes --json")).fetch("blockdevices")
-    disks = blockdevices.select { it.fetch("type") == "disk" }
+    lsblk = JSON.parse(session.exec!("lsblk --output NAME,TYPE,SIZE,UUID,MODEL,WWN --bytes --json"))
+    disks = lsblk.fetch("blockdevices").select { it.fetch("type") == "disk" }
 
     # Exclude disks with children (partitions or RAID devices)
     noneligble, eligble = disks.partition { |disk| disk.key?("children") }

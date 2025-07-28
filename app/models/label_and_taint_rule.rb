@@ -48,22 +48,23 @@ class LabelAndTaintRule < ApplicationRecord
 
   # Via https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#taint
   # A taint consists of a key, value, and effect. As an argument here, it is expressed as key=value:effect.
-  # The key must begin with a letter or number, and may contain letters, numbers, hyphens, dots, and underscores, up to 253 characters.
-  # Optionally, the key can begin with a DNS subdomain prefix and a single '/', like example.com/my-app.
-  # The value is optional. If given, it must begin with a letter or number, and may contain letters, numbers, hyphens, dots, and underscores, up to 63 characters.
-  # The effect must be NoSchedule, PreferNoSchedule or NoExecute.
+  # The key must begin with a letter or number, and may contain letters, numbers, hyphens, dots, and underscores,
+  # up to 253 characters. Optionally, the key can begin with a DNS subdomain prefix and a single '/', like
+  # example.com/my-app. The value is optional. If given, it must begin with a letter or number, and may contain
+  # letters, numbers, hyphens, dots, and underscores, up to 63 characters. The effect must be NoSchedule,
+  # PreferNoSchedule or NoExecute.
   def validate_taints
     taints_as_array.each do |taint|
       if taint.exclude?(":")
         errors.add(:taints, "must be in the format of key=value:Effect")
-        return
+        return # rubocop:disable Lint/NonLocalExitFromIterator
       end
 
       label, effect = taint.split(":", 2)
 
       if %w[NoSchedule PreferNoSchedule NoExecute].exclude?(effect)
         errors.add(:taints, "effect must be one of: NoSchedule, PreferNoSchedule, NoExecute")
-        return
+        return # rubocop:disable Lint/NonLocalExitFromIterator
       end
 
       error = validate_label(label)
@@ -82,12 +83,12 @@ class LabelAndTaintRule < ApplicationRecord
       return "keys must be between 1 and 316 characters long"
     end
 
-    unless key.match?(/\A(([A-Za-z0-9][-A-Za-z0-9_.\/]*)?[A-Za-z0-9])?\z/)
+    unless key.match?(%r{\A(([A-Za-z0-9][-A-Za-z0-9_./]*)?[A-Za-z0-9])?\z})
       return "keys must consist of alphanumeric characters, '-', '_', '/' or '.', and must start and end with an alphanumeric character (this validation is stricter than Kubernetes itself but let's be reasonable)." # rubocop:disable Layout/LineLength
     end
 
     unless value.match?(/\A(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?\z/)
-      return "values must consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character." # rubocop:disable Layout/LineLength
+      "values must consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character."
     end
   end
 end

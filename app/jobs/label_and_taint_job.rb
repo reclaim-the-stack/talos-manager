@@ -10,7 +10,8 @@ class LabelAndTaintJob < ApplicationJob
       30.times do |attempt|
         break server.kubectl
       rescue Cluster::NoControlPlaneError, Talosctl::ConnectionRefusedError
-        Rails.logger.warn "Attempt #{attempt + 1}/30: No control plane found for server #{server.name}. Retrying in 10 seconds..."
+        Rails.logger.warn "Attempt #{attempt + 1}/30: No control plane found for server #{server.name}. Retrying in 10 seconds..." # rubocop:disable Layout/LineLength
+
         sleep 10 unless Rails.env.test?
       end
 

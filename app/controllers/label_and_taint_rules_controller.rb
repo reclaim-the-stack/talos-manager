@@ -3,9 +3,6 @@ class LabelAndTaintRulesController < ApplicationController
     @label_and_taint_rules = LabelAndTaintRule.order(:id).all
   end
 
-  def show
-  end
-
   def new
     @label_and_taint_rule = LabelAndTaintRule.new
   end

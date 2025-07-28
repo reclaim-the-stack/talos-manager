@@ -1,0 +1,10 @@
+inherit_mode:
+  merge:
+    - Exclude
+
+inherit_gem:
+  rubocop-mynewsdesk:
+    - .rubocop.yml
+
+Rails: { Enabled: false }
+RSpecRails: { Enabled: false }
