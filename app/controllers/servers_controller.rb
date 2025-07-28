@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ServersController < ApplicationController
   def index
     @servers = Server.all
@@ -28,18 +30,26 @@ class ServersController < ApplicationController
     end
   end
 
+  def prepare_bootstrap
+    @server = Server.find(params[:id])
+  end
+
   def bootstrap
     server = Server.find(params[:id])
+
+    talos_version = params.expect(:talos_version)
+    talos_image_factory_schematic_id = params[:talos_image_factory_schematic_id]
 
     # pretend it's not accessible while bootstrapping to hide bootstrap button
     server.update!(
       accessible: false,
-      last_request_for_configuration_at: nil,
-      last_configured_at: nil,
       label_and_taint_job_completed_at: nil,
+      last_configured_at: nil,
+      last_request_for_configuration_at: nil,
+      talos_image_factory_schematic_id:,
     )
 
-    ServerBootstrapJob.perform_later(server.id)
+    ServerBootstrapJob.perform_later(server.id, talos_version:)
 
     redirect_to servers_path, notice: "Server #{server.name} is being bootstrapped"
   end
@@ -87,6 +97,5 @@ class ServersController < ApplicationController
 
   def upgrade_command
     @server = Server.find(params[:id])
-    @talos_image_factory_setting = TalosImageFactorySetting.sole
   end
 end

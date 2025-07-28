@@ -42,10 +42,9 @@
 <hr class="mb-10">
 
 <div class="mb-10">
-  <h2 class="text-2xl mb-5">Talos Linux Image Factory</h2>
+  <h2 class="text-2xl mb-5">Default Bootstrap Settings</h2>
   <p>
-    <%= link_to "Talos Linux Image Factory", "https://factory.talos.dev/", class: "text-blue-600 hover:underline", target: "_blank" %>
-    is used to generate the Talos Linux bootstrap image. Modify these settings to change the default image used when creating new servers. Note that if you create your own factory schematic you must add <code class="bg-gray-100 p-1">talos.config=https://<%= ENV["HOST"] %>/config</code> to kernel command line arguments for your schematic to work.
+    The values chosen here will be pre-selected when bootstrapping new servers.
   </p>
 </div>
 

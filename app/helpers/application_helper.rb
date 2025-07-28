@@ -1,4 +1,17 @@
 module ApplicationHelper
+  def sorted_talos_versions
+    # ["v1.8.1", "v1.8.2", "v1.9.0", ...]
+    available_versions = TalosImageFactory.available_versions
+    alpha_beta_versions, regular_versions = available_versions.partition do |version|
+      version.include?("beta") || version.include?("alpha")
+    end
+    regular_versions.sort! do |a, b|
+      Gem::Version.new(b.delete_prefix("v")) <=> Gem::Version.new(a.delete_prefix("v"))
+    end
+
+    regular_versions + alpha_beta_versions
+  end
+
   def pretty_api_key_provider(provider)
     icon = image_tag "provider_icons/#{provider}.png", class: "inline h-[18px] mr-2"
     label = provider.titleize

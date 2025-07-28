@@ -44,10 +44,11 @@
     <nav class="bg-white shadow-md flex px-3">
       <%# left side of nav %>
       <div class="flex gap-5 items-center">
-        <%= image_tag "logo.svg", alt: "Logo", class: "h-12 py-2" %>
+        <%= image_tag "logo.svg", width: "32", alt: "Logo", class: "h-12 py-2" %>
         <%= link_to "Servers", servers_path, class: "text-l hover:underline underline-offset-2 #{'underline' if params[:controller] == 'servers'}" %>
         <%= link_to "Clusters", clusters_path, class: "text-l hover:underline underline-offset-2 #{'underline' if params[:controller] == 'clusters'}" %>
         <%= link_to "Configs", configs_path, class: "text-l hover:underline underline-offset-2 #{'underline' if params[:controller] == 'configs'}" %>
+        <%= link_to "Talos Schematics", talos_image_factory_schematics_path, class: "text-l hover:underline underline-offset-2 #{'underline' if params[:controller] == 'talos_image_factory_schematics'}" %>
         <%= link_to "Label & Taint Rules", label_and_taint_rules_path, class: "text-l hover:underline underline-offset-2 #{'underline' if params[:controller] == 'label_and_taint_rules'}" %>
       </div>
       <%# right side of nav %>

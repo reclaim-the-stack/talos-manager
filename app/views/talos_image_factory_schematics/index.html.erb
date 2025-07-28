@@ -1,0 +1,17 @@
+<div class="flex mb-10 items-center justify-between">
+  <h1 class="text-4xl">Talos Image Factory Schematics</h1>
+  <%= link_to "New Schematic", new_talos_image_factory_schematic_path, class: "text-white rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold p-3" %>
+</div>
+
+<p class="mb-10">
+  Schematics are used to create Talos images with specific extensions and configurations. For example you may want to add Nvidia driver extensions for GPU workloads or the mdadm extension for RAID support.
+</p>
+
+<% @talos_image_factory_schematics.each do |schematic| %>
+  <div class="flex mb-5 gap-3">
+    <h2 class="text-xl font-bold"><%= schematic.name %></h2>
+    <%= link_to "Edit", edit_talos_image_factory_schematic_path(schematic), class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2" %>
+    <%= button_to icon_trash("w-5"), talos_image_factory_schematic_path(schematic), method: :delete, data: { turbo_confirm: "Sure you want to destroy the schematic #{schematic.name}?" }, class: "text-white text-sm rounded bg-mnd-red hover:bg-mnd-red-dark font-semibold px-3 py-2" %>
+  </div>
+  <code class="p-5 rounded text-black bg-gray-100 whitespace-pre text-sm mb-10"><%= schematic.body %></code>
+<% end %>

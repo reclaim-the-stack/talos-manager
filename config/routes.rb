@@ -16,6 +16,7 @@ Rails.application.routes.draw do
       end
 
       member do
+        get :prepare_bootstrap
         post :bootstrap
         post :rescue
         post :reset
@@ -25,6 +26,7 @@ Rails.application.routes.draw do
       end
     end
     resource :settings, only: %i[show]
+    resources :talos_image_factory_schematics, only: %i[index new create edit update destroy]
     resources :talos_image_factory_settings, only: %i[update]
   end
 

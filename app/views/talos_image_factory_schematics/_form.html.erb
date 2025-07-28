@@ -1,0 +1,19 @@
+<%= form_with model: model do |f| %>
+  <%
+    body_placeholder = {
+      "customization" => {
+        "systemExtensions" => {
+          "officialExtensions" => [
+            "siderolabs/amd-ucode",
+            "siderolabs/mdadm",
+          ]
+        },
+      },
+    }.to_yaml.delete_prefix("---\n")
+  %>
+
+  <%= f.text_field :name, placeholder: "default", autofocus: model.new_record? %>
+  <%= f.text_area :body, rows: 10, placeholder: body_placeholder, label: "Schematic YAML", hint: "The YAML definition of the schematic. You can step through the wizard at <a class='font-bold hover:underline' href='https://factory.talos.dev' target='_blank'>https://factory.talos.dev</a> and copy the YAML printed on the final page. Note that a talos.config entry in extraKernelArgs pointing to this talos-manager deployment will be added automatically.".html_safe %>
+
+  <%= f.submit "Save" %>
+<% end %>

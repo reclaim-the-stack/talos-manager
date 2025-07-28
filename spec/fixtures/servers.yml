@@ -1,0 +1,29 @@
+cloud_bootstrappable:
+  api_key: hetzner_cloud
+  cluster: default
+  type: Server::HetznerCloud
+  name: worker-1
+  accessible: true
+  data_center: hel1-dc2
+  ip: "37.27.31.108"
+  ipv6: "::1"
+  product: cpx31
+  status: running
+
+cloud_botstrapped:
+  api_key: hetzner_cloud
+  cluster: default
+  talos_image_factory_schematic: default
+  type: Server::HetznerCloud
+  name: worker-2
+  accessible: false
+  data_center: hel1-dc1
+  ip: "37.27.31.109"
+  ipv6: "::2"
+  product: cpx31
+  status: running
+  bootstrap_disk_wwid: wwid-worker-2"
+  last_request_for_configuration_at: "2025-01-01T12:00:00Z"
+  last_configured_at: "2025-01-01T12:00:01Z"
+  label_and_taint_job_completed_at: "2025-01-01T12:01:00Z"
+  uuid: uuid-worker-2

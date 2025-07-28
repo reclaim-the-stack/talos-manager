@@ -37,6 +37,11 @@ RSpec.configure do |config|
       .to_return(body: File.read("spec/fixtures/files/talos-versions.json"))
   end
 
+  # only request specs
+  config.before(:each, type: :request) do
+    host! HOST # avoid getting 403 Forbidden due to failing the request host check
+  end
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [Rails.root.join("spec/fixtures")]
 

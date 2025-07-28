@@ -1,0 +1,25 @@
+default:
+  name: default
+  schematic_id: 70f05b41a5ecb87754aee3bb44ba8d0083bf40c29ba0d8db70f6b6dbc124db31
+  body: |
+    customization:
+      extraKernelArgs:
+        - talos.config=https://talos-manager.example.com/config
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/amd-ucode
+          - siderolabs/mdadm
+
+gpu:
+  name: gpu
+  schematic_id: 578732ecdae65a25032a38ea85dc0a4dbac38e00a4709b60a9367c6e41ca8c49
+  body: |
+    customization:
+      extraKernelArgs:
+        - talos.config=https://talos-manager.example.com/config
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/amd-ucode
+          - siderolabs/mdadm
+          - siderolabs/nvidia-container-toolkit-production
+          - siderolabs/nvidia-open-gpu-kernel-modules-production

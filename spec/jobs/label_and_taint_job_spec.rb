@@ -14,7 +14,7 @@ RSpec.describe LabelAndTaintJob do
     cluster = Cluster.create!(name: "test", endpoint: "https://kubernetes.localhost:6443")
 
     server = Server.create!(
-      name: "worker-1",
+      name: "worker-108",
       accessible: true,
       api_key_id: api_key.id,
       cluster_id: cluster.id,
@@ -27,9 +27,9 @@ RSpec.describe LabelAndTaintJob do
 
     kubectl_mock = Kubectl.new("kubeconf")
 
-    expect(kubectl_mock).to receive(:run).with("get node worker-1")
+    expect(kubectl_mock).to receive(:run).with("get node worker-108")
       .and_return([true, "", ""])
-    expect(kubectl_mock).to receive(:run).with("label node worker-1 --overwrite node-role.kubernetes.io/worker=")
+    expect(kubectl_mock).to receive(:run).with("label node worker-108 --overwrite node-role.kubernetes.io/worker=")
       .and_return([true, "", ""])
 
     allow_any_instance_of(Server).to receive(:kubectl).and_return(kubectl_mock)
