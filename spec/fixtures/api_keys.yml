@@ -2,3 +2,7 @@ hetzner_cloud:
   provider: hetzner_cloud
   name: hetzner-cloud
   secret: token
+hetzner_robot:
+  provider: hetzner_robot
+  name: hetzner-robot
+  secret: token

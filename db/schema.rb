@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_28_075647) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_28_135005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -96,6 +96,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_28_075647) do
     t.string "bootstrap_disk_wwid"
     t.datetime "label_and_taint_job_completed_at"
     t.bigint "talos_image_factory_schematic_id"
+    t.jsonb "lsblk"
     t.index ["api_key_id"], name: "index_servers_on_api_key_id"
     t.index ["cluster_id"], name: "index_servers_on_cluster_id"
     t.index ["hetzner_vswitch_id"], name: "index_servers_on_hetzner_vswitch_id"

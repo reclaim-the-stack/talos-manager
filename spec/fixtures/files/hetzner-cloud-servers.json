@@ -1,0 +1,42 @@
+{
+  "servers": [
+    {
+      "id": 1,
+      "name": "worker-1",
+      "status": "running",
+      "public_net": {
+        "ipv4": { "ip": "37.27.31.1" },
+        "ipv6": { "ip": "::1" }
+      },
+      "server_type": {
+        "name": "cpx31",
+        "architecture": "x86"
+      },
+      "datacenter": { "name": "hel-dc1" }
+    },
+    {
+      "id": 2,
+      "name": "worker-2",
+      "status": "running",
+      "public_net": {
+        "ipv4": { "ip": "37.27.31.2" },
+        "ipv6": { "ip": "::2" }
+      },
+      "server_type": {
+        "name": "cax21",
+        "architecture": "arm"
+      },
+      "datacenter": { "name": "hel-dc2" }
+    }
+  ],
+  "meta": {
+    "pagination": {
+      "page": 1,
+      "per_page": 50,
+      "previous_page": null,
+      "next_page": null,
+      "last_page": 1,
+      "total_entries": 2
+    }
+  }
+}

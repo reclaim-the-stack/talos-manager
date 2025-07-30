@@ -35,14 +35,23 @@ class Server < ApplicationRecord
     end
   }
 
-  def talos_type
-    name.include?("control-plane") ? "controlplane" : "worker"
+  # #bootstrap_metadata must be implemented in every subclasses of Server.
+  # Should return a hash populated with:
+  # {
+  #   bootstrappable: <true/false> (eg. for Hetzner servers this is true if the server is in rescue mode),
+  #   uuid: "<output from dmidecode -s system-uuid>",
+  #   lsblk: { <JSON parsed output from lsblk --output NAME,TYPE,SIZE,UUID,MODEL,WWN --bytes --json> },
+  # }
+  def bootstrap_metadata
+    raise "#bootstrap_metadata is not implemented for #{self.class.name}"
   end
 
-  # Implement #bootstrappable? in subclasses of Server. Eg. for Hetzner servers this is
-  # true when servers are in rescue mode and SSH is accessible.
   def bootstrappable?
-    raise "#bootstrappable? is not implemented for #{self.class.name}"
+    bootstrap_metadata.fetch(:bootstrappable)
+  end
+
+  def talos_type
+    name.include?("control-plane") ? "controlplane" : "worker"
   end
 
   # NOTE: Doesn't necessarily imply that the server was successfully bootstrapped after config was sent

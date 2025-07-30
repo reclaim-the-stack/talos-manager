@@ -1,0 +1,26 @@
+[
+  {
+    "server": {
+      "server_number": 3,
+      "product": "AX52",
+      "cancelled": false,
+      "dc": "hel-dc1",
+      "server_ip": "123.123.123.1",
+      "server_ipv6_net": "::3",
+      "server_name": "worker-3",
+      "status": "running"
+    }
+  },
+  {
+    "server": {
+      "server_number": 4,
+      "product": "RX220",
+      "cancelled": false,
+      "dc": "hel-dc2",
+      "server_ip": "123.123.123.2",
+      "server_ipv6_net": "::4",
+      "server_name": "worker-4",
+      "status": "running"
+    }
+  }
+]

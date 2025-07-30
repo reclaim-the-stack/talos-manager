@@ -81,12 +81,38 @@ class ServersController < ApplicationController
     # Set server accessible status based on SSH connectability
     threads = Server.all.map do |server|
       Thread.new do
-        server.bootstrappable? ? server : nil
+        server.bootstrappable?
+        server
       end
     end
-    accessible_servers_ids = threads.map(&:value).compact.map(&:id)
-    Server.where(id: accessible_servers_ids).update!(accessible: true)
-    Server.where.not(id: accessible_servers_ids).update!(accessible: false)
+
+    accessible_servers, non_accessible_servers = threads.map(&:value).partition(&:bootstrappable?)
+
+    # Update accessible servers with their metadata using a single UPDATE query
+    if accessible_servers.any?
+      connection = Server.connection
+
+      bootstrap_metadata_values = accessible_servers.map do |server|
+        id = server.id
+        uuid = server.bootstrap_metadata.fetch(:uuid)
+        lsblk = server.bootstrap_metadata.fetch(:lsblk).to_json
+
+        "(#{id}, #{Server.connection.quote(uuid)}, #{Server.connection.quote(lsblk)}::jsonb)"
+      end.join(", ")
+
+      sql = <<~SQL
+        UPDATE servers SET
+          accessible = true,
+          uuid = bootstrap_metadata_values.uuid,
+          lsblk = bootstrap_metadata_values.lsblk
+        FROM (VALUES #{bootstrap_metadata_values}) AS bootstrap_metadata_values(id, uuid, lsblk)
+        WHERE servers.id = bootstrap_metadata_values.id
+      SQL
+
+      connection.execute(sql)
+    end
+
+    Server.where(id: non_accessible_servers.map(&:id)).update!(accessible: false)
 
     redirect_to servers_path, notice: "Synced servers"
   end
