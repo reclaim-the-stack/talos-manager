@@ -66,35 +66,15 @@ class Server < ApplicationRecord
   # wget $TALOS_IMAGE_URL --quiet -O - | zstd -d | dd of=/dev/$DEVICE status=progress
   # sync
   # reboot
-  def bootstrap!(talos_version:)
-    raise "ERROR: Can't bootstrap without a HOST configured" unless HOST
-
+  def bootstrap!(talos_version:, wipe_disk: false)
     session = Net::SSH.start(ip, "root", key_data: [ENV.fetch("SSH_PRIVATE_KEY")])
-    uuid = session.exec! "dmidecode -s system-uuid".chomp
-    if uuid.include? "-000000000000"
-      system_data = session.exec! "dmidecode -t system"
-      raise "Invalid SMBIOS UUID, send this output to Hetzner support: #{system_data}"
-    end
-
     talos_image_url = bootstrap_image_url(talos_version:)
-    lsblk = JSON.parse(session.exec!("lsblk --output NAME,TYPE,SIZE,UUID,MODEL,WWN --bytes --json"))
-    disks = lsblk.fetch("blockdevices").select { it.fetch("type") == "disk" }
 
-    # Exclude disks with children (partitions or RAID devices)
-    noneligble, eligble = disks.partition { |disk| disk.key?("children") }
-
-    Rails.logger.info "Ignoring non-eligible disks: #{noneligble.map { it.fetch('name') }.join(', ')}"
-    raise "No eligible disks found for bootstrapping" if eligble.empty?
-
-    Rails.logger.info "Eligible disks for bootstrapping: #{eligble.map { it.fetch('name') }.join(', ')}"
-
-    eligble.sort_by! { it.fetch("name") }
-    first_nvme = eligble.find { it.fetch("name").start_with?("nvme") }
-    bootstrap_disk_data = first_nvme || eligble.first
-    bootstrap_disk = "/dev/#{bootstrap_disk_data.fetch('name')}"
-    bootstrap_disk_wwid = bootstrap_disk_data.fetch("wwn")
-
-    update!(bootstrap_disk:, bootstrap_disk_wwid:, uuid:)
+    if wipe_disk
+      Rails.logger.info "Wiping disk #{bootstrap_disk} before bootstrapping"
+      ssh_exec_with_log! session, "sfdisk --delete #{bootstrap_disk}"
+      ssh_exec_with_log! session, "wipefs -a #{bootstrap_disk}"
+    end
 
     Rails.logger.info "Bootstrapping #{ip} with talos image #{talos_image_url} on #{bootstrap_disk}"
     ssh_exec_with_log! session, "wget #{talos_image_url} --quiet -O - | zstd -d | dd of=#{bootstrap_disk} status=progress"

@@ -34,13 +34,6 @@ RSpec.describe Server do
       server.update! talos_image_factory_schematic: talos_image_factory_schematics(:default)
 
       ssh_session_mock = instance_double(Net::SSH::Connection::Session)
-      expect(ssh_session_mock).to receive(:exec!)
-        .with("dmidecode -s system-uuid")
-        .and_return("123e4567-e89b-12d3-a456-426614174000")
-      expect(ssh_session_mock).to receive(:exec!)
-        .with("lsblk --output NAME,TYPE,SIZE,UUID,MODEL,WWN --bytes --json")
-        .and_return(File.read("spec/fixtures/files/lsblk.json"))
-
       ssh_channel_mock = instance_double(Net::SSH::Connection::Channel)
       expect(ssh_channel_mock).to receive(:on_data).at_least(:once)
       expect(ssh_channel_mock).to receive(:on_extended_data).at_least(:once)
@@ -48,7 +41,7 @@ RSpec.describe Server do
 
       image = server.bootstrap_image_url(talos_version:)
       expect(ssh_session_mock).to receive(:exec)
-        .with("wget #{image} --quiet -O - | zstd -d | dd of=/dev/nvme1n1 status=progress", status: {}) do |_command, options|
+        .with("wget #{image} --quiet -O - | zstd -d | dd of=/dev/nvme0n1 status=progress", status: {}) do |_command, options|
           options[:status][:exit_code] = 0
           ssh_channel_mock
         end
@@ -65,12 +58,7 @@ RSpec.describe Server do
 
       server.bootstrap!(talos_version:)
 
-      expect(server.reload).to have_attributes(
-        accessible: false,
-        bootstrap_disk: "/dev/nvme1n1",
-        bootstrap_disk_wwid: "eui.36344630528029720025384500000002", # see lsblk fixture
-        uuid: "123e4567-e89b-12d3-a456-426614174000",
-      )
+      expect(server.reload).not_to be_accessible
     end
   end
 end

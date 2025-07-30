@@ -1,31 +1,58 @@
 <%= turbo_frame_tag "servers-actions-dialog" do %>
-  <dialog id="server-actions-dialog" class="backdrop:backdrop-blur-sm backdrop:bg-gray-100 backdrop:bg-opacity-30 p-6 rounded-lg shadow-lg">
+  <dialog id="server-actions-dialog" class="max-w-[60rem] backdrop:backdrop-blur-sm backdrop:bg-gray-100 backdrop:bg-opacity-30 p-6 rounded-lg shadow-lg">
     <form method="dialog" class="flex mb-4">
       <h2 class="text-2xl mr-5">Bootstrap server: <%= @server.name %></h2>
       <button class="ml-auto text-gray-500 hover:text-gray-700"><%= icon_close %></button>
     </form>
-    <%= form_with url: bootstrap_server_path, data: { turbo_frame: "_top" } do |f| %>
-      <%=
-        f.select(
-          :talos_version,
-          sorted_talos_versions,
-          { include_blank: false, selected: TalosImageFactorySetting.singleton.version },
-          class: "w-full mb-4",
-          required: false,
-        )
-      %>
-      <%=
-        f.select(
-          :talos_image_factory_schematic_id,
-          TalosImageFactorySchematic.order(:name).pluck(:name, :id),
-          { include_blank: "none", selected: TalosImageFactorySetting.singleton.schematic_id },
-          class: "w-full mb-4",
-          label: "Talos Image Factory Schematic",
-          required: false,
-          hint: "Use the #{link_to('Talos Schematics', talos_image_factory_schematics_path, class: 'text-blue-600 hover:underline', data: { turbo_frame: '_top'})} page to create custom schematics.",
-        )
-      %>
-      <%= f.submit "Bootstrap!" %>
+    <% if @server.uuid.to_s.include?("-000000000000") %>
+      <p class="text-red-500 mb-4">
+        ERROR: The UUID of this server '<%= @server.uuid %>' appears invalid. We have found that the motherboards of certain dedicated Hetzner servers have not been properly initialized. Reach out to their support and they should be able to fix this. Talos manager does not allow bootstraping with a faulty UUID since it prevents Talos configuration from being successful in case eg. NodeID based LUKS encryption is enabled.
+      </p>
+    <% else %>
+      <%= form_with url: bootstrap_server_path, data: { turbo_frame: "_top" } do |f| %>
+        <%=
+          f.select(
+            :talos_version,
+            sorted_talos_versions,
+            { include_blank: false, selected: TalosImageFactorySetting.singleton.version },
+            class: "w-full mb-4",
+            required: false,
+          )
+        %>
+        <%=
+          f.select(
+            :talos_image_factory_schematic_id,
+            TalosImageFactorySchematic.order(:name).pluck(:name, :id),
+            { include_blank: "none", selected: TalosImageFactorySetting.singleton.schematic_id },
+            class: "w-full mb-4",
+            label: "Talos Image Factory Schematic",
+            required: false,
+            hint: "Use the #{link_to('Talos Schematics', talos_image_factory_schematics_path, class: 'text-blue-600 hover:underline', data: { turbo_frame: '_top'})} page to create custom schematics.",
+          )
+        %>
+
+        <% disks = @server.lsblk.fetch("blockdevices").select { |disk| disk['type'] == "disk" } %>
+        <%=
+          f.select(
+            :bootstrap_disk_wwid,
+            disks
+              .map { |disk| ["/dev/#{disk['name']} (#{number_to_human_size(disk['size'])})", disk.fetch('wwn')] }
+              .sort_by(&:first),
+            {
+              include_blank: false,
+              disabled: disks
+                .select do |disk|
+                  disk.fetch("children", []).any? { it.fetch("type").start_with?("raid") }
+                end
+                .map { it.fetch("wwn") },
+            },
+            required: false,
+            label: "Bootstrap disk",
+          )
+        %>
+        <%= f.check_box :wipe_bootstrap_disk, hint: "If enabled will run sfdisk --delete and wipefs -a -f on the device before installing." %>
+        <%= f.submit "Bootstrap!" %>
+      <% end %>
     <% end %>
   </dialog>
 

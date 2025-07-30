@@ -1,5 +1,7 @@
 cloud_bootstrappable:
   api_key: hetzner_cloud
+  bootstrap_disk: /dev/nvme0n1
+  bootstrap_disk_wwid: wwid-worker-1
   cluster: default
   type: Server::HetznerCloud
   name: worker-1
@@ -9,6 +11,22 @@ cloud_bootstrappable:
   ipv6: "::1"
   product: cpx31
   status: running
+  uuid: 123e4567-e89b-12d3-a456-426614174000
+  lsblk:
+    {
+      "blockdevices": [
+        {
+          "name": "nvme0n1",
+          "wwn": "wwid-worker-1",
+          "size": "1000000000",
+        },
+        {
+          "name": "nvme1n1",
+          "wwn": "wwid-worker-1-data",
+          "size": "1000000000",
+        }
+      ]
+    }
 
 cloud_botstrapped:
   api_key: hetzner_cloud

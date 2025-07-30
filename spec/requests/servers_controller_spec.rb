@@ -132,10 +132,15 @@ RSpec.describe "ServersController" do
       post "/admin/servers/#{server.id}/bootstrap", params: {
         talos_version:,
         talos_image_factory_schematic_id: talos_image_factory_schematics(:default).id,
+        bootstrap_disk_wwid: server.lsblk.fetch("blockdevices").first.fetch("wwn"),
+        wipe_bootstrap_disk: "0",
       }
 
+      expect(response).to redirect_to servers_path
+      expect(flash[:notice]).to be_present
+
       # Check that the ServerBootstrapJob was enqueued
-      expect(ServerBootstrapJob).to have_been_enqueued.with(server.id, talos_version:)
+      expect(ServerBootstrapJob).to have_been_enqueued.with(server.id, talos_version:, wipe_disk: false)
 
       expect(server.reload).to have_attributes(
         accessible: false,
@@ -144,9 +149,6 @@ RSpec.describe "ServersController" do
         last_request_for_configuration_at: nil,
         talos_image_factory_schematic_id: talos_image_factory_schematics(:default).id,
       )
-
-      expect(response).to redirect_to servers_path
-      expect(flash[:notice]).to be_present
     end
   end
 
