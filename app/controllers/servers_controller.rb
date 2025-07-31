@@ -41,7 +41,6 @@ class ServersController < ApplicationController
     talos_image_factory_schematic_id = params[:talos_image_factory_schematic_id]
     bootstrap_disk_wwid = params.expect(:bootstrap_disk_wwid)
     bootstrap_disk_name = server.lsblk.fetch("blockdevices").find { it.fetch("wwn") == bootstrap_disk_wwid }.fetch("name")
-    wipe_disk = params.expect(:wipe_bootstrap_disk) == "1"
 
     # pretend it's not accessible while bootstrapping to hide bootstrap button
     server.update!(
@@ -54,7 +53,7 @@ class ServersController < ApplicationController
       talos_image_factory_schematic_id:,
     )
 
-    ServerBootstrapJob.perform_later(server.id, talos_version:, wipe_disk:)
+    ServerBootstrapJob.perform_later(server.id, talos_version:)
 
     redirect_to servers_path, notice: "Server #{server.name} is being bootstrapped"
   end

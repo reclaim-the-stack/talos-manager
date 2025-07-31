@@ -140,7 +140,7 @@ RSpec.describe "ServersController" do
       expect(flash[:notice]).to be_present
 
       # Check that the ServerBootstrapJob was enqueued
-      expect(ServerBootstrapJob).to have_been_enqueued.with(server.id, talos_version:, wipe_disk: false)
+      expect(ServerBootstrapJob).to have_been_enqueued.with(server.id, talos_version:)
 
       expect(server.reload).to have_attributes(
         accessible: false,

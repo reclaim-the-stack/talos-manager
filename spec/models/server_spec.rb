@@ -41,7 +41,17 @@ RSpec.describe Server do
 
       image = server.bootstrap_image_url(talos_version:)
       expect(ssh_session_mock).to receive(:exec)
-        .with("wget #{image} --quiet -O - | zstd -d | dd of=/dev/nvme0n1 status=progress", status: {}) do |_command, options|
+        .with("sfdisk --delete /dev/nvme0n1 || echo 'ignoring non-zero exit code from sfdisk'", status: {}) do |_, options|
+          options[:status][:exit_code] = 0
+          ssh_channel_mock
+        end
+      expect(ssh_session_mock).to receive(:exec)
+        .with("wipefs -a -f /dev/nvme0n1", status: {}) do |_, options|
+          options[:status][:exit_code] = 0
+          ssh_channel_mock
+        end
+      expect(ssh_session_mock).to receive(:exec)
+        .with("wget #{image} --quiet -O - | zstd -d | dd of=/dev/nvme0n1 status=progress", status: {}) do |_, options|
           options[:status][:exit_code] = 0
           ssh_channel_mock
         end
