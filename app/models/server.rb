@@ -72,7 +72,8 @@ class Server < ApplicationRecord
 
     if wipe_disk
       Rails.logger.info "Wiping disk #{bootstrap_disk} before bootstrapping"
-      ssh_exec_with_log! session, "sfdisk --delete #{bootstrap_disk}"
+      # NOTE: sfdisk --delete silently returns non-zero exit code if the disk is already empty with no options to ignore it
+      ssh_exec_with_log! session, "sfdisk --delete #{bootstrap_disk} || echo 'ignoring non-zero exit code from sfdisk'"
       ssh_exec_with_log! session, "wipefs -a #{bootstrap_disk}"
     end
 
