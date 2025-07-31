@@ -1,18 +1,22 @@
 class Server::HetznerDedicated < Server
-  def bootstrappable?
-    session = Net::SSH.start(
-      ip,
-      "root",
-      key_data: [ENV.fetch("SSH_PRIVATE_KEY")],
-      non_interactive: true,
-      verify_host_key: :never,
-      timeout: 2,
-    )
+  def bootstrap_metadata
+    return @bootstrap_metadata if defined?(@bootstrap_metadata)
+
+    key_data = [ENV.fetch("SSH_PRIVATE_KEY")]
+    session = Net::SSH.start(ip, "root", key_data:, non_interactive: true, verify_host_key: :never, timeout: 2)
     hostname = session.exec!("hostname")
-    session.close
-    hostname.include?("rescue")
+    bootstrappable = hostname.include?("rescue")
+
+    # Populate bootstrap_metadata with necessary information
+    if bootstrappable
+      uuid = session.exec!("dmidecode -s system-uuid").chomp
+      lsblk_output = session.exec!("lsblk --output NAME,TYPE,SIZE,UUID,MODEL,WWN --bytes --json")
+      lsblk = JSON.parse(lsblk_output)
+    end
+
+    @bootstrap_metadata = { bootstrappable:, uuid:, lsblk: }
   rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Net::SSH::AuthenticationFailed, Net::SSH::ConnectionTimeout
-    false
+    @bootstrap_metadata = { bootstrappable: false, uuid: nil, lsblk: nil }
   ensure
     session&.shutdown!
   end

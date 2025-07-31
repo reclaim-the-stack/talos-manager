@@ -39,17 +39,22 @@ class ServersController < ApplicationController
 
     talos_version = params.expect(:talos_version)
     talos_image_factory_schematic_id = params[:talos_image_factory_schematic_id]
+    bootstrap_disk_wwid = params.expect(:bootstrap_disk_wwid)
+    bootstrap_disk_name = server.lsblk.fetch("blockdevices").find { it.fetch("wwn") == bootstrap_disk_wwid }.fetch("name")
+    wipe_disk = params.expect(:wipe_bootstrap_disk) == "1"
 
     # pretend it's not accessible while bootstrapping to hide bootstrap button
     server.update!(
       accessible: false,
+      bootstrap_disk_wwid:,
+      bootstrap_disk: "/dev/#{bootstrap_disk_name}",
       label_and_taint_job_completed_at: nil,
       last_configured_at: nil,
       last_request_for_configuration_at: nil,
       talos_image_factory_schematic_id:,
     )
 
-    ServerBootstrapJob.perform_later(server.id, talos_version:)
+    ServerBootstrapJob.perform_later(server.id, talos_version:, wipe_disk:)
 
     redirect_to servers_path, notice: "Server #{server.name} is being bootstrapped"
   end
@@ -81,12 +86,44 @@ class ServersController < ApplicationController
     # Set server accessible status based on SSH connectability
     threads = Server.all.map do |server|
       Thread.new do
-        server.bootstrappable? ? server : nil
+        server.bootstrappable?
+        server
       end
     end
-    accessible_servers_ids = threads.map(&:value).compact.map(&:id)
-    Server.where(id: accessible_servers_ids).update!(accessible: true)
-    Server.where.not(id: accessible_servers_ids).update!(accessible: false)
+
+    accessible_servers, non_accessible_servers = threads.map(&:value).partition(&:bootstrappable?)
+
+    # Update accessible servers with their metadata using a single UPDATE query
+    if accessible_servers.any?
+      connection = Server.connection
+      maybe_json_suffix = "::jsonb" if connection.adapter_name == "PostgreSQL"
+
+      bootstrap_metadata_values = accessible_servers.map do |server|
+        id = server.id
+        uuid = server.bootstrap_metadata.fetch(:uuid)
+        lsblk = server.bootstrap_metadata.fetch(:lsblk).to_json
+
+        "(#{id}, #{connection.quote(uuid)}, #{connection.quote(lsblk)}#{maybe_json_suffix})"
+      end.join(", ")
+
+      # NOTE: Using a CTE since SQLite makes it hard to do UPDATE FROM VALUES(...)
+      # NOT MATERIALIZED is a planner hint to avoid materializing the CTE
+      sql = <<~SQL
+        WITH bootstrap_metadata_values(id, uuid, lsblk) AS NOT MATERIALIZED (
+          VALUES #{bootstrap_metadata_values}
+        )
+        UPDATE servers SET
+          accessible = true,
+          uuid = bootstrap_metadata_values.uuid,
+          lsblk = bootstrap_metadata_values.lsblk
+        FROM bootstrap_metadata_values
+        WHERE servers.id = bootstrap_metadata_values.id
+      SQL
+
+      connection.execute(sql)
+    end
+
+    Server.where(id: non_accessible_servers.map(&:id)).update!(accessible: false)
 
     redirect_to servers_path, notice: "Synced servers"
   end

@@ -35,6 +35,19 @@ class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
     input_with_label_and_validation(attribute, options) { super }
   end
 
+  def check_box(attribute, options = {}, checked_value = "1", unchecked_value = "0")
+    options[:class] = "mr-1"
+    label_text = options.delete(:label) || attribute.to_s.humanize
+    hint = options[:hint] && %(<p class="text-sm text-gray-400 -mt-2 mb-4">#{options.delete(:hint)}</p>)
+    checkbox = super
+
+    label = label(attribute, nil, class: "block mb-5 font-bold") do
+      "#{checkbox} #{label_text}".html_safe
+    end
+
+    "#{label}#{hint}".html_safe
+  end
+
   def select(attribute, choices = nil, options = {}, html_options = {})
     html_options[:class] = "#{INPUT_CLASSES} appearance-none"
     # Inline CSS SVG background for custom caret
