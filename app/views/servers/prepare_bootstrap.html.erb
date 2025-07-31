@@ -36,21 +36,47 @@
           f.select(
             :bootstrap_disk_wwid,
             disks
-              .map { |disk| ["/dev/#{disk['name']} (#{number_to_human_size(disk['size'])})", disk.fetch('wwn')] }
+              .filter_map do |disk|
+                partitions = disk.fetch("children", []).select { |it| it.fetch("type").start_with?("part") }
+                partitions_suffix = "[#{partitions.length} existing partition#{'s' if partitions.length != 1}]"
+                label = "/dev/#{disk['name']} (#{number_to_human_size(disk['size'])}) #{partitions_suffix}"
+                value = disk.fetch("wwn")
+
+                [label, value]
+              end
               .sort_by(&:first),
             {
-              include_blank: false,
+              prompt: "Select a disk to bootstrap",
+              # the first non raided disk should be selected by default
+              selected: disks
+                .reject { |disk| disk.fetch("children", []).any? { it.fetch("type").start_with?("raid") } }
+                .first&.fetch("wwn"),
               disabled: disks
                 .select do |disk|
                   disk.fetch("children", []).any? { it.fetch("type").start_with?("raid") }
                 end
                 .map { it.fetch("wwn") },
             },
-            required: false,
+            onchange: "
+              if(!this.value || parseInt(this.selectedOptions[0].innerText.split('[')[1][0]) == 0)
+                document.getElementById('bootstrap-warning').classList.add('hidden')
+              else
+                document.getElementById('bootstrap-warning').classList.remove('hidden')
+            ",
+            required: true,
             label: "Bootstrap disk",
           )
         %>
-        <%= f.check_box :wipe_bootstrap_disk, hint: "If enabled will run sfdisk --delete and wipefs -a -f on the device before installing." %>
+
+        <p id="bootstrap-warning" class="bg-yellow-100 text-yellow-800 p-4 rounded mb-4 hidden border border-yellow-200">
+          <strong>Warning:</strong> Existing partitions on the selected disk will be wiped.
+        </p>
+
+        <script>
+          // Trigger change event to show/hide the warning based on the initially selected disk
+          document.getElementById("bootstrap_disk_wwid").dispatchEvent(new Event("change"))
+        </script>
+
         <%= f.submit "Bootstrap!" %>
       <% end %>
     <% end %>
