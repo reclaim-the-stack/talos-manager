@@ -27,7 +27,7 @@ class LabelAndTaintJob < ApplicationJob
 
         break true if success
 
-        Rails.logger.warn "Attempt #{attempt + 1}/30: Waiting for #{server.name}. Output: #{stderr}. Retrying in 10 seconds..."
+        Rails.logger.warn "Attempt #{attempt + 1}/30: Waiting for #{server.name}. Output: #{stderr}. Retrying in 5 seconds..."
         sleep 5 unless Rails.env.test?
         false
       end
