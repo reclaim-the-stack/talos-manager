@@ -19,11 +19,13 @@ cloud_bootstrappable:
           "name": "nvme0n1",
           "wwn": "wwid-worker-1",
           "size": "1000000000",
+          "type": "disk"
         },
         {
           "name": "nvme1n1",
           "wwn": "wwid-worker-1-data",
           "size": "1000000000",
+          "type": "disk"
         }
       ]
     }

@@ -31,31 +31,30 @@
           )
         %>
 
-        <% disks = @server.lsblk.fetch("blockdevices").select { |disk| disk['type'] == "disk" } %>
+        <% disks = @server.lsblk.fetch("blockdevices").select { |disk| disk.fetch("type") == "disk" } %>
+        <%
+          disk_options = disks
+            .map do |disk|
+              partitions = disk.fetch("children", []).select { it.fetch("type").start_with?("part") }
+              raid = disk.fetch("children", []).find { it.fetch("type").start_with?("raid") }&.fetch("name")
+              suffix = raid ? "[RAID /dev/#{raid}]" : "[#{partitions.length} existing partition#{'s' if partitions.length != 1}]"
+              label = "/dev/#{disk['name']} (#{number_to_human_size(disk['size'])}) #{suffix}"
+              value = disk.fetch("wwn")
+
+              [label, value]
+            end
+            .sort_by(&:first)
+        %>
         <%=
           f.select(
             :bootstrap_disk_wwid,
-            disks
-              .filter_map do |disk|
-                partitions = disk.fetch("children", []).select { |it| it.fetch("type").start_with?("part") }
-                partitions_suffix = "[#{partitions.length} existing partition#{'s' if partitions.length != 1}]"
-                label = "/dev/#{disk['name']} (#{number_to_human_size(disk['size'])}) #{partitions_suffix}"
-                value = disk.fetch("wwn")
-
-                [label, value]
-              end
-              .sort_by(&:first),
+            disk_options,
             {
               prompt: "Select a disk to bootstrap",
               # the first non raided disk should be selected by default
-              selected: disks
-                .reject { |disk| disk.fetch("children", []).any? { it.fetch("type").start_with?("raid") } }
-                .first&.fetch("wwn"),
-              disabled: disks
-                .select do |disk|
-                  disk.fetch("children", []).any? { it.fetch("type").start_with?("raid") }
-                end
-                .map { it.fetch("wwn") },
+              selected: disk_options.find { |label, _| label.exclude?("RAID") }&.last,
+              # raided disks should be disabled
+              disabled: disk_options.select { |label, _| label.include?("RAID") }.map(&:last),
             },
             onchange: "
               if(!this.value || parseInt(this.selectedOptions[0].innerText.split('[')[1][0]) == 0)
@@ -72,10 +71,8 @@
           <strong>Warning:</strong> Existing partitions on the selected disk will be wiped.
         </p>
 
-        <script>
-          // Trigger change event to show/hide the warning based on the initially selected disk
-          document.getElementById("bootstrap_disk_wwid").dispatchEvent(new Event("change"))
-        </script>
+        <%# Trigger change event to show/hide the warning based on the initially selected disk %>
+        <script>document.getElementById("bootstrap_disk_wwid").dispatchEvent(new Event("change"))</script>
 
         <%= f.submit "Bootstrap!" %>
       <% end %>
