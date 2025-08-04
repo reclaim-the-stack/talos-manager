@@ -19,7 +19,7 @@
         "
       >
       <code class="whitespace-pre">WORKER=<%= @server.name %>
-kubectl drain $WORKER --ignore-daemonsets --delete-local-data &&
+kubectl drain $WORKER --ignore-daemonsets --delete-emptydir-data &&
   time talosctl reboot -n $WORKER &&
   kubectl uncordon $WORKER</code>
     </div>

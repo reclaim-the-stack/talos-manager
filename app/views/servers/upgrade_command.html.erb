@@ -20,7 +20,7 @@
       >
         <code class="whitespace-pre-wrap">WORKER=<%= @server.name %>
 IMAGE=<%= @server.upgrade_image_url %>
-kubectl drain $WORKER --ignore-daemonsets --delete-local-data &&
+kubectl drain $WORKER --ignore-daemonsets --delete-emptydir-data &&
   time talosctl upgrade --preserve --debug -n $WORKER &&
   kubectl uncordon $WORKER</code>
       </div>
