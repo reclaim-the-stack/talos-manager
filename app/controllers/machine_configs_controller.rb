@@ -24,6 +24,7 @@ class MachineConfigsController < ApplicationController
       :private_ip,
       :already_configured,
       :install_disk,
+      :ephemeral_disk_identifier,
     )
     @machine_config = MachineConfig.new(machine_config_params)
     @server = @machine_config.server

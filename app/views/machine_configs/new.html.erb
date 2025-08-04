@@ -5,7 +5,49 @@
 
   <%= f.text_field :hostname, required: true, placeholder: "worker-x", hint: "Will substitute ${hostname} in your config patches." %>
   <%= f.text_field :private_ip, required: true, placeholder: "10.0.x.x", label: "Private IP", hint: "Will substitute ${private_ip} in your config patches." %>
-  <%= f.text_field :install_disk, required: true, placeholder: "/dev/sda", hint: "Gets passed into the --install-disk argument for talosctl gen config." %>
+  <% if f.object.server.lsblk.present? %>
+    <%= f.text_field :install_disk, required: true, disabled: true, hint: "Gets passed into the --install-disk argument for talosctl gen config. Non modifiable: must use the same disk which was used for bootstrapping." %>
+    <%
+      # - RAID devices are listed as children of disks
+      # - UUID of disks containing RAID devices are actually the UUID of the RAID device
+      # Hence we reduce RAID disks to a single entry per RAID device, using their UUID as value.
+      disks = f.object.server.lsblk.fetch("blockdevices").select { |disk| disk.fetch("type") == "disk" }
+      raids, other = disks.partition { |disk| disk.fetch("children", []).any? { |child| child.fetch("type").start_with?("raid") } }
+      raids = raids
+        .group_by { |disk| disk.fetch("children").find { |child| child.fetch("type").start_with?("raid") }&.fetch("name") }
+        .map do |raid_name, disks|
+          raid = disks.first.fetch("children").find { |child| child.fetch("type").start_with?("raid") }
+          type = raid.fetch("type").upcase
+          label = "/dev/#{raid_name} (#{number_to_human_size(raid.fetch('size'))}) [#{type}]"
+          value = disks.first.fetch("uuid")
+
+          [label, "uuid:#{value}"]
+        end
+      other = other
+        .reject { |disk| disk.fetch("wwn") == f.object.server.bootstrap_disk_wwid }
+        .map do |disk|
+          partitions = disk.fetch("children", []).select { it.fetch("type").start_with?("part") }
+          suffix = partitions.empty? ? "" : "[#{partitions.length} existing partition#{'s' if partitions.length != 1}]"
+          label = "/dev/#{disk['name']} (#{number_to_human_size(disk['size'])}) #{suffix}"
+          value = disk.fetch("wwn")
+
+          [label, "wwid:#{value}"]
+        end
+      ephemeral_disk_options = (raids + other).sort_by(&:first)
+    %>
+    <%=
+      f.select(
+        :ephemeral_disk_identifier,
+        ephemeral_disk_options,
+        { include_blank: "Same as install disk" },
+        required: false,
+        label: "Disk for EPHEMERAL partition (optional)",
+        hint: "If an ephemeral disk is selected, a <a href='https://www.talos.dev/v1.10/reference/configuration/block/volumeconfig/' class='text-blue-500 hover:underline' target='_blank'>VolumeConfig</a> will be added to the server's MachineConfig to use the disk for Talos Linux's EPHEMERAL partition. This is the disk mounted at /var which includes local persistent volumes, so the name ephemeral is misleading. RAID devices will be listed here but note that your Talos Factory Image must contain the <a href='https://github.com/siderolabs/extensions/tree/main/storage/mdadm' target='_blank' class='text-blue-500 hover:underline'>mdadm extension</a> for them to work.",
+      )
+    %>
+  <% else %>
+    <%= f.text_field :install_disk, required: true, placeholder: "/dev/nvme0n1", hint: "Gets passed into the --install-disk argument for talosctl gen config." %>
+  <% end %>
   <%= f.select :config_id, Config.pluck(:name, :id), { include_blank: true }, required: true %>
   <%= f.check_box :already_configured, class: "mr-1", hint: "Check to apply green status to the server immediately" %>
 
