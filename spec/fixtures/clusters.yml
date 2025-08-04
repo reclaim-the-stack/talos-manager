@@ -1,6 +1,6 @@
 default:
   name: default
-  endpoint: http://kubernetes.example.com:6443
+  endpoint: https://kubernetes.example.com:6443
   secrets: |
     cluster:
         id: d4ztP13Cr27K_0eTNQmM0I1_k50EHxci7bT_KROwxrI=

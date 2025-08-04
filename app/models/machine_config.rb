@@ -23,6 +23,7 @@ class MachineConfig < ApplicationRecord
   validates_presence_of :private_ip
   validate :validate_private_ip_format
   validates_presence_of :install_disk
+  validate :validate_ephemeral_disk_identifier_format
 
   after_create :set_configured, if: :already_configured
 
@@ -97,7 +98,38 @@ class MachineConfig < ApplicationRecord
     end
 
     # NOTE: This also gives us consistent 2 space indentation
-    talosconfig.to_yaml.delete_prefix("---\n")
+    config = talosconfig.to_yaml
+
+    # Add a VolumeConfig document if the server has an ephemeral disk identifier
+    if ephemeral_disk_identifier.present?
+      # id_type will be "wwid" for regular disks or "uuid" for raid arrays
+      id_type, id = ephemeral_disk_identifier.split(":", 2)
+
+      # https://www.talos.dev/v1.10/talos-guides/configuration/disk-management/#disk-selector
+      disk_selector_cel =
+        if id_type == "wwid"
+          "disk.wwid == '#{id}'"
+        elsif id_type == "uuid"
+          # Talos takes the UUID hex and puts colons every 8 characters
+          # 1a462672-bd83-888c-df8f-a57e6b38f998 -> 1a462672:bd83888c:df8fa57e:6b38f998
+          uuid_talos_style = id.delete("-").chars.each_slice(8).map(&:join).join(":")
+          "'dev/disk/by-id/md-uuid-#{uuid_talos_style}' in disk.symlinks"
+        end
+
+      config += <<~YAML
+        ---
+        apiVersion: v1alpha1
+        kind: VolumeConfig
+        name: EPHEMERAL
+        provisioning:
+          diskSelector:
+            match: "#{disk_selector_cel}"
+          minSize: 10GB
+          grow: true
+      YAML
+    end
+
+    config
   end
 
   private
@@ -141,6 +173,14 @@ class MachineConfig < ApplicationRecord
           "last octet must match the hostname number (expected '#{hostname_number}', got '#{private_ip_number}')",
         )
       end
+    end
+  end
+
+  def validate_ephemeral_disk_identifier_format
+    return if ephemeral_disk_identifier.blank?
+
+    unless ephemeral_disk_identifier.match?(/^(wwid|uuid):.+$/)
+      errors.add(:ephemeral_disk_identifier, "must be in the format 'wwid:<wwid>' or 'uuid:<uuid>'")
     end
   end
 

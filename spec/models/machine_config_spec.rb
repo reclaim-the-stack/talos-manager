@@ -1,4 +1,22 @@
 RSpec.describe MachineConfig do
+  it "validates format of ephemeral_disk_identifier" do
+    machine_config = MachineConfig.new
+    machine_config.validate
+    expect(machine_config.errors[:ephemeral_disk_identifier]).to be_empty
+
+    machine_config.ephemeral_disk_identifier = "wwid:1234567890abcdef"
+    machine_config.validate
+    expect(machine_config.errors[:ephemeral_disk_identifier]).to be_empty
+
+    machine_config.ephemeral_disk_identifier = "uuid:12345678-1234-5678-1234-567812345678"
+    machine_config.validate
+    expect(machine_config.errors[:ephemeral_disk_identifier]).to be_empty
+
+    machine_config.ephemeral_disk_identifier = "invalid_format"
+    machine_config.validate
+    expect(machine_config.errors[:ephemeral_disk_identifier]).to include("must be in the format 'wwid:<wwid>' or 'uuid:<uuid>'")
+  end
+
   describe "#generate_config" do
     it "raises an error if hostname is blank" do
       server = Server.new(name: "worker-1")
@@ -12,7 +30,7 @@ RSpec.describe MachineConfig do
       expect { machine_config.generate_config }.to raise_error "can't generate config before assigning private_ip"
     end
 
-    it "generates a config" do
+    it "generates a config including substitution variables: bootstrap_disk_wwid, hostname, public_ip, private_ip and vlan" do
       hetzner_vswitch = HetznerVswitch.new(name: "vswitch", vlan: 1337)
       cluster = Cluster.create!(
         name: "cluster",
@@ -69,6 +87,7 @@ RSpec.describe MachineConfig do
         server:,
       )
       expect(machine_config.generate_config).to eq <<~YAML
+        ---
         version: v1alpha1
         debug: false
         persist: true
@@ -146,6 +165,60 @@ RSpec.describe MachineConfig do
                 disabled: true
               service: {}
       YAML
+    end
+
+    context "with an ephemeral_disk_identifier" do
+      it "generates a config including a VolumeConfig for the ephemeral disk with different matchers for uuid and wwid" do
+        server = servers(:cloud_botstrapped)
+
+        config = Config.new(
+          name: "config",
+          install_image: "ghcr.io/siderolabs/installer:v1.10.6",
+          kubernetes_version: "1.33.3",
+          kubespan: true,
+          patch: "",
+        )
+        machine_config = MachineConfig.new(
+          hostname: server.name,
+          private_ip: "10.0.1.2",
+          install_disk: "/dev/nvme0n1",
+          ephemeral_disk_identifier: "wwid:eui.36344630528029720025384500000002",
+          config:,
+          server:,
+        )
+
+        generated_config = machine_config.generate_config
+        expect(YAML.load_stream(generated_config).length).to eq 2 # sanity check that YAML is valid
+
+        volume_config = generated_config.split("---\n").last # expect on raw String to ensure good formatting
+        expect(volume_config).to eq <<~YAML
+          apiVersion: v1alpha1
+          kind: VolumeConfig
+          name: EPHEMERAL
+          provisioning:
+            diskSelector:
+              match: "disk.wwid == 'eui.36344630528029720025384500000002'"
+            minSize: 10GB
+            grow: true
+        YAML
+
+        machine_config.ephemeral_disk_identifier = "uuid:1a462672-bd83-888c-df8f-a57e6b38f998"
+
+        generated_config = machine_config.generate_config
+        expect(YAML.load_stream(generated_config).length).to eq 2 # sanity check that YAML is valid
+
+        volume_config = generated_config.split("---\n").last # expect on raw String to ensure good formatting
+        expect(volume_config).to eq <<~YAML
+          apiVersion: v1alpha1
+          kind: VolumeConfig
+          name: EPHEMERAL
+          provisioning:
+            diskSelector:
+              match: "'dev/disk/by-id/md-uuid-1a462672:bd83888c:df8fa57e:6b38f998' in disk.symlinks"
+            minSize: 10GB
+            grow: true
+        YAML
+      end
     end
   end
 end
