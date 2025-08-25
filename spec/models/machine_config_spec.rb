@@ -214,7 +214,7 @@ RSpec.describe MachineConfig do
           name: EPHEMERAL
           provisioning:
             diskSelector:
-              match: "'dev/disk/by-id/md-uuid-1a462672:bd83888c:df8fa57e:6b38f998' in disk.symlinks"
+              match: "'/dev/disk/by-id/md-uuid-1a462672:bd83888c:df8fa57e:6b38f998' in disk.symlinks"
             minSize: 10GB
             grow: true
         YAML

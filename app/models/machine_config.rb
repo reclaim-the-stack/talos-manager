@@ -113,7 +113,7 @@ class MachineConfig < ApplicationRecord
           # Talos takes the UUID hex and puts colons every 8 characters
           # 1a462672-bd83-888c-df8f-a57e6b38f998 -> 1a462672:bd83888c:df8fa57e:6b38f998
           uuid_talos_style = id.delete("-").chars.each_slice(8).map(&:join).join(":")
-          "'dev/disk/by-id/md-uuid-#{uuid_talos_style}' in disk.symlinks"
+          "'/dev/disk/by-id/md-uuid-#{uuid_talos_style}' in disk.symlinks"
         end
 
       config += <<~YAML
