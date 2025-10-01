@@ -44,7 +44,7 @@ FROM base
 
 # kubectl for kubernetes integration
 
-COPY --from=bitnami/kubectl:1.33.3 /opt/bitnami/kubectl/bin/kubectl /usr/local/bin/kubectl
+COPY --from=bitnamilegacy/kubectl:1.33.3 /opt/bitnami/kubectl/bin/kubectl /usr/local/bin/kubectl
 
 # wget for talosctl installation
 # curl is required for typhoeus and the heroku release command output
