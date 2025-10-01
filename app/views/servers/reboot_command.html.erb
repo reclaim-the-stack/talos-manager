@@ -18,10 +18,10 @@
           })
         "
       >
-      <code class="whitespace-pre">WORKER=<%= @server.name %>
-kubectl drain $WORKER --ignore-daemonsets --delete-emptydir-data &&
-  time talosctl reboot -n $WORKER &&
-  kubectl uncordon $WORKER</code>
+      <code class="whitespace-pre">NODE=<%= @server.name %>
+kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
+  time talosctl reboot -n $NODE &&
+  kubectl uncordon $NODE</code>
     </div>
 
     <p class="text-gray-600 max-w-[60rem]">

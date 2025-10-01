@@ -18,11 +18,11 @@
           })
         "
       >
-        <code class="whitespace-pre-wrap">WORKER=<%= @server.name %>
+        <code class="whitespace-pre-wrap">NODE=<%= @server.name %>
 IMAGE=<%= @server.upgrade_image_url %>
-kubectl drain $WORKER --ignore-daemonsets --delete-emptydir-data &&
-  time talosctl upgrade --preserve --debug --image $IMAGE -n $WORKER &&
-  kubectl uncordon $WORKER</code>
+kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
+  time talosctl upgrade --preserve --debug --image $IMAGE -n $NODE &&
+  kubectl uncordon $NODE</code>
       </div>
     </div>
 
