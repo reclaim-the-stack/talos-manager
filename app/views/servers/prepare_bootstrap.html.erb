@@ -23,7 +23,7 @@
           f.select(
             :talos_image_factory_schematic_id,
             TalosImageFactorySchematic.order(:name).pluck(:name, :id),
-            { include_blank: "none", selected: TalosImageFactorySetting.singleton.schematic_id },
+            { include_blank: "none", selected: TalosImageFactorySetting.singleton.talos_image_factory_schematic_id },
             class: "w-full mb-4",
             label: "Talos Image Factory Schematic",
             required: false,

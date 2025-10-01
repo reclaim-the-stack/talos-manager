@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_04_112912) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_01_101556) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -120,6 +120,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_04_112912) do
     t.string "schematic_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "talos_image_factory_schematic_id"
+    t.index ["talos_image_factory_schematic_id"], name: "idx_on_talos_image_factory_schematic_id_4f8db9771d"
   end
 
   add_foreign_key "clusters", "hetzner_vswitches"
@@ -129,4 +131,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_04_112912) do
   add_foreign_key "servers", "clusters"
   add_foreign_key "servers", "hetzner_vswitches"
   add_foreign_key "servers", "talos_image_factory_schematics"
+  add_foreign_key "talos_image_factory_settings", "talos_image_factory_schematics"
 end

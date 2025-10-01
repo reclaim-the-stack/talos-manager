@@ -26,6 +26,24 @@ RSpec.describe Server do
     expect(server.errors[:name]).to include "has already been taken"
   end
 
+  describe "#bootstrap_image_url" do
+    it "returns a URL to a Talos image with the correct schematic ID and Talos version" do
+      talos_version = "v1.10.5"
+      server = servers(:cloud_bootstrappable)
+      server.update! talos_image_factory_schematic: talos_image_factory_schematics(:default)
+      expected_url = "#{TalosImageFactory::BASE_URL}/image/#{talos_image_factory_schematics(:default).schematic_id}/#{talos_version}/metal-#{server.architecture}.raw.zst"
+      expect(server.bootstrap_image_url(talos_version:)).to eq(expected_url)
+    end
+
+    it "uses the default Talos version and schematic_id if none are provided" do
+      server = Server.new
+      default_setting = TalosImageFactorySetting.singleton
+      default_setting.update! talos_image_factory_schematic: talos_image_factory_schematics(:default)
+      expected_url = "#{TalosImageFactory::BASE_URL}/image/#{default_setting.talos_image_factory_schematic&.schematic_id}/#{default_setting.version}/metal-#{server.architecture}.raw.zst"
+      expect(server.bootstrap_image_url).to eq(expected_url)
+    end
+  end
+
   describe "#bootstrap!" do
     it "writes a Talos image to an eligble disk, saves metadata and reboots" do
       talos_version = "v1.10.5"

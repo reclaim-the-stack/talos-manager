@@ -3,7 +3,7 @@
     <%= f.select :version, sorted_talos_versions, { include_blank: false }, label: "Default Talos Version", required: false %>
     <%=
       f.select(
-        :schematic_id,
+        :talos_image_factory_schematic_id,
         TalosImageFactorySchematic.order(:name).pluck(:name, :id),
         { include_blank: "none" },
         label: "Default Talos Schematic",

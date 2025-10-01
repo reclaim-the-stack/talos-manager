@@ -125,15 +125,19 @@ class Server < ApplicationRecord
   end
 
   def bootstrap_image_url(platform: "metal", talos_version: TalosImageFactorySetting.singleton.version)
-    schematic_id =
-      talos_image_factory_schematic&.schematic_id || TalosImageFactory.create_schematic_with_talos_config.fetch("id")
+    existing_schematic_id =
+      talos_image_factory_schematic&.schematic_id ||
+      TalosImageFactorySetting.singleton.talos_image_factory_schematic&.schematic_id
+    schematic_id = existing_schematic_id || TalosImageFactory.create_schematic_with_talos_config.fetch("id")
 
     "#{TalosImageFactory::BASE_URL}/image/#{schematic_id}/#{talos_version}/#{platform}-#{architecture}.raw.zst"
   end
 
   def upgrade_image_url(platform: "metal", talos_version: TalosImageFactorySetting.singleton.version)
-    schematic_id =
-      talos_image_factory_schematic&.schematic_id || TalosImageFactory.create_schematic_with_talos_config.fetch("id")
+    existing_schematic_id =
+      talos_image_factory_schematic&.schematic_id ||
+      TalosImageFactorySetting.singleton.talos_image_factory_schematic&.schematic_id
+    schematic_id = existing_schematic_id || TalosImageFactory.create_schematic_with_talos_config.fetch("id")
 
     "factory.talos.dev/#{platform}-installer/#{schematic_id}:#{talos_version}"
   end

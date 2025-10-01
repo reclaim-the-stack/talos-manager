@@ -7,12 +7,10 @@ class TalosImageFactorySetting < ApplicationRecord
     first_or_create!
   end
 
-  validates :version, presence: true
-  validates :version, uniqueness: true
-  validates :version, format: { with: /\Av\d+\.\d+\.\d+\z/, message: "must be in the format vX.Y.Z" }
-  validates :version, length: { maximum: 20 }
+  belongs_to :talos_image_factory_schematic, optional: true
 
   attribute :version, :string, default: "v1.10.4"
 
   validates_presence_of :version
+  validates :version, format: { with: /\Av\d+\.\d+\.\d+\z/, message: "must be in the format vX.Y.Z" }
 end

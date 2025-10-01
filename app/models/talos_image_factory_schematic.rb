@@ -3,6 +3,9 @@ class TalosImageFactorySchematic < ApplicationRecord
   validates_uniqueness_of :name
   validates_presence_of :body
   validate :validate_and_normalize_and_post_body, if: :body_changed?
+  validates_presence_of :schematic_id # must be validated after body is validated and posted
+
+  has_one :talos_image_factory_setting, dependent: :nullify
 
   # private
 
