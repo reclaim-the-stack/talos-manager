@@ -27,13 +27,13 @@ class LabelAndTaintJob < ApplicationJob
 
         break true if success
 
-        Rails.logger.warn "Attempt #{attempt + 1}/30: Waiting for #{server.name}. Output: #{stderr}. Retrying in 5 seconds..."
+        Rails.logger.warn "Attempt #{attempt + 1}/60: Waiting for #{server.name}. Output: #{stderr}. Retrying in 5 seconds..."
         sleep 5 unless Rails.env.test?
         false
       end
 
     unless server_present
-      Rails.logger.error "Failed to confirm #{server.name} in the cluster after 30 attempts, aborting"
+      Rails.logger.error "Failed to confirm #{server.name} in the cluster after 60 attempts, aborting"
       return
     end
 
