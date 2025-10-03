@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Server < ApplicationRecord
   belongs_to :cluster, optional: true
   belongs_to :api_key
@@ -67,7 +69,8 @@ class Server < ApplicationRecord
   # sync
   # reboot
   def bootstrap!(talos_version:)
-    session = Net::SSH.start(ip, "root", key_data: [ENV.fetch("SSH_PRIVATE_KEY")])
+    key_data = [ENV.fetch("SSH_PRIVATE_KEY")]
+    session = Net::SSH.start(ip, "root", key_data:, non_interactive: true, verify_host_key: :never, timeout: 2)
     talos_image_url = bootstrap_image_url(talos_version:)
 
     Rails.logger.info "Wiping disk #{bootstrap_disk} before bootstrapping"
