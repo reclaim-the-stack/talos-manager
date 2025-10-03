@@ -31,7 +31,7 @@ RSpec.describe Server do
       talos_version = "v1.10.5"
       server = servers(:cloud_bootstrappable)
       server.update! talos_image_factory_schematic: talos_image_factory_schematics(:default)
-      expected_url = "#{TalosImageFactory::BASE_URL}/image/#{talos_image_factory_schematics(:default).schematic_id}/#{talos_version}/metal-#{server.architecture}.raw.zst"
+      expected_url = "#{TalosImageFactory::BASE_URL}/image/#{talos_image_factory_schematics(:default).schematic_id}/#{talos_version}/metal-#{server.architecture}.raw.zst" # rubocop:disable Layout/LineLength
       expect(server.bootstrap_image_url(talos_version:)).to eq(expected_url)
     end
 
@@ -39,7 +39,7 @@ RSpec.describe Server do
       server = Server.new
       default_setting = TalosImageFactorySetting.singleton
       default_setting.update! talos_image_factory_schematic: talos_image_factory_schematics(:default)
-      expected_url = "#{TalosImageFactory::BASE_URL}/image/#{default_setting.talos_image_factory_schematic&.schematic_id}/#{default_setting.version}/metal-#{server.architecture}.raw.zst"
+      expected_url = "#{TalosImageFactory::BASE_URL}/image/#{default_setting.talos_image_factory_schematic&.schematic_id}/#{default_setting.version}/metal-#{server.architecture}.raw.zst" # rubocop:disable Layout/LineLength
       expect(server.bootstrap_image_url).to eq(expected_url)
     end
   end
