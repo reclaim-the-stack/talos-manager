@@ -71,14 +71,10 @@ class MachineConfig < ApplicationRecord
         #{server.cluster.endpoint}
     )
 
-    config = Open3.popen3(command) do |_stdin, stdout, stderr, wait_thread|
-      if wait_thread.value.success?
-        stdout.read
-      else
-        output = stderr.read
-        message = "Failed to generate talos configuration.\nCommand:#{command}\nOutput: #{output}"
-        raise InvalidConfigError.new(message, output)
-      end
+    stdout, stderr, status = Open3.capture3(command)
+    unless status.success?
+      message = "Failed to generate talos configuration.\nCommand:#{command}\nOutput: #{stderr}"
+      raise InvalidConfigError.new(message, stderr)
     end
 
     File.delete(secrets_file)
@@ -86,7 +82,7 @@ class MachineConfig < ApplicationRecord
     File.delete(patch_control_plane_file)
     File.delete(patch_worker_file)
 
-    talosconfig = YAML.safe_load(config)
+    talosconfig = YAML.safe_load(stdout)
 
     # Initially talosconfig is generated with an endpoint of 127.0.0.1 and no nodes.
     # Hence we add the first control plane IP as both enpoint and node.

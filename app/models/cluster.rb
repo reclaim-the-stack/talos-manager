@@ -68,10 +68,9 @@ class Cluster < ApplicationRecord
 
     cmd = "talosctl gen config -o - --output-types controlplane --with-secrets #{random_tmp_file} test https://host:6443"
 
-    Open3.popen3(cmd) do |_stdin, _stdout, stderr, wait_thread|
-      break if wait_thread.value.success?
-
-      errors.add(:secrets, stderr.read)
+    _stdout, stderr, status = Open3.capture3(cmd)
+    unless status.success?
+      errors.add(:secrets, stderr.presence || "talosctl gen config failed")
     end
   ensure
     FileUtils.rm_f(random_tmp_file)
