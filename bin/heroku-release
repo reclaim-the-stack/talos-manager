@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Release command which handles initial database bootstrap as well as subsequent migrations. Based on:
 # https://gist.github.com/stevenharman/98576bf49b050b9e59fb26626b7cceff#file-bin-heroku_release-sh
 
