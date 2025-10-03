@@ -39,8 +39,15 @@ class ServersController < ApplicationController
 
     talos_version = params.expect(:talos_version)
     talos_image_factory_schematic_id = params[:talos_image_factory_schematic_id]
-    bootstrap_disk_wwid = params.expect(:bootstrap_disk_wwid)
-    bootstrap_disk_name = server.lsblk.fetch("blockdevices").find { it.fetch("wwn") == bootstrap_disk_wwid }.fetch("name")
+
+    if server.is_a?(Server::HetznerDedicated)
+      bootstrap_disk_wwid = params.expect(:bootstrap_disk_wwid)
+      bootstrap_disk_name = server.lsblk.fetch("blockdevices").find { it.fetch("wwn") == bootstrap_disk_wwid }.fetch("name")
+    elsif server.is_a?(Server::HetznerCloud)
+      # Cloud servers only have one disk so we don't need to select one
+      bootstrap_disk_wwid = nil
+      bootstrap_disk_name = server.lsblk.fetch("blockdevices").find { it.fetch("type") == "disk" }.fetch("name")
+    end
 
     # pretend it's not accessible while bootstrapping to hide bootstrap button
     server.update!(

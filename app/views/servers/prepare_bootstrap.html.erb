@@ -31,48 +31,54 @@
           )
         %>
 
-        <% disks = @server.lsblk.fetch("blockdevices").select { |disk| disk.fetch("type") == "disk" } %>
-        <%
-          disk_options = disks
-            .map do |disk|
-              partitions = disk.fetch("children", []).select { it.fetch("type").start_with?("part") }
-              raid = disk.fetch("children", []).find { it.fetch("type").start_with?("raid") }&.fetch("name")
-              suffix = raid ? "[RAID /dev/#{raid}]" : "[#{partitions.length} existing partition#{'s' if partitions.length != 1}]"
-              label = "/dev/#{disk['name']} (#{number_to_human_size(disk['size'])}) #{suffix}"
-              value = disk.fetch("wwn")
+        <% if @server.is_a?(Server::HetznerDedicated) %>
+          <% disks = @server.lsblk.fetch("blockdevices").select { |disk| disk.fetch("type") == "disk" } %>
+          <%
+            disk_options = disks
+              .map do |disk|
+                partitions = disk.fetch("children", []).select { it.fetch("type").start_with?("part") }
+                raid = disk.fetch("children", []).find { it.fetch("type").start_with?("raid") }&.fetch("name")
+                suffix = raid ? "[RAID /dev/#{raid}]" : "[#{partitions.length} existing partition#{'s' if partitions.length != 1}]"
+                label = "/dev/#{disk['name']} (#{number_to_human_size(disk['size'])}) #{suffix}"
+                value = disk.fetch("wwn")
 
-              [label, value]
-            end
-            .sort_by(&:first)
-        %>
-        <%=
-          f.select(
-            :bootstrap_disk_wwid,
-            disk_options,
-            {
-              prompt: "Select a disk to bootstrap",
-              # the first non raided disk should be selected by default
-              selected: disk_options.find { |label, _| label.exclude?("RAID") }&.last,
-              # raided disks should be disabled
-              disabled: disk_options.select { |label, _| label.include?("RAID") }.map(&:last),
-            },
-            onchange: "
-              if(!this.value || parseInt(this.selectedOptions[0].innerText.split('[')[1][0]) == 0)
-                document.getElementById('bootstrap-warning').classList.add('hidden')
-              else
-                document.getElementById('bootstrap-warning').classList.remove('hidden')
-            ",
-            required: true,
-            label: "Bootstrap disk",
-          )
-        %>
+                [label, value]
+              end
+              .sort_by(&:first)
+          %>
+          <%=
+            f.select(
+              :bootstrap_disk_wwid,
+              disk_options,
+              {
+                prompt: "Select a disk to bootstrap",
+                # the first non raided disk should be selected by default
+                selected: disk_options.find { |label, _| label.exclude?("RAID") }&.last,
+                # raided disks should be disabled
+                disabled: disk_options.select { |label, _| label.include?("RAID") }.map(&:last),
+              },
+              onchange: "
+                if(!this.value || parseInt(this.selectedOptions[0].innerText.split('[')[1][0]) == 0)
+                  document.getElementById('bootstrap-warning').classList.add('hidden')
+                else
+                  document.getElementById('bootstrap-warning').classList.remove('hidden')
+              ",
+              required: true,
+              label: "Bootstrap disk",
+            )
+          %>
 
-        <p id="bootstrap-warning" class="bg-yellow-100 text-yellow-800 p-4 rounded mb-4 hidden border border-yellow-200">
-          <strong>Warning:</strong> Existing partitions on the selected disk will be wiped.
-        </p>
+          <p id="bootstrap-warning" class="bg-yellow-100 text-yellow-800 p-4 rounded mb-4 hidden border border-yellow-200">
+            <strong>Warning:</strong> Existing partitions on the selected disk will be wiped.
+          </p>
 
-        <%# Trigger change event to show/hide the warning based on the initially selected disk %>
-        <script>document.getElementById("bootstrap_disk_wwid").dispatchEvent(new Event("change"))</script>
+          <%# Trigger change event to show/hide the warning based on the initially selected disk %>
+          <script>document.getElementById("bootstrap_disk_wwid").dispatchEvent(new Event("change"))</script>
+        <% else %>
+          <p class="bg-blue-100 text-blue-800 p-4 rounded mb-4 border border-blue-200">
+            <strong>Note:</strong> Talos will be installed to /dev/sda. Any existing partitions will be wiped.
+          </p>
+        <% end %>
 
         <%= f.submit "Bootstrap!" %>
       <% end %>
