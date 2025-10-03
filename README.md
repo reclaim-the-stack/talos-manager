@@ -115,6 +115,22 @@ heroku container:release web --app <heroku-app-name>
 
 Set `DB_ADAPTER=sqlite` and `config/database.yml` will be configured to use SQLite.
 
+## RAID support
+
+Talos manager supports using a RAID device for Talos's EPHEMERAL partition provided you have added the `mdadm` extension to your Talos Factory Schematic.
+
+For this to work you'll need at least 3 disks on the target server (1 for Talos system installation and 2+ for RAID).
+
+Prepare the the RAID device in Hetzner rescue OS before bootstrapping with `mdadm --create`. Eg:
+
+```bash
+mdadm --create --verbose /dev/md0 --level=0 --raid-devices=2 /dev/<device1> /dev/<device2>
+```
+
+NOTE: DO NOT create any filesystem on the device or Talos Manager won't recognize the device as available for EPHEMERAL bootstrapping.
+
+After creating the RAID device, refresh the servers inside Talos Manager to pick up the new block device configuration. In the Configure screen you should now be able to select the RAID device for the EPHEMERAL partition.
+
 ## Config Patch Examples
 
 ### Basic
