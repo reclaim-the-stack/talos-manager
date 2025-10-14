@@ -89,4 +89,15 @@ RSpec.describe Server do
       expect(server.reload).not_to be_accessible
     end
   end
+
+  describe "#bootstrap_disk_wwid=" do
+    it "converts SCSI WWIDs to the correct format" do
+      server = Server.new(bootstrap_disk_wwid: "0x5002538c6003052d")
+      expect(server.bootstrap_disk_wwid).to eq "naa.5002538c6003052d"
+
+      # sanity check regular WWIDs are not changed
+      server = Server.new(bootstrap_disk_wwid: "eui.00000000000000178ce38e02001d0b64")
+      expect(server.bootstrap_disk_wwid).to eq "eui.00000000000000178ce38e02001d0b64"
+    end
+  end
 end
