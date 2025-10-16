@@ -52,10 +52,9 @@ class Server < ApplicationRecord
     bootstrap_metadata.fetch(:bootstrappable)
   end
 
-  # Convert SCSI NAA addresses to Talos readable WWIDs, more at:
-  # https://chatgpt.com/share/e/68ac4c53-3eec-800e-93de-fc4e97d2bf33
+  # Convert SCSI NAA addresses to Talos readable WWIDs
   def bootstrap_disk_wwid=(value)
-    if value.start_with?("0x")
+    if value&.start_with?("0x")
       super "naa.#{value.delete_prefix('0x').downcase}"
     else
       super

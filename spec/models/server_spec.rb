@@ -98,6 +98,10 @@ RSpec.describe Server do
       # sanity check regular WWIDs are not changed
       server = Server.new(bootstrap_disk_wwid: "eui.00000000000000178ce38e02001d0b64")
       expect(server.bootstrap_disk_wwid).to eq "eui.00000000000000178ce38e02001d0b64"
+
+      # sanity check works with nil value
+      server = Server.new(bootstrap_disk_wwid: nil)
+      expect(server.bootstrap_disk_wwid).to be_nil
     end
   end
 end
