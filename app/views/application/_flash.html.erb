@@ -7,7 +7,7 @@
   }
 </style>
 
-<dialog class="bottom-0 w-full bg-transparent" <%= "open" if flash[:notice] %>>
+<dialog closedBy="any" class="bottom-0 w-full bg-transparent" <%= "open" if flash[:notice] %>>
   <div
     class="flex bg-white shadow rounded opacity-0 -bottom-20 left-8 fixed p-3 items-center justify-between"
     style="animation: flash 10s; animation-iteration-count: 1;"
@@ -20,7 +20,7 @@
   </div>
 </dialog>
 
-<dialog class="bottom-0 w-full bg-transparent" <%= "open" if flash[:alert] %>>
+<dialog closedBy="any" class="bottom-0 w-full bg-transparent" <%= "open" if flash[:alert] %>>
   <div
     class="flex bg-white shadow rounded opacity-0 -bottom-20 left-8 fixed p-3 items-center justify-between"
     style="animation: flash 10s; animation-iteration-count: 1;"
