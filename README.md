@@ -333,3 +333,29 @@ kubectl drain $NODE --ignore-daemonsets --delete-emptydir-data &&
   talosctl reboot -n $NODE &&
   kubectl uncordon $NODE
 ```
+
+### Mounting encrypted partitions in rescue OS
+
+In case Talos blows up on a node and you need to access its disk encrypted with nodeID for reconfiguration or backup purposes do the following:
+
+```bash
+uuid=`dmidecode -s system-uuid`
+
+# State partition:
+echo "Password is: ${uuid}STATE"
+cryptsetup luksOpen /dev/nvme2n1p1 decrypted_state
+mount /dev/mapper/decrypted_state /mnt
+
+# Ephemeral partition:
+echo "Password is: ${uuid}EPHEMERAL"
+cryptsetup luksOpen /dev/nvme2n1p5 decrypted_ephemeral
+mount /dev/mapper/decrypted_ephemeral /mnt
+```
+
+### Figure out the network details in rescue OS
+
+Get the qualified network interface name:
+
+```bash
+udevadm test-builtin net_id /sys/class/net/eth0 2>/dev/null | grep ID_NET_NAME
+```
