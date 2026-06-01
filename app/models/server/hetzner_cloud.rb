@@ -15,7 +15,8 @@ class Server::HetznerCloud < Server
     end
 
     @bootstrap_metadata = { bootstrappable:, uuid:, lsblk: }
-  rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Net::SSH::AuthenticationFailed, Net::SSH::ConnectionTimeout
+  rescue Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Net::SSH::AuthenticationFailed,
+         Net::SSH::ConnectionTimeout
     @bootstrap_metadata = { bootstrappable: false, uuid: nil, lsblk: nil }
   ensure
     session&.shutdown!
