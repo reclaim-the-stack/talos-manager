@@ -17,7 +17,7 @@ class HetznerCloud
             type: "Server::HetznerCloud",
             architecture: server_payload.fetch("server_type").fetch("architecture") == "arm" ? "arm64" : "amd64",
             cancelled: false,
-            data_center: server_payload.fetch("datacenter").fetch("name"),
+            data_center: server_payload.fetch("location").fetch("name"),
             hetzner_vswitch_id: nil,
             ip: server_payload.fetch("public_net").fetch("ipv4").fetch("ip"),
             ipv6: server_payload.fetch("public_net").fetch("ipv6").fetch("ip"),
