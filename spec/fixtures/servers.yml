@@ -6,7 +6,7 @@ cloud_bootstrappable:
   type: Server::HetznerCloud
   name: worker-1
   accessible: true
-  data_center: hel1-dc2
+  data_center: hel1
   ip: "37.27.31.108"
   ipv6: "::1"
   product: cpx31
@@ -37,7 +37,7 @@ cloud_botstrapped:
   type: Server::HetznerCloud
   name: worker-2
   accessible: false
-  data_center: hel1-dc1
+  data_center: hel1
   ip: "37.27.31.109"
   ipv6: "::2"
   product: cpx31

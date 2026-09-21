@@ -12,7 +12,7 @@
         "name": "cpx31",
         "architecture": "x86"
       },
-      "datacenter": { "name": "hel-dc1" }
+      "location": { "name": "hel1" }
     },
     {
       "id": 2,
@@ -26,7 +26,7 @@
         "name": "cax21",
         "architecture": "arm"
       },
-      "datacenter": { "name": "hel-dc2" }
+      "location": { "name": "hel1" }
     }
   ],
   "meta": {
