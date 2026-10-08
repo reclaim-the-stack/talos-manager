@@ -135,7 +135,7 @@ After creating the RAID device, refresh the servers inside Talos Manager to pick
 
 ## Config Patch Examples
 
-Note: Talos Manager sets the hostname of each server to the name of the server, since Talos uses the hostname as the name of the cluster member and Kubernetes node. Hence config patches must not set the hostname.
+Note: Talos Manager sets the hostname of each server to the hostname chosen when configuring it (defaults to the server name). Hence config patches must not set the hostname.
 
 ### Basic
 

@@ -19,15 +19,14 @@ RSpec.describe MachineConfig do
 
   describe "#generate_config" do
     it "raises an error if hostname is blank" do
-      server = Server.new(name: nil)
-      machine_config = MachineConfig.new(server:)
-      expect { machine_config.generate_config(output_type: "worker") }
-        .to raise_error "can't generate config before assigning hostname"
+      server = Server.new(name: "worker-1")
+      machine_config = MachineConfig.new(hostname: nil, server:)
+      expect { machine_config.generate_config }.to raise_error "can't generate config before assigning hostname"
     end
 
     it "raises an error if private_ip is blank" do
       server = Server.new(name: "worker-1")
-      machine_config = MachineConfig.new(private_ip: nil, server:)
+      machine_config = MachineConfig.new(hostname: server.name, private_ip: nil, server: server)
       expect { machine_config.generate_config }.to raise_error "can't generate config before assigning private_ip"
     end
 
@@ -82,6 +81,7 @@ RSpec.describe MachineConfig do
         YAML
       )
       machine_config = MachineConfig.new(
+        hostname: server.name,
         private_ip: "10.0.1.1",
         install_disk: "/dev/nvme0n1",
         config:,
@@ -179,6 +179,7 @@ RSpec.describe MachineConfig do
         patch: "",
       )
       machine_config = MachineConfig.new(
+        hostname: server.name,
         private_ip: "10.0.1.2",
         install_disk: "/dev/nvme0n1",
         config:,
@@ -205,6 +206,7 @@ RSpec.describe MachineConfig do
           patch: "",
         )
         machine_config = MachineConfig.new(
+          hostname: server.name,
           private_ip: "10.0.1.2",
           install_disk: "/dev/nvme0n1",
           ephemeral_disk_identifier: "wwid:eui.36344630528029720025384500000002",
@@ -251,6 +253,7 @@ RSpec.describe MachineConfig do
           YAML
         )
         machine_config = MachineConfig.new(
+          hostname: server.name,
           private_ip: "10.0.1.2",
           install_disk: "/dev/nvme0n1",
           ephemeral_disk_identifier: "wwid:eui.36344630528029720025384500000002",

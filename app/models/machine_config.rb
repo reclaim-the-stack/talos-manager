@@ -1,4 +1,4 @@
-# Represents an application of Config on a Server, including private_ip and disk selection
+# Represents an application of Config on a Server, including hostname and private_ip
 
 require "open3"
 require "resolv"
@@ -107,12 +107,6 @@ class MachineConfig < ApplicationRecord
     patch_files&.each { FileUtils.rm_f(it.last) }
   end
 
-  # The hostname is always the server name since Talos uses the hostname as the name of the cluster
-  # member and Kubernetes node.
-  def hostname
-    server&.name
-  end
-
   private
 
   def empty_patch?(patch)
@@ -182,15 +176,12 @@ class MachineConfig < ApplicationRecord
     return if hostname.blank?
 
     unless valid_hostname_format?
-      errors.add(
-        :hostname,
-        "must contain only lowercase ASCII and dash and must end with -<number> (rename the server to change it)",
-      )
+      errors.add(:hostname, "must contain only lowercase ASCII and dash and must end with -<number>")
     end
   end
 
   def valid_hostname_format?
-    hostname.present? && hostname[/[a-z-]+-\d+$/]
+    hostname[/[a-z-]+-\d+$/]
   end
 
   def validate_private_ip_format
