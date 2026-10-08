@@ -70,8 +70,7 @@ RSpec.describe Config do
     config.validate
 
     hostname_patches.each_key do |attribute|
-      expect(config.errors[attribute])
-        .to include "must not set the hostname since Talos Manager sets it to the name of the server"
+      expect(config.errors[attribute]).to include "must not set the hostname since it's managed by Talos Manager"
     end
   end
 

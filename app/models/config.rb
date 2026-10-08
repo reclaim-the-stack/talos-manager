@@ -30,7 +30,7 @@ class Config < ApplicationRecord
     )
     dummy_cluster.validate # trigger the default secret generation callback
     dummy_server = Server.new(name: "control-plane-1", ip: "108.108.108.108", cluster: dummy_cluster)
-    dummy_config = MachineConfig.new(config: self, server: dummy_server, private_ip: "10.0.0.1")
+    dummy_config = MachineConfig.new(config: self, server: dummy_server, hostname: "worker-1", private_ip: "10.0.1.1")
     tmp_config_file = "#{Dir.tmpdir}/#{SecureRandom.hex}"
     File.write(tmp_config_file, dummy_config.generate_config)
     talos_validation = `talosctl validate -m metal --strict -c #{tmp_config_file} 2>&1`
@@ -46,7 +46,7 @@ class Config < ApplicationRecord
     documents = YAML.safe_load_stream(public_send(attribute).to_s)
 
     if documents.any? { sets_hostname?(it) }
-      errors.add(attribute, "must not set the hostname since Talos Manager sets it to the name of the server")
+      errors.add(attribute, "must not set the hostname since it's managed by Talos Manager")
       return false
     end
 
