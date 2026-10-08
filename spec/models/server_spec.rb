@@ -26,20 +26,6 @@ RSpec.describe Server do
     expect(server.errors[:name]).to include "has already been taken"
   end
 
-  it "validates format of talos_version" do
-    server = Server.new(talos_version: nil)
-    server.validate
-    expect(server.errors[:talos_version]).to be_empty
-
-    server.talos_version = "v1.10.4"
-    server.validate
-    expect(server.errors[:talos_version]).to be_empty
-
-    server.talos_version = "1.10.4; rm -rf /"
-    server.validate
-    expect(server.errors[:talos_version]).to include "must be in the format vX.Y.Z"
-  end
-
   describe "#bootstrap_image_url" do
     it "returns a URL to a Talos image with the correct schematic ID and Talos version" do
       talos_version = "v1.10.5"

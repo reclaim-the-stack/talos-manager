@@ -17,19 +17,6 @@ RSpec.describe MachineConfig do
     expect(machine_config.errors[:ephemeral_disk_identifier]).to include("must be in the format 'wwid:<wwid>' or 'uuid:<uuid>'")
   end
 
-  describe "#talos_version" do
-    it "returns the Talos version the server was bootstrapped with" do
-      machine_config = MachineConfig.new(server: Server.new(talos_version: "v1.11.2"))
-      expect(machine_config.talos_version).to eq "v1.11.2"
-    end
-
-    it "falls back to the default bootstrap Talos version for servers without a known version" do
-      TalosImageFactorySetting.singleton.update!(version: "v1.11.3")
-      machine_config = MachineConfig.new(server: Server.new(talos_version: nil))
-      expect(machine_config.talos_version).to eq "v1.11.3"
-    end
-  end
-
   describe "#generate_config" do
     it "raises an error if hostname is blank" do
       server = Server.new(name: "worker-1")
@@ -180,7 +167,7 @@ RSpec.describe MachineConfig do
       YAML
     end
 
-    it "generates a config for the Talos version the server was bootstrapped with" do
+    it "generates a config for the default Talos version" do
       server = servers(:cloud_botstrapped)
       config = Config.new(
         name: "config",
@@ -197,10 +184,10 @@ RSpec.describe MachineConfig do
       )
 
       # Talos 1.8 started forwarding Kubernetes DNS requests to the host DNS by default
-      server.talos_version = "v1.7.7"
+      TalosImageFactorySetting.singleton.update!(version: "v1.7.7")
       expect(machine_config.generate_config).not_to include "forwardKubeDNSToHost"
 
-      server.talos_version = "v1.8.0"
+      TalosImageFactorySetting.singleton.update!(version: "v1.8.0")
       expect(machine_config.generate_config).to include "forwardKubeDNSToHost: true"
     end
 

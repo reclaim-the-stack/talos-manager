@@ -103,7 +103,7 @@ Once the build has completed you should be able to access Talos Manager at `<nam
 
 The default Talos version for bootstrapping servers can be configured on the Settings page of the application, and can be overridden per server when bootstrapping.
 
-Machine configs are generated for the Talos version each server was bootstrapped with (via `talosctl gen config --talos-version`), so the `talosctl` bundled in the docker container doesn't need to match the Talos version of your servers. Servers bootstrapped before Talos Manager started tracking versions fall back to the default version from the Settings page.
+The default Talos version is also used as the target version when generating machine configs (via `talosctl gen config --talos-version`), so the `talosctl` bundled in the docker container doesn't need to match the Talos version of your servers. If you override the Talos version when bootstrapping a server, avoid picking a version older than the default, since configs generated for newer Talos versions may not be understood by older ones.
 
 If you need a different `talosctl` version, eg. to make use of configuration features from a newer Talos release, you can build the docker container using the `TALOS_VERSION` build arg. Eg:
 
