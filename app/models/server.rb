@@ -18,6 +18,7 @@ class Server < ApplicationRecord
   validates_presence_of :product
   validates_presence_of :data_center
   validates_presence_of :status # running, initializing, starting, stopping, off, deleting migrating, rebuilding, unknown
+  validates :talos_version, format: { with: /\Av\d+\.\d+\.\d+\z/, message: "must be in the format vX.Y.Z" }, allow_nil: true
 
   # Implement #sync_with_provider in subclasses of Server
   after_save :sync_with_provider, if: :sync

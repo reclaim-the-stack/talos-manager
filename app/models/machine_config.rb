@@ -55,6 +55,7 @@ class MachineConfig < ApplicationRecord
 
     command = %(
       talosctl gen config \
+        --talos-version #{talos_version} \
         --install-disk #{install_disk} \
         --install-image #{config.install_image} \
         --kubernetes-version #{running_or_configured_kubernetes_version} \
@@ -126,6 +127,14 @@ class MachineConfig < ApplicationRecord
     end
 
     config
+  end
+
+  # The machine config format depends on the Talos version, eg. newer versions of talosctl generate
+  # multi-document configs which older versions of Talos won't accept. Hence we generate configs for
+  # the Talos version the server was bootstrapped with rather than the version of talosctl installed.
+  # Servers bootstrapped before we started tracking versions fall back to the default bootstrap version.
+  def talos_version
+    server.talos_version.presence || TalosImageFactorySetting.singleton.version
   end
 
   private

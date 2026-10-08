@@ -58,6 +58,7 @@ class ServersController < ApplicationController
       last_configured_at: nil,
       last_request_for_configuration_at: nil,
       talos_image_factory_schematic_id:,
+      talos_version:,
     )
 
     ServerBootstrapJob.perform_later(server.id, talos_version:)

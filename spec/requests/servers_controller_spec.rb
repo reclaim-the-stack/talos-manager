@@ -148,6 +148,7 @@ RSpec.describe "ServersController" do
         last_configured_at: nil,
         last_request_for_configuration_at: nil,
         talos_image_factory_schematic_id: talos_image_factory_schematics(:default).id,
+        talos_version:,
       )
     end
   end

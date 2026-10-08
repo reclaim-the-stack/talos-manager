@@ -101,12 +101,14 @@ Once the build has completed you should be able to access Talos Manager at `<nam
 
 #### Deploying with a specific talos version
 
-Talos version can be configured on the Settings page of the application.
+The default Talos version for bootstrapping servers can be configured on the Settings page of the application, and can be overridden per server when bootstrapping.
 
-However, to support configuration generation in legacy versions you may also need to manually build the docker container using the appropriate `TALOS_VERSION` build arg. Eg:
+Machine configs are generated for the Talos version each server was bootstrapped with (via `talosctl gen config --talos-version`), so the `talosctl` bundled in the docker container doesn't need to match the Talos version of your servers. Servers bootstrapped before Talos Manager started tracking versions fall back to the default version from the Settings page.
+
+If you need a different `talosctl` version, eg. to make use of configuration features from a newer Talos release, you can build the docker container using the `TALOS_VERSION` build arg. Eg:
 
 ```
-docker build --platform linux/amd64 --build-arg TALOS_VERSION=1.3.7 -t registry.heroku.com/<heroku-app-name>/web .
+docker build --platform linux/amd64 --build-arg TALOS_VERSION=<talosctl-version> -t registry.heroku.com/<heroku-app-name>/web .
 docker push registry.heroku.com/<heroku-app-name>/web
 heroku container:release web --app <heroku-app-name>
 ```
