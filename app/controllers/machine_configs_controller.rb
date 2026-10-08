@@ -10,7 +10,6 @@ class MachineConfigsController < ApplicationController
     @server = Server.find(params.require(:server_id))
     @machine_config = MachineConfig.new(
       server: @server,
-      hostname: @server.name,
       private_ip: default_private_ip(@server.name),
       install_disk: @server.bootstrap_disk || "/dev/sda",
     )
@@ -20,7 +19,6 @@ class MachineConfigsController < ApplicationController
     machine_config_params = params.require(:machine_config).permit(
       :config_id,
       :server_id,
-      :hostname,
       :private_ip,
       :already_configured,
       :install_disk,

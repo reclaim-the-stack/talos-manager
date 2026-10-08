@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_01_101556) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_08_142919) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -64,7 +64,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_01_101556) do
   create_table "machine_configs", force: :cascade do |t|
     t.integer "config_id", null: false
     t.integer "server_id", null: false
-    t.string "hostname", null: false
     t.string "private_ip", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

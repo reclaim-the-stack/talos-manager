@@ -19,14 +19,15 @@ RSpec.describe MachineConfig do
 
   describe "#generate_config" do
     it "raises an error if hostname is blank" do
-      server = Server.new(name: "worker-1")
-      machine_config = MachineConfig.new(hostname: nil, server:)
-      expect { machine_config.generate_config }.to raise_error "can't generate config before assigning hostname"
+      server = Server.new(name: nil)
+      machine_config = MachineConfig.new(server:)
+      expect { machine_config.generate_config(output_type: "worker") }
+        .to raise_error "can't generate config before assigning hostname"
     end
 
     it "raises an error if private_ip is blank" do
       server = Server.new(name: "worker-1")
-      machine_config = MachineConfig.new(hostname: server.name, private_ip: nil, server: server)
+      machine_config = MachineConfig.new(private_ip: nil, server:)
       expect { machine_config.generate_config }.to raise_error "can't generate config before assigning private_ip"
     end
 
@@ -49,8 +50,9 @@ RSpec.describe MachineConfig do
             install:
               diskSelector:
                 wwid: ${bootstrap_disk_wwid}
+            nodeLabels:
+              example.com/hostname: ${hostname}
             network:
-              hostname: ${hostname}
               interfaces:
                 - dhcp: true
                   interface: eth0
@@ -80,7 +82,6 @@ RSpec.describe MachineConfig do
         YAML
       )
       machine_config = MachineConfig.new(
-        hostname: server.name,
         private_ip: "10.0.1.1",
         install_disk: "/dev/nvme0n1",
         config:,
@@ -142,6 +143,8 @@ RSpec.describe MachineConfig do
             hostDNS:
               enabled: true
               forwardKubeDNSToHost: true
+          nodeLabels:
+            example.com/hostname: worker-1
         cluster:
           id: tU5mLlegKAEG9dzpYl2AUmzqjvWrOgosLmcsdBgotuU=
           secret: 7sfcLtpX8+5+Pf/dWVSr6bXBcYtLFn9g9L0FOn60h0s=
@@ -176,7 +179,6 @@ RSpec.describe MachineConfig do
         patch: "",
       )
       machine_config = MachineConfig.new(
-        hostname: server.name,
         private_ip: "10.0.1.2",
         install_disk: "/dev/nvme0n1",
         config:,
@@ -203,7 +205,52 @@ RSpec.describe MachineConfig do
           patch: "",
         )
         machine_config = MachineConfig.new(
-          hostname: server.name,
+          private_ip: "10.0.1.2",
+          install_disk: "/dev/nvme0n1",
+          ephemeral_disk_identifier: "wwid:eui.36344630528029720025384500000002",
+          config:,
+          server:,
+        )
+
+        documents = YAML.load_stream(machine_config.generate_config)
+        expect(documents.length).to eq 2
+        expect(documents.last).to eq(
+          "apiVersion" => "v1alpha1",
+          "kind" => "VolumeConfig",
+          "name" => "EPHEMERAL",
+          "provisioning" => {
+            "diskSelector" => { "match" => "disk.wwid == 'eui.36344630528029720025384500000002'" },
+            "minSize" => "10GB",
+            "grow" => true,
+          },
+        )
+
+        machine_config.ephemeral_disk_identifier = "uuid:1a462672-bd83-888c-df8f-a57e6b38f998"
+
+        documents = YAML.load_stream(machine_config.generate_config)
+        expect(documents.length).to eq 2
+        expect(documents.last.dig("provisioning", "diskSelector", "match"))
+          .to eq "'/dev/disk/by-id/md-uuid-1a462672:bd83888c:df8fa57e:6b38f998' in disk.symlinks"
+      end
+    end
+
+    context "with Talos 1.12+" do
+      it "generates a multi document config with a HostnameConfig and the ephemeral VolumeConfig merged into the defaults" do
+        TalosImageFactorySetting.singleton.update!(version: "v1.14.1")
+        server = servers(:cloud_botstrapped)
+
+        config = Config.new(
+          name: "config",
+          install_image: "ghcr.io/siderolabs/installer:v1.14.1",
+          kubernetes_version: "1.33.3",
+          patch: <<~YAML,
+            apiVersion: v1alpha1
+            kind: SysctlConfig
+            params:
+              vm.max_map_count: "262144"
+          YAML
+        )
+        machine_config = MachineConfig.new(
           private_ip: "10.0.1.2",
           install_disk: "/dev/nvme0n1",
           ephemeral_disk_identifier: "wwid:eui.36344630528029720025384500000002",
@@ -212,36 +259,31 @@ RSpec.describe MachineConfig do
         )
 
         generated_config = machine_config.generate_config
-        expect(YAML.load_stream(generated_config).length).to eq 2 # sanity check that YAML is valid
+        documents = YAML.load_stream(generated_config)
+        documents_by_kind = documents.group_by { it["kind"] }
 
-        volume_config = generated_config.split("---\n").last # expect on raw String to ensure good formatting
-        expect(volume_config).to eq <<~YAML
-          apiVersion: v1alpha1
-          kind: VolumeConfig
-          name: EPHEMERAL
-          provisioning:
-            diskSelector:
-              match: "disk.wwid == 'eui.36344630528029720025384500000002'"
-            minSize: 10GB
-            grow: true
-        YAML
+        expect(documents.first.dig("machine", "network", "hostname")).to be_nil
+        expect(documents_by_kind.fetch("HostnameConfig")).to eq [
+          { "apiVersion" => "v1alpha1", "kind" => "HostnameConfig", "auto" => "off", "hostname" => "worker-2" },
+        ]
+        expect(documents_by_kind.fetch("SysctlConfig").sole.fetch("params")).to eq("vm.max_map_count" => "262144")
+        expect(documents_by_kind.fetch("UnattendedInstallConfig").sole.dig("installer", "image"))
+          .to eq "ghcr.io/siderolabs/installer:v1.14.1"
 
-        machine_config.ephemeral_disk_identifier = "uuid:1a462672-bd83-888c-df8f-a57e6b38f998"
+        ephemeral_volume_configs = documents_by_kind.fetch("VolumeConfig").select { it["name"] == "EPHEMERAL" }
+        expect(ephemeral_volume_configs.sole).to include(
+          "mount" => { "secure" => true }, # default from talosctl gen config
+          "provisioning" => {
+            "diskSelector" => { "match" => "disk.wwid == 'eui.36344630528029720025384500000002'" },
+            "minSize" => "10GB",
+            "grow" => true,
+          },
+        )
 
-        generated_config = machine_config.generate_config
-        expect(YAML.load_stream(generated_config).length).to eq 2 # sanity check that YAML is valid
-
-        volume_config = generated_config.split("---\n").last # expect on raw String to ensure good formatting
-        expect(volume_config).to eq <<~YAML
-          apiVersion: v1alpha1
-          kind: VolumeConfig
-          name: EPHEMERAL
-          provisioning:
-            diskSelector:
-              match: "'/dev/disk/by-id/md-uuid-1a462672:bd83888c:df8fa57e:6b38f998' in disk.symlinks"
-            minSize: 10GB
-            grow: true
-        YAML
+        config_file = Tempfile.new("config")
+        config_file.write(generated_config)
+        config_file.close
+        expect(`talosctl validate -m metal --strict -c #{config_file.path} 2>&1`).to include "is valid"
       end
     end
   end
