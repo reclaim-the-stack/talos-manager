@@ -76,10 +76,10 @@ RSpec.describe Config do
   end
 
   it "accepts multi document patches for Talos 1.12+" do
-    TalosImageFactorySetting.singleton.update!(version: "v1.14.1")
+    TalosImageFactorySetting.singleton.update!(version: "v1.14.2")
 
     config = Config.new(
-      install_image: "ghcr.io/siderolabs/installer:v1.14.1",
+      install_image: "ghcr.io/siderolabs/installer:v1.14.2",
       kubernetes_version: "1.33.3",
       patch: <<~YAML,
         apiVersion: v1alpha1
