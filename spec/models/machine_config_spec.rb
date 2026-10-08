@@ -236,12 +236,12 @@ RSpec.describe MachineConfig do
 
     context "with Talos 1.12+" do
       it "generates a multi document config with a HostnameConfig and the ephemeral VolumeConfig merged into the defaults" do
-        TalosImageFactorySetting.singleton.update!(version: "v1.14.1")
+        TalosImageFactorySetting.singleton.update!(version: "v1.14.2")
         server = servers(:cloud_botstrapped)
 
         config = Config.new(
           name: "config",
-          install_image: "ghcr.io/siderolabs/installer:v1.14.1",
+          install_image: "ghcr.io/siderolabs/installer:v1.14.2",
           kubernetes_version: "1.33.3",
           patch: <<~YAML,
             apiVersion: v1alpha1
@@ -268,7 +268,7 @@ RSpec.describe MachineConfig do
         ]
         expect(documents_by_kind.fetch("SysctlConfig").sole.fetch("params")).to eq("vm.max_map_count" => "262144")
         expect(documents_by_kind.fetch("UnattendedInstallConfig").sole.dig("installer", "image"))
-          .to eq "ghcr.io/siderolabs/installer:v1.14.1"
+          .to eq "ghcr.io/siderolabs/installer:v1.14.2"
 
         ephemeral_volume_configs = documents_by_kind.fetch("VolumeConfig").select { it["name"] == "EPHEMERAL" }
         expect(ephemeral_volume_configs.sole).to include(
