@@ -1,6 +1,6 @@
 <%= turbo_frame_tag talos_image_factory_setting do %>
   <%= form_with model: talos_image_factory_setting do |f| %>
-    <%= f.select :version, sorted_talos_versions, { include_blank: false }, label: "Default Talos Version", required: false %>
+    <%= f.select :version, sorted_talos_versions, { include_blank: false }, label: "Default Talos Version", required: false, hint: "Also used as the target version (--talos-version) when generating machine configs." %>
     <%=
       f.select(
         :talos_image_factory_schematic_id,

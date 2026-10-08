@@ -53,8 +53,14 @@ class MachineConfig < ApplicationRecord
         server.cluster.running_kubernetes_version || config.kubernetes_version
       end
 
+    # The machine config format depends on the Talos version, eg. newer versions of talosctl generate
+    # multi-document configs which older versions of Talos won't accept. Hence we explicitly generate
+    # configs for the default Talos version rather than for the version of the installed talosctl.
+    talos_version = TalosImageFactorySetting.singleton.version
+
     command = %(
       talosctl gen config \
+        --talos-version #{talos_version} \
         --install-disk #{install_disk} \
         --install-image #{config.install_image} \
         --kubernetes-version #{running_or_configured_kubernetes_version} \

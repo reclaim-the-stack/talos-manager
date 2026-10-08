@@ -167,6 +167,30 @@ RSpec.describe MachineConfig do
       YAML
     end
 
+    it "generates a config for the default Talos version" do
+      server = servers(:cloud_botstrapped)
+      config = Config.new(
+        name: "config",
+        install_image: "ghcr.io/siderolabs/installer:v1.10.4",
+        kubernetes_version: "1.30.1",
+        patch: "",
+      )
+      machine_config = MachineConfig.new(
+        hostname: server.name,
+        private_ip: "10.0.1.2",
+        install_disk: "/dev/nvme0n1",
+        config:,
+        server:,
+      )
+
+      # Talos 1.8 started forwarding Kubernetes DNS requests to the host DNS by default
+      TalosImageFactorySetting.singleton.update!(version: "v1.7.7")
+      expect(machine_config.generate_config).not_to include "forwardKubeDNSToHost"
+
+      TalosImageFactorySetting.singleton.update!(version: "v1.8.0")
+      expect(machine_config.generate_config).to include "forwardKubeDNSToHost: true"
+    end
+
     context "with an ephemeral_disk_identifier" do
       it "generates a config including a VolumeConfig for the ephemeral disk with different matchers for uuid and wwid" do
         server = servers(:cloud_botstrapped)
