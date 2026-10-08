@@ -60,9 +60,9 @@ RSpec.describe Config do
         hostname: ${hostname}
       YAML
       patch_worker: <<~YAML,
-        - op: add
-          path: /machine/network/hostname
-          value: ${hostname}
+        apiVersion: v1alpha1
+        kind: HostnameConfig
+        auto: stable
       YAML
     }
 
