@@ -3,7 +3,7 @@
 <%= form_with model: @machine_config do |f| %>
   <%= f.hidden_field :server_id %>
 
-  <%= f.text_field :hostname, required: true, placeholder: "worker-x", hint: "Will substitute ${hostname} in your config patches." %>
+  <%= f.text_field :hostname, required: true, placeholder: "worker-x", hint: "Sets the hostname of the server, which Talos uses as the name of the cluster member and Kubernetes node. Will substitute ${hostname} in your config patches." %>
   <%= f.text_field :private_ip, required: true, placeholder: "10.0.x.x", label: "Private IP", hint: "Will substitute ${private_ip} in your config patches." %>
   <% if f.object.server.lsblk.present? %>
     <%= f.text_field :install_disk, required: true, disabled: true, hint: "Gets passed into the --install-disk argument for talosctl gen config. Non modifiable: must use the same disk which was used for bootstrapping." %>

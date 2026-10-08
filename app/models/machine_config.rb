@@ -31,18 +31,6 @@ class MachineConfig < ApplicationRecord
     raise "can't generate config before assigning hostname" if hostname.blank?
     raise "can't generate config before assigning private_ip" if private_ip.blank?
 
-    secrets_file = "#{Dir.tmpdir}/secrets-#{SecureRandom.hex}"
-    File.write(secrets_file, server.cluster.secrets)
-
-    patch_file = "#{Dir.tmpdir}/patch-#{SecureRandom.hex}"
-    File.write(patch_file, replace_substitution_variables(config.patch))
-
-    patch_control_plane_file = "#{Dir.tmpdir}/patch-control-plane-#{SecureRandom.hex}"
-    File.write(patch_control_plane_file, replace_substitution_variables(config.patch_control_plane || ""))
-
-    patch_worker_file = "#{Dir.tmpdir}/patch-worker-#{SecureRandom.hex}"
-    File.write(patch_worker_file, replace_substitution_variables(config.patch_worker || ""))
-
     # Prefer the running kubernetes version over the configured one since bootstrapping
     # outdated versions can lead to issues.
     running_or_configured_kubernetes_version =
@@ -58,15 +46,31 @@ class MachineConfig < ApplicationRecord
     # configs for the default Talos version rather than for the version of the installed talosctl.
     talos_version = TalosImageFactorySetting.singleton.version
 
+    secrets_file = "#{Dir.tmpdir}/secrets-#{SecureRandom.hex}"
+    File.write(secrets_file, server.cluster.secrets)
+
+    patches = [
+      ["--config-patch", replace_substitution_variables(config.patch.to_s)],
+      ["--config-patch", talos_manager_patch(talos_version)],
+      ["--config-patch-control-plane", replace_substitution_variables(config.patch_control_plane.to_s)],
+      ["--config-patch-worker", replace_substitution_variables(config.patch_worker.to_s)],
+    ]
+    # talosctl treats empty patches as JSON6902 patches which aren't supported for multi-document configs
+    patches.reject! { |_flag, patch| empty_patch?(patch) }
+
+    patch_files = patches.map do |flag, patch|
+      patch_file = "#{Dir.tmpdir}/patch-#{SecureRandom.hex}"
+      File.write(patch_file, patch)
+      [flag, patch_file]
+    end
+
     command = %(
       talosctl gen config \
         --talos-version #{talos_version} \
         --install-disk #{install_disk} \
         --install-image #{config.install_image} \
         --kubernetes-version #{running_or_configured_kubernetes_version} \
-        --config-patch @#{patch_file} \
-        --config-patch-control-plane @#{patch_control_plane_file} \
-        --config-patch-worker @#{patch_worker_file} \
+        #{patch_files.map { |flag, patch_file| "#{flag} @#{patch_file}" }.join(' ')} \
         --output-types #{output_type} \
         --with-secrets #{secrets_file} \
         --with-docs=false \
@@ -83,16 +87,13 @@ class MachineConfig < ApplicationRecord
       raise InvalidConfigError.new(message, stderr)
     end
 
-    File.delete(secrets_file)
-    File.delete(patch_file)
-    File.delete(patch_control_plane_file)
-    File.delete(patch_worker_file)
-
-    talosconfig = YAML.safe_load(stdout)
+    # Machine configs for Talos 1.12+ consist of multiple YAML documents
+    documents = YAML.safe_load_stream(stdout)
 
     # Initially talosconfig is generated with an endpoint of 127.0.0.1 and no nodes.
     # Hence we add the first control plane IP as both enpoint and node.
     if output_type == "talosconfig"
+      talosconfig = documents.first
       context_name = talosconfig.fetch("context")
       context = talosconfig.fetch("contexts").fetch(context_name)
       context["endpoints"] = [server.ip]
@@ -100,41 +101,67 @@ class MachineConfig < ApplicationRecord
     end
 
     # NOTE: This also gives us consistent 2 space indentation
-    config = talosconfig.to_yaml
-
-    # Add a VolumeConfig document if the server has an ephemeral disk identifier
-    if ephemeral_disk_identifier.present?
-      # id_type will be "wwid" for regular disks or "uuid" for raid arrays
-      id_type, id = ephemeral_disk_identifier.split(":", 2)
-
-      # https://www.talos.dev/v1.10/talos-guides/configuration/disk-management/#disk-selector
-      disk_selector_cel =
-        if id_type == "wwid"
-          "disk.wwid == '#{id}'"
-        elsif id_type == "uuid"
-          # Talos takes the UUID hex and puts colons every 8 characters
-          # 1a462672-bd83-888c-df8f-a57e6b38f998 -> 1a462672:bd83888c:df8fa57e:6b38f998
-          uuid_talos_style = id.delete("-").chars.each_slice(8).map(&:join).join(":")
-          "'/dev/disk/by-id/md-uuid-#{uuid_talos_style}' in disk.symlinks"
-        end
-
-      config += <<~YAML
-        ---
-        apiVersion: v1alpha1
-        kind: VolumeConfig
-        name: EPHEMERAL
-        provisioning:
-          diskSelector:
-            match: "#{disk_selector_cel}"
-          minSize: 10GB
-          grow: true
-      YAML
-    end
-
-    config
+    documents.map(&:to_yaml).join
+  ensure
+    FileUtils.rm_f(secrets_file) if secrets_file
+    patch_files&.each { FileUtils.rm_f(it.last) }
   end
 
   private
+
+  def empty_patch?(patch)
+    YAML.safe_load_stream(patch).compact.empty?
+  rescue Psych::Exception
+    false # leave it to talosctl to report the error
+  end
+
+  # Config documents managed by Talos Manager, applied on top of the user supplied config patches
+  def talos_manager_patch(talos_version)
+    documents = [hostname_patch(talos_version)]
+    documents << ephemeral_volume_config if ephemeral_disk_identifier.present?
+    documents.map(&:to_yaml).join
+  end
+
+  # Talos 1.12 deprecated machine.network.hostname in favour of the HostnameConfig document
+  def hostname_patch(talos_version)
+    if Gem::Version.new(talos_version.delete_prefix("v")) >= Gem::Version.new("1.12")
+      {
+        "apiVersion" => "v1alpha1",
+        "kind" => "HostnameConfig",
+        "auto" => "off", # gen config defaults to auto: stable which conflicts with a static hostname
+        "hostname" => hostname,
+      }
+    else
+      { "machine" => { "network" => { "hostname" => hostname } } }
+    end
+  end
+
+  def ephemeral_volume_config
+    # id_type will be "wwid" for regular disks or "uuid" for raid arrays
+    id_type, id = ephemeral_disk_identifier.split(":", 2)
+
+    # https://www.talos.dev/v1.10/talos-guides/configuration/disk-management/#disk-selector
+    disk_selector_cel =
+      if id_type == "wwid"
+        "disk.wwid == '#{id}'"
+      elsif id_type == "uuid"
+        # Talos takes the UUID hex and puts colons every 8 characters
+        # 1a462672-bd83-888c-df8f-a57e6b38f998 -> 1a462672:bd83888c:df8fa57e:6b38f998
+        uuid_talos_style = id.delete("-").chars.each_slice(8).map(&:join).join(":")
+        "'/dev/disk/by-id/md-uuid-#{uuid_talos_style}' in disk.symlinks"
+      end
+
+    {
+      "apiVersion" => "v1alpha1",
+      "kind" => "VolumeConfig",
+      "name" => "EPHEMERAL",
+      "provisioning" => {
+        "diskSelector" => { "match" => disk_selector_cel },
+        "minSize" => "10GB",
+        "grow" => true,
+      },
+    }
+  end
 
   def replace_substitution_variables(patch)
     patch

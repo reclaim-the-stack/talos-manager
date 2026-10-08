@@ -3,7 +3,7 @@
 set -e
 
 export DB_ADAPTER=sqlite
-export TALOS_VERSION=1.10.4
+export TALOS_VERSION=1.14.2
 export TALOS_SUFFIX="-amd64" # no plans to run CI on ARM as of now
 
 wget https://github.com/siderolabs/talos/releases/download/v${TALOS_VERSION}/talosctl-linux${TALOS_SUFFIX} -O /usr/local/bin/talosctl

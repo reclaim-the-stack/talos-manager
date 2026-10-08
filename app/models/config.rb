@@ -9,12 +9,8 @@ class Config < ApplicationRecord
   private
 
   def validate_talos_config
-    begin
-      YAML.safe_load(patch)
-    rescue Psych::SyntaxError => e
-      errors.add(:patch, e.message)
-      return
-    end
+    # NOTE: map before all? to report errors for every patch rather than stopping at the first invalid one
+    return unless %i[patch patch_control_plane patch_worker].map { validate_patch(it) }.all?
 
     # Use `talosctl validate` to validate the config.
     #
@@ -43,5 +39,29 @@ class Config < ApplicationRecord
   # Can be triggered by dummy_config.generate_config
   rescue MachineConfig::InvalidConfigError => e
     errors.add(:config, e.output)
+  end
+
+  # Returns true if the patch is valid YAML which doesn't attempt to set the hostname
+  def validate_patch(attribute)
+    documents = YAML.safe_load_stream(public_send(attribute).to_s)
+
+    if documents.any? { sets_hostname?(it) }
+      errors.add(attribute, "must not set the hostname since it's managed by Talos Manager")
+      return false
+    end
+
+    true
+  rescue Psych::Exception => e
+    errors.add(attribute, e.message)
+    false
+  end
+
+  def sets_hostname?(document)
+    return false unless document.is_a?(Hash)
+
+    machine = document["machine"]
+    network = machine["network"] if machine.is_a?(Hash)
+
+    document["kind"] == "HostnameConfig" || (network.is_a?(Hash) && network.key?("hostname"))
   end
 end
