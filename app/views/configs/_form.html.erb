@@ -1,6 +1,7 @@
 <link href="https://cdn.jsdelivr.net/npm/vscode-codicons@0.0.17/dist/codicon.min.css" rel="stylesheet">
 <script type="module">
-  import * as monaco from "https://cdn.jsdelivr.net/npm/monaco-editor@latest/+esm"
+  // NOTE: Pinned since jsDelivr fails to serve the YAML language definition for monaco-editor 0.56+ as +esm
+  import * as monaco from "https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/+esm"
 
   document.querySelectorAll(".monaco-editor").forEach((container) => {
     const target = document.getElementById(container.dataset.target)
