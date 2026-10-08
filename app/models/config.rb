@@ -57,16 +57,11 @@ class Config < ApplicationRecord
   end
 
   def sets_hostname?(document)
-    case document
-    when Hash
-      machine = document["machine"]
-      network = machine["network"] if machine.is_a?(Hash)
+    return false unless document.is_a?(Hash)
 
-      document["kind"] == "HostnameConfig" || (network.is_a?(Hash) && network.key?("hostname"))
-    when Array # JSON patch (RFC 6902)
-      document.any? { it.is_a?(Hash) && it["path"].to_s.start_with?("/machine/network/hostname") }
-    else
-      false
-    end
+    machine = document["machine"]
+    network = machine["network"] if machine.is_a?(Hash)
+
+    document["kind"] == "HostnameConfig" || (network.is_a?(Hash) && network.key?("hostname"))
   end
 end
