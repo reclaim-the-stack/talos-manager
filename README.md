@@ -135,11 +135,12 @@ After creating the RAID device, refresh the servers inside Talos Manager to pick
 
 ## Config Patch Examples
 
+Note: Talos Manager sets the hostname of each server to the name of the server, since Talos uses the hostname as the name of the cluster member and Kubernetes node. Hence config patches must not set the hostname.
+
 ### Basic
 
 As a baseline config we recommend:
 - setting the Linux CPU governor to `performance` to ensure you're not missing out on performance
-- setting `network.hostname` to interpolate the servername
 - setting `vm.max_map_count` to `262144` (or higher) to avoid issues with eg. Elastic Search
 
 ```yaml
@@ -150,8 +151,6 @@ machine:
     # `talosctl read /proc/cmdline -n <node>`
     extraKernelArgs:
       - cpufreq.default_governor=performance
-  network:
-    hostname: ${hostname}
   sysctls:
     vm.max_map_count: 262144 # Increase max_map_count required by eg. elasticsearch
 ```
@@ -230,7 +229,6 @@ Note: We currently do not support hybrid cloud / metal server configuration when
 ```yaml
 machine:
   network:
-    hostname: ${hostname}
     interfaces:
       - dhcp: true
         interface: eth0
