@@ -10,12 +10,12 @@ class Talosctl
   end
 
   def kubernetes_version
-    # NOTE: Using jsonpath rather than parsing JSON since talosctl may output multiple resources
-    # (observed after upgrading to talosctl 1.14, which made JSON.parse fail on the concatenated output).
-    success, stdout, _stderr = run("get apiserverconfig -o jsonpath={.spec.image}")
+    # NOTE: Talos 1.14 added a final-kube-apiserver APIServerConfig resource alongside kube-apiserver,
+    # so we fetch kube-apiserver by ID to get a single resource.
+    success, stdout, _stderr = run("get apiserverconfig kube-apiserver -o jsonpath={.spec.image}")
     return unless success
 
-    apiserver_image = stdout.lines.first&.strip
+    apiserver_image = stdout.strip
 
     if apiserver_image.blank?
       Rails.logger.warn "WARNING: Unexpectedly failed to find image in apiserverconfig"

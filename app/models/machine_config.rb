@@ -58,10 +58,12 @@ class MachineConfig < ApplicationRecord
     # talosctl treats empty patches as JSON6902 patches which aren't supported for multi-document configs
     patches.reject! { |_flag, patch| empty_patch?(patch) }
 
-    patch_files = patches.map do |flag, patch|
+    # Built incrementally so the ensure block can clean up files written before a failing write
+    patch_files = []
+    patches.each do |flag, patch|
       patch_file = "#{Dir.tmpdir}/patch-#{SecureRandom.hex}"
+      patch_files << [flag, patch_file]
       File.write(patch_file, patch)
-      [flag, patch_file]
     end
 
     command = %(

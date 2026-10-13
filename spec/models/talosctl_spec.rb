@@ -1,9 +1,10 @@
 RSpec.describe Talosctl do
   describe "#kubernetes_version" do
-    it "returns the version of the first apiserverconfig image" do
+    it "returns the version of the kube-apiserver image" do
       talosctl = Talosctl.new("talosconfig")
-      stdout = "registry.k8s.io/kube-apiserver:v1.33.3\nregistry.k8s.io/kube-apiserver:v1.33.3\n"
-      allow(talosctl).to receive(:run).with("get apiserverconfig -o jsonpath={.spec.image}").and_return([true, stdout, ""])
+      allow(talosctl).to receive(:run)
+        .with("get apiserverconfig kube-apiserver -o jsonpath={.spec.image}")
+        .and_return([true, "registry.k8s.io/kube-apiserver:v1.33.3\n", ""])
 
       expect(talosctl.kubernetes_version).to eq "1.33.3"
     end
