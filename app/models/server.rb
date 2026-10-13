@@ -14,7 +14,6 @@ class Server < ApplicationRecord
   # at Hetzner in which case the sync will bypass the validation and add duplicates to the database.
   validates_uniqueness_of :name, allow_nil: true, if: -> { name_changed? }
   validates_presence_of :ip
-  validates_presence_of :ipv6
   validates_presence_of :product
   validates_presence_of :data_center
   validates_presence_of :status # running, initializing, starting, stopping, off, deleting migrating, rebuilding, unknown

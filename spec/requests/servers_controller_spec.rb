@@ -87,6 +87,7 @@ RSpec.describe "ServersController" do
         accessible: false,
         uuid: nil,
         lsblk: nil,
+        ipv6: nil,
       )
 
       expect(Server.find_by!(name: "worker-3")).to have_attributes(

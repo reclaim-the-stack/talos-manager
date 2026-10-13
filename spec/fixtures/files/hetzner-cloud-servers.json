@@ -20,7 +20,7 @@
       "status": "running",
       "public_net": {
         "ipv4": { "ip": "37.27.31.2" },
-        "ipv6": { "ip": "::2" }
+        "ipv6": null
       },
       "server_type": {
         "name": "cax21",
