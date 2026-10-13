@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_01_101556) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_13_151322) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -77,7 +77,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_01_101556) do
   create_table "servers", force: :cascade do |t|
     t.string "name"
     t.string "ip", null: false
-    t.string "ipv6", null: false
+    t.string "ipv6"
     t.string "product", null: false
     t.string "data_center", null: false
     t.string "status", null: false

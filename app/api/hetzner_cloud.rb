@@ -20,7 +20,7 @@ class HetznerCloud
             data_center: server_payload.fetch("location").fetch("name"),
             hetzner_vswitch_id: nil,
             ip: server_payload.fetch("public_net").fetch("ipv4").fetch("ip"),
-            ipv6: server_payload.fetch("public_net").fetch("ipv6").fetch("ip"),
+            ipv6: server_payload.dig("public_net", "ipv6", "ip"),
             name: server_payload.fetch("name"),
             product: server_payload.fetch("server_type").fetch("name"),
             status: server_payload.fetch("status"),
