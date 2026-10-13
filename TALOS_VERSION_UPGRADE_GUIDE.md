@@ -4,7 +4,7 @@ Talos Manager generates machine configs with `talosctl gen config --talos-versio
 
 This guide describes the patch changes needed per Talos version. For upgrading Talos itself on your nodes, see [Upgrading Talos on a node](README.md#upgrading-talos-on-a-node).
 
-Note that Talos Manager only generates configs for servers being bootstrapped. Already running nodes keep their legacy config, which newer Talos versions still accept. But where behaviour differs between a legacy field and its replacement (eg. kernel args, OpenEBS paths and etcd encryption below), new nodes will behave differently from existing ones unless you also patch the existing nodes, eg. with `talosctl patch machineconfig`.
+Note that Talos Manager only generates configs for servers being bootstrapped. Already running nodes keep their legacy config, which newer Talos versions still accept. But where behaviour differs between a legacy field and its replacement (eg. kernel args and OpenEBS paths below), new nodes will behave differently from existing ones unless you also patch the existing nodes, eg. with `talosctl patch machineconfig`.
 
 ## Upgrade procedure
 
@@ -38,7 +38,7 @@ Talos Manager doesn't validate machine configs when serving them to servers. Unt
 | `cluster.proxy` | 1.14 | `KubeProxyConfig` |
 | `cluster.network` | 1.14 | `KubeNetworkConfig`, `KubeFlannelCNIConfig` |
 | `cluster.allowSchedulingOnControlPlanes` | 1.14 | Remove the control plane taint via `KubeNodeConfig` |
-| `cluster.aescbcEncryptionSecret`, `cluster.secretboxEncryptionSecret` | 1.14 | Remove them, see [Etcd encryption](#etcd-encryption) |
+| `cluster.secretboxEncryptionSecret` | 1.14 | Remove it, see [Etcd encryption](#etcd-encryption) |
 
 These legacy fields are deprecated but still accepted on Talos 1.14: `machine.network.interfaces` (including VLANs), `machine.sysctls`, `machine.registries`, `machine.systemDiskEncryption`, `machine.logging`, `machine.features.kubernetesTalosAPIAccess`, `machine.time`, `machine.env`, `machine.certSANs`, `machine.kernel`, `cluster.etcd`, `cluster.externalCloudProvider` and `cluster.inlineManifests`. Migrating them is optional, eg. `machine.sysctls` becomes:
 
@@ -199,54 +199,7 @@ configuration:
 
 ### Etcd encryption
 
-On Talos 1.14 `talosctl gen config` generates a `KubeEtcdEncryptionConfig` document from the cluster's secrets bundle, so remove `aescbcEncryptionSecret` and `secretboxEncryptionSecret` from your patches. What gets generated depends on the bundle (shown via "Show secrets" when editing the cluster):
-
-**The bundle has `secretboxencryptionsecret`:** the document contains only the `secretbox` provider. Legacy configs also included `identity` and, if your patch set `aescbcEncryptionSecret`, an `aescbc` provider. A new control plane can't read Secrets stored with those. Check what your running control planes use with `talosctl read /system/secrets/kubernetes/kube-apiserver/encryptionconfig.yaml -n <control-plane>`. If `secretbox` isn't the only provider, rewrite all Secrets with the first one before bootstrapping control planes with the new config:
-
-```bash
-kubectl get secrets --all-namespaces -o json | kubectl replace -f -
-```
-
-This only rewrites Secrets that aren't already stored with the first provider. If you run Argo CD, check `argocd-secret` afterwards: rewriting it can cause Argo CD's next sync of its own Application to empty it. Restarting `argocd-server` regenerates its keys.
-
-**The bundle only has `aescbcencryptionsecret`** (clusters created before Talos generated secretbox keys): `talosctl` 1.14 incorrectly puts the aescbc key under a `secretbox` provider. Replace the generated document in the control plane patch with what your running control planes use, eg:
-
-```yaml
-apiVersion: v1alpha1
-kind: KubeEtcdEncryptionConfig
-$patch: delete
----
-apiVersion: v1alpha1
-kind: KubeEtcdEncryptionConfig
-config:
-  resources:
-    - resources:
-        - secrets
-      providers:
-        - aescbc:
-            keys:
-              - name: key1
-                secret: <aescbcencryptionsecret from the bundle>
-        - identity: {}
-```
-
-Alternatively rotate the running control planes to a secretbox key, which makes the generated document correct without any patch. Using `talosctl patch machineconfig --mode=no-reboot` on one control plane at a time (kube-apiserver restarts automatically):
-1. Remove `cluster.aescbcEncryptionSecret` (`$patch: delete`) and add a `KubeEtcdEncryptionConfig` with the providers `aescbc key1`, `secretbox key2` (a new key from `head -c 32 /dev/urandom | base64`), `identity`. Every control plane can now read secretbox, but still writes aescbc.
-2. Replace the document with the providers in the order `secretbox key2`, `aescbc key1`, `identity` to write with secretbox.
-3. Rewrite all Secrets with `kubectl get secrets --all-namespaces -o json | kubectl replace -f -` (see the Argo CD note above).
-4. Replace the document with only `secretbox key2`.
-
-Then replace `aescbcencryptionsecret` in the cluster's secrets bundle with `secretboxencryptionsecret: <key2>`. After each step, check `talosctl read /system/secrets/kubernetes/kube-apiserver/encryptionconfig.yaml` on every control plane before continuing, and don't bootstrap control planes until the rotation is complete.
-
-### Secrets bundle
-
-The `talosctl` version bundled with Talos Manager (1.14 or later) refuses secrets bundles without an encryption key, regardless of the target Talos version:
-
-```
-one of [secrets.secretboxencryptionsecret, secrets.aescbcencryptionsecret] is required
-```
-
-The bundle keys are all lowercase. A camelCase `aescbcEncryptionSecret` (the machine config field name) in the bundle is ignored. Rename it to `aescbcencryptionsecret`.
+On Talos 1.14 the encryption configuration for Secrets stored in etcd is a separate `KubeEtcdEncryptionConfig` document, which `talosctl gen config` generates from the encryption key in the cluster's secrets bundle. Remove `cluster.secretboxEncryptionSecret` from your patches if you set it. To customise the encryption configuration, replace the generated document in the control plane patch as described in [How patches merge with config documents](#how-patches-merge-with-config-documents).
 
 ### RAID
 
