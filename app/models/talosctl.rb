@@ -10,20 +10,21 @@ class Talosctl
   end
 
   def kubernetes_version
-    success, stdout, _stderr = run("get apiserverconfig -o json")
+    # NOTE: Talos 1.14 added a final-kube-apiserver APIServerConfig resource alongside kube-apiserver,
+    # so we fetch kube-apiserver by ID to get a single resource.
+    success, stdout, _stderr = run("get apiserverconfig kube-apiserver -o jsonpath={.spec.image}")
     return unless success
 
-    apiserverconfig = JSON.parse(stdout)
-    apiserver_image = apiserverconfig.dig("spec", "image")
+    apiserver_image = stdout.strip
 
-    unless apiserver_image
-      Rails.logger.warning "WARNING: Unexpectedly failed to find image in apiserverconfig"
+    if apiserver_image.blank?
+      Rails.logger.warn "WARNING: Unexpectedly failed to find image in apiserverconfig"
       return
     end
 
     version = apiserver_image.split(":").last.delete_prefix("v")
     unless version.match?(/^\d+\.\d+\.\d+$/)
-      Rails.logger.warning "WARNING: Unexpectedly failed to get version from apiserverconfig image: '#{version}'"
+      Rails.logger.warn "WARNING: Unexpectedly failed to get version from apiserverconfig image: '#{version}'"
       return
     end
 

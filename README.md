@@ -105,6 +105,8 @@ The default Talos version for bootstrapping servers can be configured on the Set
 
 The default Talos version is also used as the target version when generating machine configs (via `talosctl gen config --talos-version`), so the `talosctl` bundled in the docker container doesn't need to match the Talos version of your servers. If you override the Talos version when bootstrapping a server, avoid picking a version older than the default, since configs generated for newer Talos versions may not be understood by older ones.
 
+Changing the default Talos version may require changes to your config patches. See the [Talos Version Upgrade Guide](TALOS_VERSION_UPGRADE_GUIDE.md).
+
 If you need a different `talosctl` version, eg. to make use of configuration features from a newer Talos release, you can build the docker container using the `TALOS_VERSION` build arg. Eg:
 
 ```
@@ -119,7 +121,7 @@ Set `DB_ADAPTER=sqlite` and `config/database.yml` will be configured to use SQLi
 
 ## RAID support
 
-Talos manager supports using a RAID device for Talos's EPHEMERAL partition provided you have added the `mdadm` extension to your Talos Factory Schematic.
+Talos manager supports using a RAID device for Talos's EPHEMERAL partition. For Talos versions older than 1.14 this requires adding the `mdadm` extension to your Talos Factory Schematic. From Talos 1.14 mdadm is built into Talos.
 
 For this to work you'll need at least 3 disks on the target server (1 for Talos system installation and 2+ for RAID).
 
@@ -135,11 +137,12 @@ After creating the RAID device, refresh the servers inside Talos Manager to pick
 
 ## Config Patch Examples
 
+Note: Talos Manager sets the hostname of each server to the hostname chosen when configuring it (defaults to the server name). Hence config patches must not set the hostname.
+
 ### Basic
 
 As a baseline config we recommend:
 - setting the Linux CPU governor to `performance` to ensure you're not missing out on performance
-- setting `network.hostname` to interpolate the servername
 - setting `vm.max_map_count` to `262144` (or higher) to avoid issues with eg. Elastic Search
 
 ```yaml
@@ -150,8 +153,6 @@ machine:
     # `talosctl read /proc/cmdline -n <node>`
     extraKernelArgs:
       - cpufreq.default_governor=performance
-  network:
-    hostname: ${hostname}
   sysctls:
     vm.max_map_count: 262144 # Increase max_map_count required by eg. elasticsearch
 ```
@@ -230,7 +231,6 @@ Note: We currently do not support hybrid cloud / metal server configuration when
 ```yaml
 machine:
   network:
-    hostname: ${hostname}
     interfaces:
       - dhcp: true
         interface: eth0
