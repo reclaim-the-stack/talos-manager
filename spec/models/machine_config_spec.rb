@@ -17,6 +17,22 @@ RSpec.describe MachineConfig do
     expect(machine_config.errors[:ephemeral_disk_identifier]).to include("must be in the format 'wwid:<wwid>' or 'uuid:<uuid>'")
   end
 
+  it "validates format of hostname" do
+    %w[worker-1 staging-control-plane-12].each do |hostname|
+      machine_config = MachineConfig.new(hostname:)
+      machine_config.validate
+      expect(machine_config.errors[:hostname]).to be_empty
+    end
+
+    ["Worker-1", "foo.Bar-1", "my_host-1", "worker-1\n", "worker-1a"].each do |hostname|
+      machine_config = MachineConfig.new(hostname:)
+      machine_config.validate
+      expect(machine_config.errors[:hostname]).to include(
+        "must contain only lowercase ASCII and dash and must end with -<number>",
+      )
+    end
+  end
+
   describe "#generate_config" do
     it "raises an error if hostname is blank" do
       server = Server.new(name: "worker-1")

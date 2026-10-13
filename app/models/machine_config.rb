@@ -154,7 +154,7 @@ class MachineConfig < ApplicationRecord
   end
 
   def valid_hostname_format?
-    hostname[/[a-z-]+-\d+$/]
+    hostname[/\A[a-z-]+-\d+\z/]
   end
 
   def validate_private_ip_format
