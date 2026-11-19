@@ -1,6 +1,6 @@
 # This Dockerfile produces a production ready image of talos-manager.
 
-ARG RUBY_VERSION=4.0.9
+ARG RUBY_VERSION=4.0.10
 FROM ruby:${RUBY_VERSION}-slim as base
 ARG TARGETPLATFORM
 
